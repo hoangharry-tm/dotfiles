@@ -10,6 +10,10 @@ return {
         "tailwindcss-language-server",
         "typescript-language-server",
         "css-lsp",
+        "pyright",
+        "mypy",
+        "ruff",
+        "black",
       })
     end,
   },
@@ -27,7 +31,7 @@ return {
             return require("lspconfig.util").root_pattern(".git")(...)
           end,
         },
-        tsserver = {
+        tssever = {
           root_dir = function(...)
             return require("lspconfig.util").root_pattern(".git")(...)
           end,
