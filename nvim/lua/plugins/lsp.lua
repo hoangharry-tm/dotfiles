@@ -1,3 +1,4 @@
+---@diagnostic disable: undefined-doc-name
 return {
   -- tools
   {
