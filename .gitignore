@@ -1,3 +1,6 @@
 iterm2/
 tmux/**
 !tmux/tmux.conf
+doom/
+emacs/
+coc/

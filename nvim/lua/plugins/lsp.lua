@@ -1,20 +1,30 @@
----@diagnostic disable: undefined-doc-name
 return {
   -- tools
   {
     "williamboman/mason.nvim",
     opts = function(_, opts)
       vim.list_extend(opts.ensure_installed, {
+
         "luacheck",
         "shellcheck",
         "shfmt",
+
+        --#region Web Dev Plugins
         "tailwindcss-language-server",
         "typescript-language-server",
         "css-lsp",
+        --#endregion
+
+        --#region Python
         "pyright",
         "mypy",
         "ruff",
         "black",
+        --#endregion
+
+        --#region C/C++
+        "clangd",
+        --#endregion
       })
     end,
   },
@@ -24,7 +34,6 @@ return {
     "neovim/nvim-lspconfig",
     opts = {
       inlay_hints = { enabled = true },
-      ---@type lspconfig.options
       servers = {
         cssls = {},
         tailwindcss = {

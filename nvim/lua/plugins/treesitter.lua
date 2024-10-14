@@ -16,6 +16,11 @@ return {
         "vim",
         "lua",
         "python",
+        "c",
+        "cpp",
+        "make",
+        "bash",
+        "meson",
       },
       query_linter = {
         enable = true,
