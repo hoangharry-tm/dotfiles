@@ -41,36 +41,37 @@ return {
             return require("lspconfig.util").root_pattern(".git")(...)
           end,
         },
-        tssever = {
-          root_dir = function(...)
-            return require("lspconfig.util").root_pattern(".git")(...)
-          end,
-          single_file_support = false,
-          settings = {
-            typescript = {
-              inlayHints = {
-                includeInlayParameterNameHints = "literal",
-                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-                includeInlayFunctionParameterTypeHints = true,
-                includeInlayVariableTypeHints = false,
-                includeInlayPropertyDeclarationTypeHints = true,
-                includeInlayFunctionLikeReturnTypeHints = true,
-                includeInlayEnumMemberValueHints = true,
-              },
-            },
-            javascript = {
-              inlayHints = {
-                includeInlayParameterNameHints = "all",
-                includeInlayParameterNameHintsWhenArgumentMatchesName = false,
-                includeInlayFunctionParameterTypeHints = true,
-                includeInlayVariableTypeHints = true,
-                includeInlayPropertyDeclarationTypeHints = true,
-                includeInlayFunctionLikeReturnTypeHints = true,
-                includeInlayEnumMemberValueHints = true,
-              },
-            },
-          },
-        },
+        -- tssever = {
+        --   root_dir = function(...)
+        --     return require("lspconfig.util").root_pattern(".git", "package.json", "tsconfig.json")(...)
+        --       or vim.loop.cwd()
+        --   end,
+        --   single_file_support = false,
+        --   settings = {
+        --     typescript = {
+        --       inlayHints = {
+        --         includeInlayParameterNameHints = "literal",
+        --         includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+        --         includeInlayFunctionParameterTypeHints = true,
+        --         includeInlayVariableTypeHints = false,
+        --         includeInlayPropertyDeclarationTypeHints = true,
+        --         includeInlayFunctionLikeReturnTypeHints = true,
+        --         includeInlayEnumMemberValueHints = true,
+        --       },
+        --     },
+        --     javascript = {
+        --       inlayHints = {
+        --         includeInlayParameterNameHints = "all",
+        --         includeInlayParameterNameHintsWhenArgumentMatchesName = false,
+        --         includeInlayFunctionParameterTypeHints = true,
+        --         includeInlayVariableTypeHints = true,
+        --         includeInlayPropertyDeclarationTypeHints = true,
+        --         includeInlayFunctionLikeReturnTypeHints = true,
+        --         includeInlayEnumMemberValueHints = true,
+        --       },
+        --     },
+        --   },
+        -- },
         html = {},
         lua_ls = {
           -- enabled = false,
@@ -138,14 +139,26 @@ return {
           },
         },
       },
-      setup = {},
+      setup = {
+        cmd = {
+          os.getenv("HOME") .. "/.npm-packages/bin/typescript-language-server",
+          "--stdio",
+          "--tsserver-path",
+          os.getenv("HOME") .. "/.npm-packages/lib/node_modules/typescript-language-server/lib",
+        },
+      },
     },
   },
   {
     "nvim-cmp",
-    dependencies = { "hrsh7th/cmp-emoji" },
+    dependencies = { "hrsh7th/cmp-emoji", "codeium.nvim" },
     opts = function(_, opts)
       table.insert(opts.sources, { name = "emoji" })
+      table.insert(opts.sources, 1, {
+        name = "codeium",
+        group_index = 1,
+        priority = 100,
+      })
     end,
   },
 }

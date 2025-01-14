@@ -15,6 +15,9 @@ call plug#begin('~/.vim/plugged')
 
     " Colorscheme(s)
     Plug 'arzg/vim-colors-xcode'
+    Plug 'morhetz/gruvbox'
+    Plug 'NLKNguyen/papercolor-theme'
+    Plug 'ayu-theme/ayu-vim'
 
     " Plugins for Python Development
     Plug 'dense-analysis/ale'
@@ -23,13 +26,14 @@ call plug#begin('~/.vim/plugged')
 
     " Git
     Plug 'tpope/vim-fugitive'
+    Plug 'stevearc/oil.nvim'
 call plug#end()
 
 syntax on
 filetype indent on
 filetype plugin on
 
-colo xcodehc
+colo ayu
 
 source ~/.config/vim/settings.vim
 source ~/.config/vim/mappings.vim

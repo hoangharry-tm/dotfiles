@@ -34,3 +34,4 @@ set clipboard=unnamed
 set updatetime=300
 set signcolumn=yes
 set background=dark
+set termguicolors
