@@ -1,6 +1,5 @@
-iterm2/
-tmux/**
+*
+!vim/**
+!nvim/**
+!doom/**
 !tmux/tmux.conf
-doom/
-emacs/
-coc/

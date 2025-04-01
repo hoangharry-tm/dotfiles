@@ -1,6 +1,6 @@
 call plug#begin('~/.vim/plugged')
     " Markdown Plugins
-    " Plug 'preservim/vim-markdown'          " Markdown Syntax Highlighting
+    " Plug 'preservim/vim-markdown'         " Markdown Syntax Highlighting
     Plug 'godlygeek/tabular'                " Align tables in markdown
     Plug 'preservim/vim-pencil'             " Improved writing experience
     Plug 'junegunn/goyo.vim'                " Distraction-free writing mode

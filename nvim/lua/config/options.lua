@@ -32,6 +32,11 @@ vim.opt.wildignore:append({ "*/node_modules/*" })
 vim.opt.splitbelow = true
 vim.opt.splitright = true
 vim.opt.splitkeep = "cursor"
+vim.opt.guifont = "FiraCode Nerd Font:h12"
+
+-- vim wrapping
+vim.opt.textwidth = 80
+vim.opt.colorcolumn = "80"
 
 -- Add asterisks in block comments
 vim.opt.formatoptions:append({ "r" })

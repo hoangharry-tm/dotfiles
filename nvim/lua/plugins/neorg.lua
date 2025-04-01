@@ -10,7 +10,22 @@ return {
         ["core.keybinds"] = {},
         ["core.concealer"] = {},
         ["core.summary"] = {},
-        ["core.completion"] = {},
+        ["core.completion"] = {
+          config = {
+            engine = "nvim-cmp",
+          },
+        },
+        ["core.dirman"] = {
+          config = {
+            index = "index.norg",
+            workspaces = {
+              base = "~/neorg/",
+              base_personal = "~/neorg/personal/",
+              base_todo = "~/neorg/todo/",
+            },
+          },
+        },
+        ["core.tangle"] = {},
       },
     })
   end,
