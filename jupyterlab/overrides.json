@@ -1,0 +1,194 @@
+{
+  "@jupyterlab/toc-extension:registry": {
+    "maximalDepth": 4,
+    "numberingH1": true,
+    "numberHeaders": true,
+    "includeOutput": true,
+    "syncCollapseState": false,
+    "baseNumbering": 1
+  },
+  "@jupyterlab/notebook-extension:tracker": {
+    "autoStartDefaultKernel": true,
+    "enableKernelInitNotification": false,
+    "codeCellConfig": {
+      "lineNumbers": false,
+      "lineWrap": false
+    },
+    "defaultCell": "code",
+    "inputHistoryScope": "global",
+    "kernelShutdown": false,
+    "markdownCellConfig": {
+      "matchBrackets": false,
+      "rulers": [
+        80
+      ]
+    },
+    "rawCellConfig": {
+      "lineNumbers": false,
+      "matchBrackets": false
+    },
+    "scrollPastEnd": true,
+    "recordTiming": false,
+    "overscanCount": 1,
+    "maxNumberOutputs": 50,
+    "scrollHeadingToTop": true,
+    "showEditorForReadOnlyMarkdown": true,
+    "kernelStatus": {
+      "showOnStatusBar": false,
+      "showProgress": true
+    },
+    "documentWideUndoRedo": false,
+    "showHiddenCellsButton": true,
+    "renderingLayout": "default",
+    "sideBySideLeftMarginOverride": "10px",
+    "sideBySideRightMarginOverride": "10px",
+    "sideBySideOutputRatio": 1,
+    "windowingMode": "full",
+    "accessKernelHistory": false
+  },
+  "@jupyterlab/filebrowser-extension:browser": {
+    "navigateToCurrentDirectory": false,
+    "useFuzzyFilter": true,
+    "filterDirectories": true,
+    "showLastModifiedColumn": true,
+    "showFileSizeColumn": false,
+    "showHiddenFiles": true,
+    "showFileCheckboxes": false,
+    "showFullPath": false,
+    "sortNotebooksFirst": false,
+    "singleClickNavigation": false,
+    "autoOpenUploads": true,
+    "maxAutoOpenSizeMB": 50,
+    "allowFileUploads": true,
+    "breadcrumbs": {
+      "minimumLeftItems": 0,
+      "minimumRightItems": 2
+    }
+  },
+  "@jupyterlab/extensionmanager-extension:plugin": {
+    "disclaimed": true
+  },
+  "@jupyterlab/apputils-extension:themes": {
+    "adaptive-theme": true,
+    "theme": "JupyterLab Light"
+  },
+  "@jupyterlab/apputils-extension:notification": {
+    "fetchNews": "true"
+  },
+  "@jupyterlab/application-extension:top-bar": {
+    "toolbar": [
+      {
+        "name": "spacer",
+        "type": "spacer",
+        "rank": 50
+      },
+      {
+        "name": "workspaceIndicator",
+        "rank": 1000,
+        "disabled": false
+      }
+    ]
+  },
+  "@jupyterlab/lsp-extension:plugin": {
+    "activate": "on",
+    "languageServers": {
+      "pylsp": {
+        "configuration": {},
+        "rank": 50
+      }
+    },
+    "logAllCommunication": false,
+    "setTrace": "off"
+  },
+  "@jupyterlab/fileeditor-extension:plugin": {
+    "editorConfig": {
+      "lineNumbers": true,
+      "theme": "jupyter"
+    }
+  },
+  "@jupyterlab/console-extension:tracker": {
+    "clearCellsOnExecute": false,
+    "clearCodeContentOnExecute": true,
+    "hideCodeInput": false,
+    "interactionMode": "notebook",
+    "showAllKernelActivity": false,
+    "promptCellConfig": {
+      "highlightActiveLine": true,
+      "highlightWhitespace": true,
+      "lineNumbers": true
+    },
+    "promptCellPosition": "bottom",
+    "showBanner": true,
+    "toolbar": [
+      {
+        "name": "run",
+        "command": "console:run-forced",
+        "rank": 0
+      },
+      {
+        "name": "restart",
+        "command": "console:restart-kernel",
+        "rank": 10
+      },
+      {
+        "name": "clear",
+        "command": "console:clear",
+        "rank": 20
+      },
+      {
+        "name": "spacer",
+        "type": "spacer",
+        "rank": 100
+      },
+      {
+        "name": "kernelName",
+        "rank": 1000
+      },
+      {
+        "name": "kernelStatus",
+        "rank": 1010
+      },
+      {
+        "name": "promptPosition",
+        "rank": 1020
+      }
+    ]
+  },
+  "@jupyterlab/codemirror-extension:plugin": {
+    "defaultConfig": {
+      "autoClosingBrackets": true,
+      "codeFolding": true,
+      "rulers": [
+        80
+      ]
+    }
+  },
+  "@jupyterlab/completer-extension:manager": {
+    "availableProviders": {
+      "CompletionProvider:context": 500,
+      "CompletionProvider:kernel": 550
+    },
+    "providerTimeout": 1000,
+    "showDocumentationPanel": true,
+    "autoCompletion": true,
+    "suppressIfInlineCompleterActive": true
+  },
+  "@jupyterlab/completer-extension:inline-completer": {
+    "providers": {
+      "@jupyterlab/inline-completer:history": {
+        "enabled": true,
+        "timeout": 5000,
+        "debouncerDelay": 0,
+        "maxSuggestions": 100
+      }
+    },
+    "showWidget": "onHover",
+    "showShortcuts": true,
+    "suppressIfTabCompleterActive": true,
+    "streamingAnimation": "uncover",
+    "minLines": 0,
+    "maxLines": 0,
+    "reserveSpaceForLongest": false,
+    "editorResizeDelay": 1000
+  }
+}

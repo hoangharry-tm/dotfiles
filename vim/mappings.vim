@@ -13,5 +13,6 @@ nnoremap <Tab> :tabnext<CR>
 nnoremap <S-Tab> :tabprevious<CR>
 
 imap jj <Esc>
+imap fd <Esc>
 
 source ~/.config/vim/plugins/coc-mappings.vim

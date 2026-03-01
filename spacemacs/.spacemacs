@@ -32,16 +32,19 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(
+   '(clojure
      toml
      (python :variable
              python-format-on-save t
              python-sort-imports-on-save t
              python-virtualenv-management 'pet
-             python-enable-tools '(uv))
+             python-enable-tools '(uv)
+             python-backend 'lsp
+             python-lsp-server 'pyright)
      (typescript :variable
                  typescript-fmt-on-save t
                  typescript-fmt-tool 'prettier)
+     themes-megapack
      prettier
      shell
      auto-completion
@@ -52,15 +55,18 @@ This function should only modify configuration layer settings."
      lsp
      markdown
      multiple-cursors
-     org
+     (org :variable
+          org-enable-roam-support t
+          org-enable-roam-ui t
+          org-enable-modern-support t)
      ;; (shell :variables
      ;;        shell-default-height 30
      ;;        shell-default-position 'bottom)
      ;; spell-checking
      syntax-checking
-     ;; version-control
+     version-control
      (treemacs :variable
-               treemacs-use-all-the-icons-theme t))
+               treemacs-use-icons-dired t))
 
 
    ;; List of additional packages that will be installed without being wrapped
@@ -218,7 +224,13 @@ It should only modify the values of Spacemacs settings."
    ;; DOCUMENTATION.org for the full theme specifications.
    dotspacemacs-themes '(catppuccin
                          spacemacs-dark
-                         spacemacs-light)
+                         spacemacs-light
+                         alect-black
+                         doom-ayu-dark
+                         doom-gruvbox
+                         ef-arbutus
+                         ef-reverie
+                         gruvbox-dark-hard)
 
    ;; Set the theme for the Spaceline. Supported themes are `spacemacs',
    ;; `all-the-icons', `custom', `doom', `vim-powerline' and `vanilla'. The
@@ -238,7 +250,7 @@ It should only modify the values of Spacemacs settings."
    ;; fixed-pitch faces. The `:size' can be specified as
    ;; a non-negative integer (pixel size), or a floating-point (point size).
    ;; Point size is recommended, because it's device independent. (default 10.0)
-   dotspacemacs-default-font '("Source Code Pro"
+   dotspacemacs-default-font '("Iosevka Nerd Font"
                                :size 11.0
                                :weight normal
                                :width normal)
@@ -585,7 +597,7 @@ before packages are loaded."
   (setq catppuccin-flavor                      'mocha
         lsp-pylsp-plugins-pydocstyle-enabled   nil
         typescript-fmt-tool                    'prettier
-        fill-column                            80
+        fill-column                            120
         scroll-bar-mode                        -1)
   (catppuccin-reload)
 
@@ -597,8 +609,7 @@ before packages are loaded."
     (setq tab-width 2)
     (setq c-basic-offset 2)
     (setq typescript-indent-level 2)
-    (setq indent-tabs-mode nil)
-    (message ">>> Indentation is working"))
+    (setq indent-tabs-mode nil))
 
   ;; Apply hard wrapping to common text and code modes
   (add-hook 'text-mode-hook 'my-auto-fill-setup)
@@ -775,7 +786,8 @@ This function is called at the very end of Spacemacs initialization."
      wgrep
      winum
      writeroom-mode
-     ws-butler)))
+     ws-butler
+     zonokai-emacs)))
 (custom-set-faces
  ;; custom-set-faces was added by Custom.
  ;; If you edit it by hand, you could mess it up, so be careful.
