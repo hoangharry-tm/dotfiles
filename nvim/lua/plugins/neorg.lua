@@ -35,7 +35,15 @@ return {
           ["core.export"] = {},
           ["core.export.markdown"] = { config = { extensions = "all" } },
           ["core.summary"] = {},
-          ["core.keybinds"] = { config = { default_keybinds = true } },
+          ["core.keybinds"] = {
+            config = {
+              default_keybinds = true,
+              hook = function(keybinds)
+                -- <C-Space> conflicts with tmux leader; remap todo cycle
+                keybinds.remap_event("norg", "n", "<C-Space>", "<LocalLeader>tt")
+              end,
+            },
+          },
           ["core.ui.calendar"] = {},
           ["core.journal"] = {
             config = {
