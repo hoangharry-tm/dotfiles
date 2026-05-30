@@ -1,6 +1,7 @@
 *
 !vim/**
 !nvim/**
+!kitty/**
 !doom/**
 !wezterm/**
 !tmux/tmux.conf
