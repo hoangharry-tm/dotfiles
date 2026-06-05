@@ -6,8 +6,8 @@ local config = wezterm.config_builder()
 config.font = wezterm.font("Iosevka Nerd Font")
 config.font_size = 15
 config.color_scheme = "Gruvbox dark, hard (base16)"
-config.window_background_opacity = 0.92
-config.macos_window_background_blur = 12
+config.window_background_opacity = 0.88
+config.macos_window_background_blur = 18
 
 -- ── Tab bar ───────────────────────────────────────────────────────────────────
 config.enable_tab_bar = true
@@ -17,24 +17,25 @@ config.hide_tab_bar_if_only_one_tab = false
 config.tab_max_width = 36
 config.show_new_tab_button_in_tab_bar = true
 
--- Gruvbox Dark Hard palette — mirrors tmux theme
-local TAB_BG = "#1d2021" -- hard charcoal base
-local ACTIVE_BG = "#504945" -- medium wood (active tab)
-local ACTIVE_FG = "#ebdbb2" -- cream
-local INACTIVE_BG = "#3c3836" -- dark wood (inactive tab)
-local INACTIVE_FG = "#928374" -- muted gray
-local HOVER_BG = "#665c54" -- lighter wood hover
-local ORANGE = "#fe8019" -- warm accent
-local NEW_BTN_FG = "#fe8019"
+-- Darker gruvbox — near-black warm bases, orange stays vivid for contrast
+local TAB_BG      = "#0e0c0b"  -- near-black with warm tint (tab bar base)
+local ACTIVE_BG   = "#2a2218"  -- deep amber-brown (active tab)
+local ACTIVE_FG   = "#ebdbb2"  -- gruvbox cream
+local INACTIVE_BG = "#181614"  -- very dark wood (inactive tab)
+local INACTIVE_FG = "#5a4e45"  -- muted brown-gray
+local HOVER_BG    = "#332b22"  -- dark amber hover
+local ORANGE      = "#fe8019"  -- bright orange — pops against dark bgs
+local NEW_BTN_FG  = "#fe8019"
 
 config.colors = {
+	background = "#0e0c0b",  -- override terminal bg darker than the scheme's default
 	tab_bar = {
-		background = TAB_BG,
-		new_tab = { bg_color = TAB_BG, fg_color = NEW_BTN_FG },
-		new_tab_hover = { bg_color = HOVER_BG, fg_color = NEW_BTN_FG },
-		active_tab = { bg_color = ACTIVE_BG, fg_color = ACTIVE_FG, intensity = "Bold" },
-		inactive_tab = { bg_color = INACTIVE_BG, fg_color = INACTIVE_FG },
-		inactive_tab_hover = { bg_color = HOVER_BG, fg_color = ACTIVE_FG },
+		background         = TAB_BG,
+		new_tab            = { bg_color = TAB_BG,      fg_color = NEW_BTN_FG },
+		new_tab_hover      = { bg_color = HOVER_BG,    fg_color = NEW_BTN_FG },
+		active_tab         = { bg_color = ACTIVE_BG,   fg_color = ACTIVE_FG, intensity = "Bold" },
+		inactive_tab       = { bg_color = INACTIVE_BG, fg_color = INACTIVE_FG },
+		inactive_tab_hover = { bg_color = HOVER_BG,    fg_color = ACTIVE_FG },
 	},
 }
 
