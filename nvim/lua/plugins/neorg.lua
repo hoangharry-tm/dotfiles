@@ -28,10 +28,6 @@ return {
               index = "index.norg",
             },
           },
-          ["core.integrations.nvim-cmp"] = {},
-          ["core.completion"] = {
-            config = { engine = "nvim-compe" },
-          },
           ["core.export"] = {},
           ["core.export.markdown"] = { config = { extensions = "all" } },
           ["core.summary"] = {},
@@ -92,21 +88,33 @@ return {
         use_absolute_path = false,
         relative_to_current_file = true,
       },
+      filetypes = {
+        -- image.nvim renders .image infirm tags in norg
+        norg = {
+          template = ".image $FILE_PATH",
+        },
+      },
     },
   },
 
-  -- Render images inline (requires ImageMagick + ueberzugpp or kitty protocol)
+  -- Render images inline (requires ImageMagick + kitty graphics protocol)
   {
     "3rd/image.nvim",
     lazy = false,
     opts = {
-      backend = "kitty", -- kitty terminal supports this natively
+      backend = "kitty",
       integrations = {
-        neorg = { enabled = true, filetypes = { "norg" } },
+        neorg = {
+          enabled = true,
+          filetypes = { "norg" },
+          only_render_image_at_cursor = false,
+        },
         markdown = { enabled = true },
       },
       max_width_window_percentage = 50,
       max_height_window_percentage = 40,
+      editor_only_render_when_focused = true,
+      window_overlap_clear_enabled = true,
     },
   },
 
@@ -117,9 +125,9 @@ return {
     build = "sh install.sh",
     cmd = { "SnipRun", "SnipClose", "SnipReset" },
     keys = {
-      { "<leader>sr", "<cmd>SnipRun<cr>",   mode = { "n", "v" }, desc = "SnipRun" },
-      { "<leader>sc", "<cmd>SnipClose<cr>",              desc = "SnipRun close" },
-      { "<leader>sx", "<cmd>SnipReset<cr>",              desc = "SnipRun reset" },
+      { "<leader>sr", "<cmd>SnipRun<cr>", mode = { "n", "v" }, desc = "SnipRun" },
+      { "<leader>sc", "<cmd>SnipClose<cr>", desc = "SnipRun close" },
+      { "<leader>sx", "<cmd>SnipReset<cr>", desc = "SnipRun reset" },
     },
     opts = {
       display = { "NvimNotify" },

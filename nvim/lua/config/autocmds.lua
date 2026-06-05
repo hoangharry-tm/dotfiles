@@ -14,3 +14,21 @@ vim.api.nvim_create_autocmd("FileType", {
     vim.opt_local.linebreak = true -- break at word boundaries
   end,
 })
+
+-- Hard wrap at 80 for prose filetypes.
+-- fo flags used:
+--   t = auto-wrap while typing
+--   q = allow gq/gw to reflow paragraphs
+--   n = recognise numbered lists so gq doesn't break them
+-- 'a' (auto-reflow on edit) is intentionally omitted — it destroys code blocks.
+-- Use gw ip  to reflow the current paragraph after editing.
+vim.api.nvim_create_autocmd("FileType", {
+  pattern = { "norg", "markdown" },
+  callback = function()
+    vim.opt_local.textwidth = 80
+    vim.opt_local.formatoptions:append("tqn")
+    vim.opt_local.formatoptions:remove("l") -- don't skip already-long lines
+    vim.opt_local.wrap = true
+    vim.opt_local.linebreak = true
+  end,
+})
