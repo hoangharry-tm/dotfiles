@@ -17,7 +17,17 @@ return {
         callback = function(args)
           local client = vim.lsp.get_client_by_id(args.data.client_id)
           if client and (client.name == "ltex" or client.name == "ltex_plus") then
-            require("ltex_extra").reload()
+            vim.defer_fn(function()
+              local ok, err = pcall(require("ltex_extra").reload)
+              if not ok then
+                vim.schedule(function()
+                  vim.notify("[ltex_extra] reload failed (client not ready?), retrying in 200ms", vim.log.levels.WARN)
+                  vim.defer_fn(function()
+                    pcall(require("ltex_extra").reload)
+                  end, 200)
+                end)
+              end
+            end, 100)
           end
         end,
       })

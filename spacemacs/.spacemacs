@@ -32,7 +32,8 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(clojure
+   '(html
+     clojure
      toml
      (python :variable
              python-format-on-save t
@@ -44,6 +45,22 @@ This function should only modify configuration layer settings."
      (typescript :variable
                  typescript-fmt-on-save t
                  typescript-fmt-tool 'prettier)
+     (go :variable
+         go-format-before-save t
+         go-tab-width 4
+         go-backend 'lsp)
+     (rust :variable
+           rust-format-on-save t
+           rust-backend 'lsp)
+     (c-c++ :variable
+            c-c++-backend 'lsp
+            c-c++-format-on-save t)
+     (java :variable
+           java-backend 'lsp
+           java-format-on-save t)
+     (elixir :variable
+             elixir-backend 'lsp
+             elixir-format-on-save t)
      themes-megapack
      prettier
      shell
@@ -53,6 +70,11 @@ This function should only modify configuration layer settings."
      git
      helm
      lsp
+     tree-sitter
+     (latex :variables
+            latex-backend 'lsp
+            latex-refresh-preview t)
+     pdf
      markdown
      multiple-cursors
      (org :variable
@@ -77,7 +99,10 @@ This function should only modify configuration layer settings."
    ;; `dotspacemacs/user-config'. To use a local version of a package, use the
    ;; `:location' property: '(your-package :location "~/path/to/your-package/")
    ;; Also include the dependencies as they will not be resolved automatically.
-   dotspacemacs-additional-packages '(catppuccin-theme)
+   dotspacemacs-additional-packages '(doom-themes
+                                      catppuccin-theme
+                                      ef-themes
+                                      vue-mode)
 
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
@@ -104,7 +129,7 @@ It should only modify the values of Spacemacs settings."
   (setq-default
    ;; Maximum allowed time in seconds to contact an ELPA repository.
    ;; (default 5)
-   dotspacemacs-elpa-timeout 5
+   dotspacemacs-elpa-timeout 20
 
    ;; Set `gc-cons-threshold' and `gc-cons-percentage' when startup finishes.
    ;; This is an advanced option and should not be changed unless you suspect
@@ -222,15 +247,9 @@ It should only modify the values of Spacemacs settings."
    ;; package can be defined with `:package', or a theme can be defined with
    ;; `:location' to download the theme package, refer the themes section in
    ;; DOCUMENTATION.org for the full theme specifications.
-   dotspacemacs-themes '(catppuccin
-                         spacemacs-dark
+   dotspacemacs-themes '(spacemacs-dark
                          spacemacs-light
-                         alect-black
-                         doom-ayu-dark
-                         doom-gruvbox
-                         ef-arbutus
-                         ef-reverie
-                         gruvbox-dark-hard)
+                         alect-black)
 
    ;; Set the theme for the Spaceline. Supported themes are `spacemacs',
    ;; `all-the-icons', `custom', `doom', `vim-powerline' and `vanilla'. The
@@ -239,7 +258,7 @@ It should only modify the values of Spacemacs settings."
    ;; refer to the DOCUMENTATION.org for more info on how to create your own
    ;; spaceline theme. Value can be a symbol or list with additional properties.
    ;; (default '(spacemacs :separator wave :separator-scale 1.5))
-   dotspacemacs-mode-line-theme '(spacemacs :separator wave :separator-scale 1.5)
+   dotspacemacs-mode-line-theme 'doom
 
    ;; If non-nil the cursor color matches the state color in GUI Emacs.
    ;; (default t)
@@ -251,7 +270,7 @@ It should only modify the values of Spacemacs settings."
    ;; a non-negative integer (pixel size), or a floating-point (point size).
    ;; Point size is recommended, because it's device independent. (default 10.0)
    dotspacemacs-default-font '("Iosevka Nerd Font"
-                               :size 11.0
+                               :size 13.0
                                :weight normal
                                :width normal)
 
@@ -593,28 +612,111 @@ This function is called at the very end of Spacemacs startup, after layer
 configuration.
 Put your configuration code here, except for variables that should be set
 before packages are loaded."
-  ;; 'frappe, 'latte, 'macchiato, or 'mocha
-  (setq catppuccin-flavor                      'mocha
-        lsp-pylsp-plugins-pydocstyle-enabled   nil
-        typescript-fmt-tool                    'prettier
-        fill-column                            120
-        scroll-bar-mode                        -1)
-  (catppuccin-reload)
 
+  ;; ── PATH: ensure Go, Rust, etc. are found (macOS GUI fix) ──
+  (let (path-list)
+    (dolist (dir '("~/.cargo/bin" "~/go/bin" "/usr/local/go/bin" "/opt/homebrew/bin"))
+      (when (file-directory-p dir)
+        (let ((exp (expand-file-name dir)))
+          (push exp exec-path)
+          (push exp path-list))))
+    (when path-list
+      (setenv "PATH" (concat (string-join path-list ":") ":" (getenv "PATH")))))
+
+  ;; ── Appearance ──
+  (scroll-bar-mode -1)
+  (load-theme 'gruvbox-dark-hard t)
+  ;; frame transparency (desktop wallpaper shows through)
+  (if (assq 'alpha-background (frame-parameters))
+      ;; emacs-mac: fully transparent bg + slightly dimmed frame
+      (progn
+        ;; Background blurness
+        (set-frame-parameter nil 'alpha-background 0.7)
+        ;; Background transparency (ACTIVE . INACTIVE)
+        (set-frame-parameter nil 'alpha '(90 . 30)))
+    ;; GNU Emacs NS port: full frame transparency
+    (set-frame-parameter nil 'alpha '(80 . 80)))
+  ;; minimal mode-line: disable spaceline segments we don't need
+  (setq spaceline-point-position-p nil
+        spaceline-minor-modes-p nil
+        spaceline-version-control-p nil)
+
+  ;; ── emacs-mac: Option key as Meta ──
+  (setq mac-option-modifier 'meta)
+
+  ;; ── `fd` to escape insert mode ──
+  (setq-default evil-escape-key-sequence "fd")
+
+  ;; ── Ctrl+h/j/k/l to navigate between windows (normal + visual) ──
+  (evil-define-key '(normal visual) 'global
+    (kbd "C-h") 'evil-window-left
+    (kbd "C-j") 'evil-window-down
+    (kbd "C-k") 'evil-window-up
+    (kbd "C-l") 'evil-window-right)
+  ;; Also in treemacs buffer
+  (with-eval-after-load 'treemacs-mode
+    (dolist (binding '(([?\C-h] . evil-window-left)
+                       ([?\C-j] . evil-window-down)
+                       ([?\C-k] . evil-window-up)
+                       ([?\C-l] . evil-window-right)))
+      (define-key treemacs-mode-map (car binding) (cdr binding))))
+
+  ;; ── Editing defaults ──
+  (setq-default fill-column 80)
+  (global-display-fill-column-indicator-mode 1)
+
+  ;; ── Go: display tabs as 2 columns ──
+  (setq-default go-tab-width 4)
+
+  ;; ── Indentation: 2 spaces, no tabs for all languages ──
+  (defun my-set-2space-indent ()
+    (setq-local tab-width 2
+                indent-tabs-mode nil
+                c-basic-offset 2
+                typescript-indent-level 2
+                js-indent-level 2
+                js2-basic-offset 2
+                css-indent-offset 2
+                rust-indent-offset 2
+                python-indent-offset 2))
+
+  (dolist (hook '(prog-mode-hook
+                  go-mode-hook
+                  rust-mode-hook
+                  java-mode-hook
+                  c-mode-common-hook
+                  python-mode-hook
+                  elixir-mode-hook
+                  vue-mode-hook
+                  web-mode-hook
+                  css-mode-hook
+                  typescript-mode-hook
+                  js-mode-hook
+                  js2-mode-hook
+                  tsx-ts-mode-hook
+                  js-ts-mode-hook))
+    (add-hook hook 'my-set-2space-indent))
+  (with-eval-after-load 'c-ts-mode
+    (add-hook 'c-ts-mode-hook (lambda () (setq-local c-ts-mode-indent-offset 2)))
+    (add-hook 'c++-ts-mode-hook (lambda () (setq-local c-ts-mode-indent-offset 2))))
+  (with-eval-after-load 'rust-ts-mode
+    (add-hook 'rust-ts-mode-hook (lambda () (setq-local rust-ts-mode-indent-offset 2))))
+
+  ;; ── Python ──
+  (setq lsp-pylsp-plugins-pydocstyle-enabled nil)
+
+  ;; ── LSP: format + organize imports on save ──
+  (setq lsp-format-on-save t
+        lsp-organize-imports-on-save t
+        ;; Use latexindent for texlab formatting
+        lsp-latex-latex-formatter "latexindent")
+
+  ;; ── Auto-fill for text and prose ──
   (defun my-auto-fill-setup ()
-    "Enable auto-fill mode and visual-fill-column-mode."
     (auto-fill-mode 1)
     (display-fill-column-indicator-mode 1))
-  (defun my-ts-indentation-setup ()
-    (setq tab-width 2)
-    (setq c-basic-offset 2)
-    (setq typescript-indent-level 2)
-    (setq indent-tabs-mode nil))
-
-  ;; Apply hard wrapping to common text and code modes
   (add-hook 'text-mode-hook 'my-auto-fill-setup)
-  (add-hook 'prog-mode-hook 'my-auto-fill-setup)
-  (add-hook 'typescript-mode-hook 'my-ts-indentation-setup)
+
   )
 
 
@@ -625,173 +727,53 @@ before packages are loaded."
 This is an auto-generated function, do not modify its content directly, use
 Emacs customize menu instead.
 This function is called at the very end of Spacemacs initialization."
-(custom-set-variables
- ;; custom-set-variables was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- '(package-selected-packages
-   '(ace-link
-     aggressive-indent
-     all-the-icons
-     auto-compile
-     auto-highlight-symbol
-     avy-jump-helm-line
-     centered-cursor-mode
-     clean-aindent-mode
-     code-cells
-     column-enforce-mode
-     cython-mode
-     define-word
-     devdocs
-     diminish
-     dired-quick-sort
-     disable-mouse
-     dotenv-mode
-     drag-stuff
-     dumb-jump
-     eat
-     elisp-autofmt
-     elisp-def
-     elisp-demos
-     elisp-slime-nav
-     emr
-     esh-help
-     eshell-prompt-extras
-     eshell-z
-     eval-sexp-fu
-     evil-anzu
-     evil-args
-     evil-cleverparens
-     evil-collection
-     evil-easymotion
-     evil-escape
-     evil-evilified-state
-     evil-exchange
-     evil-goggles
-     evil-iedit-state
-     evil-indent-plus
-     evil-lion
-     evil-lisp-state
-     evil-matchit
-     evil-mc
-     evil-nerd-commenter
-     evil-numbers
-     evil-surround
-     evil-textobj-line
-     evil-tutor
-     evil-unimpaired
-     evil-visual-mark-mode
-     evil-visualstar
-     expand-region
-     eyebrowse
-     fancy-battery
-     golden-ratio
-     google-translate
-     helm-ag
-     helm-comint
-     helm-descbinds
-     helm-make
-     helm-mode-manager
-     helm-org
-     helm-projectile
-     helm-purpose
-     helm-pydoc
-     helm-swoop
-     helm-xref
-     hide-comnt
-     highlight-indentation
-     highlight-numbers
-     highlight-parentheses
-     hl-todo
-     holy-mode
-     hungry-delete
-     hybrid-mode
-     indent-guide
-     info+
-     inspector
-     js-doc
-     js2-mode
-     js2-refactor
-     json-mode
-     json-navigator
-     json-reformat
-     json-snatcher
-     link-hint
-     live-py-mode
-     livid-mode
-     load-env-vars
-     lorem-ipsum
-     macrostep
-     multi-line
-     multi-term
-     multi-vterm
-     multiple-cursors
-     nameless
-     nerd-icons
-     nodejs-repl
-     npm-mode
-     open-junk-file
-     org-superstar
-     overseer
-     page-break-lines
-     paradox
-     password-generator
-     pcre2el
-     pip-requirements
-     pipenv
-     pippel
-     poetry
-     popwin
-     prettier-js
-     py-isort
-     pydoc
-     pyenv-mode
-     pylookup
-     python-pytest
-     pythonic
-     pyvenv
-     quickrun
-     rainbow-delimiters
-     restart-emacs
-     shell-pop
-     simple-httpd
-     skewer-mode
-     space-doc
-     spaceline
-     spacemacs-purpose-popwin
-     spacemacs-whitespace-cleanup
-     sphinx-doc
-     string-edit-at-point
-     string-inflection
-     symbol-overlay
-     symon
-     term-cursor
-     terminal-here
-     toc-org
-     toml-mode
-     transient
-     treemacs-evil
-     treemacs-icons-dired
-     treemacs-persp
-     treemacs-projectile
-     typescript-mode
-     undo-fu-session
-     uuidgen
-     vi-tilde-fringe
-     volatile-highlights
-     vterm
-     vundo
-     web-beautify
-     wgrep
-     winum
-     writeroom-mode
-     ws-butler
-     zonokai-emacs)))
-(custom-set-faces
- ;; custom-set-faces was added by Custom.
- ;; If you edit it by hand, you could mess it up, so be careful.
- ;; Your init file should contain only one such instance.
- ;; If there is more than one, they won't work right.
- )
-)
+  (custom-set-variables
+   ;; custom-set-variables was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   '(package-selected-packages
+     '(ace-link add-node-modules-path aggressive-indent all-the-icons auto-compile
+                auto-highlight-symbol avy-jump-helm-line centered-cursor-mode
+                clean-aindent-mode code-cells column-enforce-mode company-web
+                counsel counsel-css cython-mode define-word devdocs diminish
+                dired-quick-sort disable-mouse doom-modeline dotenv-mode
+                drag-stuff dumb-jump eat elisp-autofmt elisp-def elisp-demos
+                elisp-slime-nav emmet-mode emr esh-help eshell-prompt-extras
+                eshell-z eval-sexp-fu evil-anzu evil-args evil-cleverparens
+                evil-collection evil-easymotion evil-escape evil-evilified-state
+                evil-exchange evil-goggles evil-iedit-state evil-indent-plus
+                evil-lion evil-lisp-state evil-matchit evil-mc evil-nerd-commenter
+                evil-numbers evil-surround evil-textobj-line evil-tutor
+                evil-unimpaired evil-visual-mark-mode evil-visualstar
+                expand-region eyebrowse fancy-battery golden-ratio
+                google-translate haml-mode helm-ag helm-comint helm-css-scss
+                helm-descbinds helm-make helm-mode-manager helm-org
+                helm-projectile helm-purpose helm-pydoc helm-swoop helm-xref
+                hide-comnt highlight-indentation highlight-numbers
+                highlight-parentheses hl-todo holy-mode hungry-delete hybrid-mode
+                impatient-mode indent-guide info+ inspector ivy js-doc js2-mode
+                js2-refactor json-mode json-navigator json-reformat json-snatcher
+                link-hint live-py-mode livid-mode load-env-vars lorem-ipsum
+                macrostep moody multi-line multi-term multi-vterm multiple-cursors
+                nameless nerd-icons nodejs-repl npm-mode open-junk-file
+                org-superstar overseer page-break-lines paradox password-generator
+                pcre2el pip-requirements pipenv pippel poetry popwin prettier-js
+                pug-mode py-isort pydoc pyenv-mode pylookup python-pytest pythonic
+                pyvenv quickrun rainbow-delimiters restart-emacs sass-mode
+                scss-mode shell-pop shrink-path simple-httpd skewer-mode slim-mode
+                space-doc spaceline spacemacs-purpose-popwin
+                spacemacs-whitespace-cleanup sphinx-doc string-edit-at-point
+                string-inflection swiper symbol-overlay symon tagedit term-cursor
+                terminal-here toc-org toml-mode transient treemacs-evil
+                treemacs-icons-dired treemacs-persp treemacs-projectile
+                typescript-mode undo-fu-session uuidgen vi-tilde-fringe
+                volatile-highlights vterm vundo web-beautify web-completion-data
+                web-mode wgrep winum writeroom-mode ws-butler zonokai-emacs)))
+  (custom-set-faces
+   ;; custom-set-faces was added by Custom.
+   ;; If you edit it by hand, you could mess it up, so be careful.
+   ;; Your init file should contain only one such instance.
+   ;; If there is more than one, they won't work right.
+   )
+  )
