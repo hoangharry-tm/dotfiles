@@ -11,6 +11,7 @@
 !wezterm/**
 !tmux/
 !tmux/**
+tmux/plugins/
 !ranger/
 !ranger/**
 !spacemacs/

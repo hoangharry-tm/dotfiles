@@ -1,0 +1,18 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(nvim --headless -c \"lua vim.defer_fn\\(function\\(\\) vim.cmd\\('qa!'\\) end, 3000\\)\")",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(nvim --headless -c \"lua local ok, err = pcall\\(require, 'ltex_extra'\\); print\\('ltex_extra:', ok, err\\)\" -c \"qa!\")",
+      "Bash(gopls version *)",
+      "Bash(go version *)",
+      "Bash(golangci-lint version *)",
+      "Bash(~/.local/share/nvim/mason/bin/gopls version *)",
+      "Bash(~/.local/share/nvim/mason/bin/golangci-lint version *)",
+      "Bash(~/.local/share/nvim/mason/bin/golangci-lint-langserver --version)",
+      "Read(//private/tmp/**)",
+      "Bash(~/.local/share/nvim/mason/bin/golangci-lint run *)",
+      "Bash(nvim --headless --noplugin -c \"qa!\")"
+    ]
+  }
+}
