@@ -386,7 +386,7 @@ It should only modify the values of Spacemacs settings."
    ;; If t, enable the `package-quickstart' feature to avoid full package
    ;; loading, otherwise no `package-quickstart' attemption (default nil).
    ;; Refer the FAQ.org "package-quickstart" section for details.
-   dotspacemacs-enable-package-quickstart nil
+   dotspacemacs-enable-package-quickstart t
 
    ;; If non-nil a progress bar is displayed when spacemacs is loading. This
    ;; may increase the boot time on some systems and emacs builds, set it to
@@ -404,7 +404,7 @@ It should only modify the values of Spacemacs settings."
    ;; If non-nil the frame is maximized when Emacs starts up.
    ;; Takes effect only if `dotspacemacs-fullscreen-at-startup' is nil.
    ;; (default t) (Emacs 24.4+ only)
-   dotspacemacs-maximized-at-startup t
+   dotspacemacs-maximized-at-startup nil
 
    ;; If non-nil the frame is undecorated when Emacs starts up. Combine this
    ;; variable with `dotspacemacs-maximized-at-startup' to obtain fullscreen
@@ -604,7 +604,8 @@ This function is called immediately after `dotspacemacs/init', before layer
 configuration.
 It is mostly for variables that should be set before packages are loaded.
 If you are unsure, try setting them in `dotspacemacs/user-config' first."
-  )
+  ;; Prevent url-retrieve from hanging on TLS connections
+  (setq url-connection-timeout 10))
 
 (defun dotspacemacs/user-config ()
   "Configuration for user code:
@@ -628,21 +629,31 @@ before packages are loaded."
   (load-theme 'gruvbox-dark-hard t)
   ;; frame transparency (desktop wallpaper shows through)
   (if (assq 'alpha-background (frame-parameters))
-      ;; emacs-mac: fully transparent bg + slightly dimmed frame
+      ;; emacs-mac: transparent bg + hidden title bar
       (progn
-        ;; Background blurness
-        (set-frame-parameter nil 'alpha-background 0.7)
-        ;; Background transparency (ACTIVE . INACTIVE)
-        (set-frame-parameter nil 'alpha '(90 . 30)))
+        (set-frame-parameter nil 'alpha-background 0.2)
+        (setq mac-title-bar-style 'hidden))
     ;; GNU Emacs NS port: full frame transparency
-    (set-frame-parameter nil 'alpha '(80 . 80)))
+    (set-frame-parameter nil 'alpha '(90 . 20)))
   ;; minimal mode-line: disable spaceline segments we don't need
   (setq spaceline-point-position-p nil
         spaceline-minor-modes-p nil
         spaceline-version-control-p nil)
 
-  ;; ── emacs-mac: Option key as Meta ──
-  (setq mac-option-modifier 'meta)
+  ;; ── emacs-mac: Option key as Meta, Cmd as clipboard ──
+  (setq mac-option-modifier 'meta
+        mac-command-modifier 'super)
+  ;; Cmd+C/V/X/A/Z for system clipboard
+  (global-set-key (kbd "s-c") 'kill-ring-save)
+  (global-set-key (kbd "s-v") 'yank)
+  (global-set-key (kbd "s-x") 'kill-region)
+  (global-set-key (kbd "s-a") 'mark-whole-buffer)
+  (global-set-key (kbd "s-z") 'undo)
+  ;; Also in visual / insert mode (Evil)
+  (with-eval-after-load 'evil
+    (define-key evil-visual-state-map (kbd "s-c") 'kill-ring-save)
+    (define-key evil-visual-state-map (kbd "s-x") 'kill-region)
+    (define-key evil-insert-state-map (kbd "s-v") 'yank))
 
   ;; ── `fd` to escape insert mode ──
   (setq-default evil-escape-key-sequence "fd")
@@ -653,13 +664,19 @@ before packages are loaded."
     (kbd "C-j") 'evil-window-down
     (kbd "C-k") 'evil-window-up
     (kbd "C-l") 'evil-window-right)
-  ;; Also in treemacs buffer
-  (with-eval-after-load 'treemacs-mode
-    (dolist (binding '(([?\C-h] . evil-window-left)
-                       ([?\C-j] . evil-window-down)
-                       ([?\C-k] . evil-window-up)
-                       ([?\C-l] . evil-window-right)))
-      (define-key treemacs-mode-map (car binding) (cdr binding))))
+  ;; Also in treemacs and lsp-ui-imenu buffers
+  (dolist (config '((treemacs-mode . treemacs-mode-map)
+                    (lsp-ui-imenu-mode . lsp-ui-imenu-mode-map)))
+    (with-eval-after-load (car config)
+      (dolist (binding '(([?\C-h] . evil-window-left)
+                         ([?\C-j] . evil-window-down)
+                         ([?\C-k] . evil-window-up)
+                         ([?\C-l] . evil-window-right)))
+        (define-key (symbol-value (cdr config)) (car binding) (cdr binding)))))
+
+  ;; ── wdired: auto-switch to insert state for editing ──
+  (with-eval-after-load 'wdired
+    (add-hook 'wdired-mode-hook 'evil-insert-state))
 
   ;; ── Editing defaults ──
   (setq-default fill-column 80)
@@ -668,11 +685,20 @@ before packages are loaded."
   ;; ── Go: display tabs as 2 columns ──
   (setq-default go-tab-width 4)
 
+  ;; ── Electric indent: automatic newline+indent ──
+  (electric-indent-mode 1)
+
   ;; ── Indentation: 2 spaces, no tabs for all languages ──
+  (setq-default c-tab-always-indent t
+                c-electric-flag t
+                evil-want-C-i-jump nil) ; TAB indents, doesn't jump
+  (with-eval-after-load 'cc-mode
+    (define-key c-mode-base-map (kbd "RET") 'newline-and-indent))
   (defun my-set-2space-indent ()
     (setq-local tab-width 2
                 indent-tabs-mode nil
                 c-basic-offset 2
+                c-echo-syntactic-information-p nil
                 typescript-indent-level 2
                 js-indent-level 2
                 js2-basic-offset 2
