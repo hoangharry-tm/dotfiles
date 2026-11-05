@@ -30,7 +30,7 @@ ZSH_THEME="powerlevel10k/powerlevel10k"
 zstyle ':omz:update' mode auto
 
 # Docker completions (add before OMZ compinit runs)
-fpath=(/Users/hoangharry/.docker/completions $fpath)
+fpath=("$HOME/.docker/completions" $fpath)
 
 # zsh-vi-mode: leave insert mode with `jk` (Esc still works too)
 ZVM_VI_INSERT_ESCAPE_BINDKEY=jk
@@ -46,9 +46,9 @@ plugins=(
   colored-man-pages
   copyfile
   copypath
-  macos
   gh
 )
+[[ "$OSTYPE" == darwin* ]] && plugins+=(macos)
 
 source $ZSH/oh-my-zsh.sh
 
@@ -244,7 +244,11 @@ npx() { lazy_load_nvm && npx "$@"; }
 # ============================================================
 #  PNPM
 # ============================================================
-export PNPM_HOME="/Users/hoangharry/Library/pnpm"
+if [[ "$OSTYPE" == darwin* ]]; then
+  export PNPM_HOME="$HOME/Library/pnpm"
+else
+  export PNPM_HOME="${XDG_DATA_HOME:-$HOME/.local/share}/pnpm"
+fi
 case ":$PATH:" in
   *":$PNPM_HOME:"*) ;;
   *) export PATH="$PNPM_HOME:$PATH" ;;
@@ -268,7 +272,7 @@ export PATH="/opt/homebrew/share/man:$PATH"
 # ============================================================
 #  RBENV
 # ============================================================
-eval "$(rbenv init - zsh)"
+(( $+commands[rbenv] )) && eval "$(rbenv init - zsh)"
 
 # ============================================================
 #  LOCAL OVERRIDES (git-ignored, machine-specific)
