@@ -32,7 +32,10 @@ This function should only modify configuration layer settings."
 
    ;; List of configuration layers to load.
    dotspacemacs-configuration-layers
-   '(html
+   '(markdown
+     go
+     yaml
+     html
      clojure
      toml
      (python :variable
@@ -88,7 +91,8 @@ This function should only modify configuration layer settings."
      syntax-checking
      version-control
      (treemacs :variable
-               treemacs-use-icons-dired t))
+               treemacs-use-icons nil
+               treemacs-use-icons-dired nil))
 
 
    ;; List of additional packages that will be installed without being wrapped
@@ -102,13 +106,14 @@ This function should only modify configuration layer settings."
    dotspacemacs-additional-packages '(doom-themes
                                       catppuccin-theme
                                       ef-themes
-                                      vue-mode)
+                                      vue-mode
+                                      vterm)
 
    ;; A list of packages that cannot be updated.
    dotspacemacs-frozen-packages '()
 
    ;; A list of packages that will not be installed and loaded.
-   dotspacemacs-excluded-packages '()
+   dotspacemacs-excluded-packages '(nerd-icons nerd-icons-data)
 
    ;; Defines the behaviour of Spacemacs when installing packages.
    ;; Possible values are `used-only', `used-but-keep-unused' and `all'.
@@ -247,9 +252,10 @@ It should only modify the values of Spacemacs settings."
    ;; package can be defined with `:package', or a theme can be defined with
    ;; `:location' to download the theme package, refer the themes section in
    ;; DOCUMENTATION.org for the full theme specifications.
-   dotspacemacs-themes '(spacemacs-dark
-                         spacemacs-light
-                         alect-black)
+   dotspacemacs-themes '(gruvbox-dark-hard
+                         darktooth-darker
+                         spacemacs-dark
+                         spacemacs-light)
 
    ;; Set the theme for the Spaceline. Supported themes are `spacemacs',
    ;; `all-the-icons', `custom', `doom', `vim-powerline' and `vanilla'. The
@@ -269,13 +275,13 @@ It should only modify the values of Spacemacs settings."
    ;; fixed-pitch faces. The `:size' can be specified as
    ;; a non-negative integer (pixel size), or a floating-point (point size).
    ;; Point size is recommended, because it's device independent. (default 10.0)
-   dotspacemacs-default-font '("Iosevka Nerd Font"
+   dotspacemacs-default-font '("DankMono Nerd Font"
                                :size 13.0
                                :weight normal
                                :width normal)
 
    ;; Default icons font, it can be `all-the-icons' or `nerd-icons'.
-   dotspacemacs-default-icons-font 'nerd-icons
+   dotspacemacs-default-icons-font 'all-the-icons
 
    ;; The leader key (default "SPC")
    dotspacemacs-leader-key "SPC"
@@ -386,7 +392,7 @@ It should only modify the values of Spacemacs settings."
    ;; If t, enable the `package-quickstart' feature to avoid full package
    ;; loading, otherwise no `package-quickstart' attemption (default nil).
    ;; Refer the FAQ.org "package-quickstart" section for details.
-   dotspacemacs-enable-package-quickstart t
+   dotspacemacs-enable-package-quickstart nil
 
    ;; If non-nil a progress bar is displayed when spacemacs is loading. This
    ;; may increase the boot time on some systems and emacs builds, set it to
@@ -605,7 +611,14 @@ configuration.
 It is mostly for variables that should be set before packages are loaded.
 If you are unsure, try setting them in `dotspacemacs/user-config' first."
   ;; Prevent url-retrieve from hanging on TLS connections
-  (setq url-connection-timeout 10))
+  (setq url-connection-timeout 10)
+  ;; zig-mode + reformatter loaded from source (not MELPA)
+  (add-to-list 'load-path "~/.emacs.d/zig-mode")
+  (add-to-list 'load-path "~/.emacs.d/reformatter")
+  (setq package-archives
+        '(("gnu" . "https://elpa.gnu.org/packages/")
+          ("melpa" . "https://melpa.org/packages/")
+          ("nongnu" . "https://elpa.nongnu.org/nongnu/"))))
 
 (defun dotspacemacs/user-config ()
   "Configuration for user code:
@@ -616,7 +629,7 @@ before packages are loaded."
 
   ;; ── PATH: ensure Go, Rust, etc. are found (macOS GUI fix) ──
   (let (path-list)
-    (dolist (dir '("~/.cargo/bin" "~/go/bin" "/usr/local/go/bin" "/opt/homebrew/bin"))
+    (dolist (dir '("~/.cargo/bin" "~/go/bin" "/usr/local/go/bin" "/opt/homebrew/bin" "/opt/homebrew/opt/zig/bin"))
       (when (file-directory-p dir)
         (let ((exp (expand-file-name dir)))
           (push exp exec-path)
@@ -626,15 +639,23 @@ before packages are loaded."
 
   ;; ── Appearance ──
   (scroll-bar-mode -1)
-  (load-theme 'gruvbox-dark-hard t)
+  (condition-case nil
+      (load-theme 'gruvbox-dark-hard t)
+    (error
+     (condition-case nil
+         (load-theme 'darktooth-darker t)
+       (error (message "No theme found, skipping")))))
   ;; frame transparency (desktop wallpaper shows through)
   (if (assq 'alpha-background (frame-parameters))
       ;; emacs-mac: transparent bg + hidden title bar
       (progn
-        (set-frame-parameter nil 'alpha-background 0.2)
-        (setq mac-title-bar-style 'hidden))
-    ;; GNU Emacs NS port: full frame transparency
-    (set-frame-parameter nil 'alpha '(90 . 20)))
+        (set-frame-parameter nil 'alpha-background 0.8)
+        (set-frame-parameter nil 'alpha '(80 . 50))
+        )
+    (setq mac-title-bar-style 'hidden))
+  ;; GNU Emacs NS port: full frame transparency
+  ;; (set-frame-parameter nil 'alpha '(90 . 20))
+
   ;; minimal mode-line: disable spaceline segments we don't need
   (setq spaceline-point-position-p nil
         spaceline-minor-modes-p nil
@@ -655,15 +676,16 @@ before packages are loaded."
     (define-key evil-visual-state-map (kbd "s-x") 'kill-region)
     (define-key evil-insert-state-map (kbd "s-v") 'yank))
 
-  ;; ── `fd` to escape insert mode ──
+  ;; ── fd to escape insert mode ──
   (setq-default evil-escape-key-sequence "fd")
 
   ;; ── Ctrl+h/j/k/l to navigate between windows (normal + visual) ──
-  (evil-define-key '(normal visual) 'global
-    (kbd "C-h") 'evil-window-left
-    (kbd "C-j") 'evil-window-down
-    (kbd "C-k") 'evil-window-up
-    (kbd "C-l") 'evil-window-right)
+  (with-eval-after-load 'evil
+    (evil-define-key '(normal visual) 'global
+      (kbd "C-h") 'evil-window-left
+      (kbd "C-j") 'evil-window-down
+      (kbd "C-k") 'evil-window-up
+      (kbd "C-l") 'evil-window-right))
   ;; Also in treemacs and lsp-ui-imenu buffers
   (dolist (config '((treemacs-mode . treemacs-mode-map)
                     (lsp-ui-imenu-mode . lsp-ui-imenu-mode-map)))
@@ -704,7 +726,8 @@ before packages are loaded."
                 js2-basic-offset 2
                 css-indent-offset 2
                 rust-indent-offset 2
-                python-indent-offset 2))
+                python-indent-offset 2
+                zig-indent-offset 4))
 
   (dolist (hook '(prog-mode-hook
                   go-mode-hook
@@ -713,6 +736,7 @@ before packages are loaded."
                   c-mode-common-hook
                   python-mode-hook
                   elixir-mode-hook
+                  zig-mode-hook
                   vue-mode-hook
                   web-mode-hook
                   css-mode-hook
@@ -743,8 +767,26 @@ before packages are loaded."
     (display-fill-column-indicator-mode 1))
   (add-hook 'text-mode-hook 'my-auto-fill-setup)
 
-  )
+  ;; ── vterm config ──
+  (with-eval-after-load 'vterm
+    (setq vterm-shell "/opt/homebrew/bin/zsh"))
 
+  ;; ── Turn off fill-column indicator in shell and terminal buffers ──
+  (dolist (hook '(shell-mode-hook
+                  term-mode-hook
+                  eshell-mode-hook
+                  vterm-mode-hook))
+    (add-hook hook (lambda () (display-fill-column-indicator-mode -1))))
+
+  ;; ── Zig (installed from source, not MELPA) ──
+  (require 'zig-mode)
+  (add-to-list 'auto-mode-alist '("\\.\\(zig\\|zon\\)\\'" . zig-mode))
+  (add-hook 'zig-mode-hook 'lsp-deferred)
+  (setq zig-format-on-save t)
+  (add-hook 'zig-mode-hook
+            (lambda ()
+              (setq-local tab-width 4
+                          indent-tabs-mode nil))))
 
 ;; Do not write anything past this comment. This is where Emacs will
 ;; auto-generate custom variable definitions.
@@ -759,43 +801,7 @@ This function is called at the very end of Spacemacs initialization."
    ;; Your init file should contain only one such instance.
    ;; If there is more than one, they won't work right.
    '(package-selected-packages
-     '(ace-link add-node-modules-path aggressive-indent all-the-icons auto-compile
-                auto-highlight-symbol avy-jump-helm-line centered-cursor-mode
-                clean-aindent-mode code-cells column-enforce-mode company-web
-                counsel counsel-css cython-mode define-word devdocs diminish
-                dired-quick-sort disable-mouse doom-modeline dotenv-mode
-                drag-stuff dumb-jump eat elisp-autofmt elisp-def elisp-demos
-                elisp-slime-nav emmet-mode emr esh-help eshell-prompt-extras
-                eshell-z eval-sexp-fu evil-anzu evil-args evil-cleverparens
-                evil-collection evil-easymotion evil-escape evil-evilified-state
-                evil-exchange evil-goggles evil-iedit-state evil-indent-plus
-                evil-lion evil-lisp-state evil-matchit evil-mc evil-nerd-commenter
-                evil-numbers evil-surround evil-textobj-line evil-tutor
-                evil-unimpaired evil-visual-mark-mode evil-visualstar
-                expand-region eyebrowse fancy-battery golden-ratio
-                google-translate haml-mode helm-ag helm-comint helm-css-scss
-                helm-descbinds helm-make helm-mode-manager helm-org
-                helm-projectile helm-purpose helm-pydoc helm-swoop helm-xref
-                hide-comnt highlight-indentation highlight-numbers
-                highlight-parentheses hl-todo holy-mode hungry-delete hybrid-mode
-                impatient-mode indent-guide info+ inspector ivy js-doc js2-mode
-                js2-refactor json-mode json-navigator json-reformat json-snatcher
-                link-hint live-py-mode livid-mode load-env-vars lorem-ipsum
-                macrostep moody multi-line multi-term multi-vterm multiple-cursors
-                nameless nerd-icons nodejs-repl npm-mode open-junk-file
-                org-superstar overseer page-break-lines paradox password-generator
-                pcre2el pip-requirements pipenv pippel poetry popwin prettier-js
-                pug-mode py-isort pydoc pyenv-mode pylookup python-pytest pythonic
-                pyvenv quickrun rainbow-delimiters restart-emacs sass-mode
-                scss-mode shell-pop shrink-path simple-httpd skewer-mode slim-mode
-                space-doc spaceline spacemacs-purpose-popwin
-                spacemacs-whitespace-cleanup sphinx-doc string-edit-at-point
-                string-inflection swiper symbol-overlay symon tagedit term-cursor
-                terminal-here toc-org toml-mode transient treemacs-evil
-                treemacs-icons-dired treemacs-persp treemacs-projectile
-                typescript-mode undo-fu-session uuidgen vi-tilde-fringe
-                volatile-highlights vterm vundo web-beautify web-completion-data
-                web-mode wgrep winum writeroom-mode ws-butler zonokai-emacs)))
+     '(yaml-mode ace-link add-node-modules-path aggressive-indent all-the-icons auto-compile auto-highlight-symbol avy-jump-helm-line centered-cursor-mode clean-aindent-mode code-cells column-enforce-mode company-web counsel counsel-css cython-mode define-word devdocs diminish dired-quick-sort disable-mouse doom-modeline dotenv-mode drag-stuff dumb-jump eat elisp-autofmt elisp-def elisp-demos elisp-slime-nav emmet-mode emr esh-help eshell-prompt-extras eshell-z eval-sexp-fu evil-anzu evil-args evil-cleverparens evil-collection evil-easymotion evil-escape evil-evilified-state evil-exchange evil-goggles evil-iedit-state evil-indent-plus evil-lion evil-lisp-state evil-matchit evil-mc evil-nerd-commenter evil-numbers evil-surround evil-textobj-line evil-tutor evil-unimpaired evil-visual-mark-mode evil-visualstar expand-region eyebrowse fancy-battery golden-ratio google-translate haml-mode helm-ag helm-comint helm-css-scss helm-descbinds helm-make helm-mode-manager helm-org helm-projectile helm-purpose helm-pydoc helm-swoop helm-xref hide-comnt highlight-indentation highlight-numbers highlight-parentheses hl-todo holy-mode hungry-delete hybrid-mode impatient-mode indent-guide info+ inspector ivy js-doc js2-mode js2-refactor json-mode json-navigator json-reformat json-snatcher link-hint live-py-mode livid-mode load-env-vars lorem-ipsum macrostep moody multi-line multi-term multi-vterm multiple-cursors nameless nerd-icons nodejs-repl npm-mode open-junk-file org-superstar overseer page-break-lines paradox password-generator pcre2el pip-requirements pipenv pippel poetry popwin prettier-js pug-mode py-isort pydoc pyenv-mode pylookup python-pytest pythonic pyvenv quickrun rainbow-delimiters restart-emacs sass-mode scss-mode shell-pop shrink-path simple-httpd skewer-mode slim-mode space-doc spaceline spacemacs-purpose-popwin spacemacs-whitespace-cleanup sphinx-doc string-edit-at-point string-inflection swiper symbol-overlay symon tagedit term-cursor terminal-here toc-org toml-mode transient treemacs-evil treemacs-icons-dired treemacs-persp treemacs-projectile typescript-mode undo-fu-session uuidgen vi-tilde-fringe volatile-highlights vterm vundo web-beautify web-completion-data web-mode wgrep winum writeroom-mode ws-butler zonokai-emacs)))
   (custom-set-faces
    ;; custom-set-faces was added by Custom.
    ;; If you edit it by hand, you could mess it up, so be careful.

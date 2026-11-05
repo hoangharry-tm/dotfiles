@@ -36,18 +36,23 @@ A personal Neovim configuration built on [LazyVim](https://lazyvim.github.io/) (
 | `neorg.lua` | michaelb/sniprun | Run code blocks inline |
 | `neorg.lua` | folke/zen-mode.nvim + twilight.nvim | Distraction-free writing |
 | `dbee.lua` | nvim-dbee | DB client; Postgres connection to BravoPGE dev |
-| `vimtex.lua` | vimtex | LaTeX; viewer = zathura |
+| `vimtex.lua` | vimtex | LaTeX; viewer = sioyek |
 | `colorscheme.lua` | solarized-osaka, sonokai | Themes |
 | `neo-tree.lua` | neo-tree | Shows dotfiles; hides .gitignored |
 | `snacks-nvim.lua` | snacks.nvim | Picker searches hidden + gitignored files |
 | `yamlls-blueprints.lua` | nvim-lspconfig (yamlls override) | Excludes "Quali Torque Blueprint Spec 2" from SchemaStore to suppress false YAML errors in Aethel Workspace `blueprints/` dirs |
-| `ltex.lua` | barreiroleo/ltex_extra.nvim | Handles ltex-ls code actions (Add to dictionary, Add to library, Hide false positive); persists to `~/.local/share/ltex/` |
+| `disable-lsp-servers.lua` | nvim-lspconfig override | Disables `ltex` (grammar checker) and `texlab` (LaTeX LSP) — LaTeX support comes from VimTeX alone |
+| `render-markdown.lua` | render-markdown.nvim override | `pipe.border_virtual = true` — table borders render on virtual lines so a table at the end of a note doesn't overflow into the footnote |
 | `go.lua` | nvim-lspconfig override | Disables `golangci_lint_ls` auto-start — Mason has `golangci-lint-langserver` installed which conflicts with nvim-lint's `golangcilint` linter (both run golangci-lint, causing duplicate diagnostics) |
+| `obsidian.lua` | obsidian-nvim/obsidian.nvim (main) | Obsidian vault integration — wikilink nav, backlinks, search, rename, embedded `obsidian-ls` LSP completion, paste_img |
+| `ruby.lua` | nvim-lspconfig + neotest overrides | Enables `ruby_lsp` + `rubocop` (installed via rbenv, not Mason); bundle-aware LSP cmds; neotest-rspec + neotest-minitest adapters |
 
 ## LazyVim extras enabled (`lazyvim.json`)
 
-Lang: Python, Go, TypeScript/VTSLS, Java, Lua, SQL, Markdown, YAML, Dart, Svelte, Vue, Tailwind, Clojure, C/CMake, Docker, Git
-Tools: Prettier, ESLint, yanky, inc-rename, gh, gitui, mini-hipatterns, mini-animate, project, VSCode compat
+Lang: Python, Go, TypeScript/VTSLS, Java, SQL, Markdown, YAML, Dart, Svelte, Vue, Tailwind, Clojure, C/CMake, Docker, Git, Ruby
+(Lua has no extra — LazyVim's base layer already sets up `lua_ls`.)
+Tools: Prettier, ESLint, mini-surround, yanky, inc-rename, gh, gitui, mini-hipatterns, mini-animate, project, VSCode compat
+Test: core (neotest + `<leader>t` keymaps)
 
 ## Formatting
 
@@ -65,13 +70,21 @@ Check without writing: `stylua --check lua/`
 - `<leader>z` → ZenMode toggle
 - `<leader>ip` → PasteImage (img-clip) — pastes clipboard image, saves to `assets/`, inserts `.image` tag
 - `<leader>sr/sc/sx` → SnipRun / SnipClose / SnipReset
+- `<leader>o*` → Obsidian (group): `<leader>oo` commands picker, `on` new note, `oq` quick switch, `os` search, `ob` backlinks, `of` follow link, `or` rename, `ol` (visual) link selection, `ot` tags, `op` paste image
+- In-vault buffer maps (obsidian.nvim defaults): `<CR>` smart action (follow/toggle), `]o`/`[o` next/prev link
 
 ## Prose formatting (norg + markdown)
 
-`textwidth=80` with `formatoptions+=tqn` set in `autocmds.lua` — hard-wraps at 80
-columns as you type. Use `gwip` (normal mode) to reflow the paragraph under the
-cursor after edits. The `a` flag (auto-reflow on every keystroke) is deliberately
-off — it destroys `@code ... @end` blocks in norg and fenced code blocks in markdown.
+Non-Obsidian `norg`/`markdown` buffers use `textwidth=80` with
+`formatoptions+=tqn` in `autocmds.lua` — hard-wraps at 80 columns as you type.
+Use `gwip` (normal mode) to reflow the paragraph under the cursor after edits.
+The `a` flag (auto-reflow on every keystroke) is deliberately off — it destroys
+`@code ... @end` blocks in norg and fenced code blocks in markdown.
+
+**Obsidian vault notes are the exception: soft wrap only.** They set
+`textwidth=0` (see the soft-wrap bullet under "Obsidian setup"), so they never
+hard-wrap no matter what `formatoptions` contains. To reflow one at a fixed
+width: `:set tw=80 | gwip | set tw=0`.
 
 ## Adding a plugin
 
@@ -80,6 +93,31 @@ override a LazyVim plugin, use the exact upstream plugin name and supply `opts`
 (merged) or `config` (replaces). To enable a LazyVim extra, add it to the
 `extras` array in `lazyvim.json` — do not add extra plugins in Lua for things
 LazyVim already ships as an extra.
+
+## Ruby / Rails setup
+
+Laptop: Ruby + Rails managed via **rbenv** (Homebrew-installed). Init lines are
+in `~/.zshrc` (`export PATH="$HOME/.rbenv/bin:$PATH"` +
+`eval "$(rbenv init - zsh)"`). Global version: `4.0.6`; Rails `8.1.3.1`
+installed as a gem. `ruby-lsp` and `rubocop` gems are installed globally via
+rbenv — **not** through Mason.
+
+Neovim (`lua/plugins/ruby.lua` overrides the `lang.ruby` extra):
+- `ruby_lsp` + `rubocop` LSPs are enabled with `mason = false` (mason-lspconfig
+  only auto-enables servers it installed). Both use a `cmd` factory
+  (`vim.lsp.rpc.start`): if the gem is in the project's `Gemfile` **and**
+  `Gemfile.lock`, they run via `bundle exec` (so `ruby-lsp-rails` and the
+  project's rubocop config load); otherwise they fall back to the global
+  binary. Spawn cwd is `config.root_dir`.
+- Formatting (from the extra): conform runs `rubocop` for ruby and
+  `erb_format` for eruby; mason installs `erb-formatter`/`erb-lint`.
+- Tests via neotest (`<leader>t` group, `test.core` extra): `neotest-rspec`
+  forced to `bundle exec rspec`; `neotest-minitest` uses `bin/rails test` when
+  `bin/rails` exists, else `bundle exec ruby -Itest`.
+
+Per-project Rails app: `bundle add ruby-lsp ruby-lsp-rails` (then reopen) to
+get Rails-aware features; RuboCop config comes from
+`rubocop-rails-omakase` (already in the Rails 8 default Gemfile).
 
 ## Neorg setup
 
@@ -146,3 +184,33 @@ The `dkjson` rock must be present in the plugin's `.rocks` tree. If the
   the kitty graphics protocol and images will not appear there.
 - **Clear images**: `:lua require("image").clear()`
 - ImageMagick (v7) and the `magick` luarock are both installed and working.
+
+## Obsidian setup
+
+`obsidian.lua` wires obsidian.nvim (tracking `main`, the 4.0 rewrite) to the
+OneDrive Obsidian vault:
+
+- Vault: `~/Library/CloudStorage/OneDrive-Personal/mh_obsidian/personal`
+- Workspace name: `personal`. Plugin lazy-loads only for `*.md` inside that vault.
+- **Completion** is the embedded `obsidian-ls` in-process LSP server (no
+  nvim-cmp / blink.compat). Works with blink.cmp's `lsp` source; starts on
+  BufEnter of a vault note. `:Obsidian check` verifies setup.
+- Picker: `snacks.picker` (no telescope/fzf needed on main).
+- `frontmatter.enabled = false` — vault notes use custom YAML (e.g.
+  `type: "[[🗼 Store]]"`) so obsidian must NOT rewrite frontmatter. New notes are
+  created as plain markdown; do not re-enable without testing a save first.
+- `note_id_func = title_id` — new notes get readable slug filenames.
+- Keymaps: `<leader>o` group + default buffer maps `<CR>`, `]o`, `[o`.
+- macOS deps: `pngpaste` (for `:Obsidian paste_img`); `fzf`/`rg` not required
+  but present.
+- Vault editing quirks (in `autocmds.lua`): for any `*.md` under
+  `~/OneDrive/mh_obsidian/` (or its real path) line numbers are off and
+  diagnostics are muted — markdownlint's MD013/MD041 are noise in notes.
+  Completion is unaffected.
+- Vault notes soft-wrap: `wrap` + `linebreak` + `textwidth=0` — display wraps
+  at word boundaries and typing never hard-wraps. `textwidth=0` is used (not
+  just removing the `t` formatoptions flag) because plugins reloading on the
+  markdown filetype (render-markdown via LazyVim's `do FileType`) re-add `t`;
+  with no width, hard wrap can't fire regardless. To reflow a paragraph at 80:
+  `:set tw=80 | gwip | set tw=0`. Applied via BufEnter, a `vim.schedule` re-apply
+  in the FileType autocmd, and two deferred re-applies for the arg-started buffer.

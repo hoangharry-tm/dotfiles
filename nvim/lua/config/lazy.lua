@@ -17,7 +17,7 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
   spec = {
     -- add LazyVim and import its plugins
-    { "LazyVim/LazyVim", import = "lazyvim.plugins", opts = { colorscheme = "solarized-osaka" } },
+    { "LazyVim/LazyVim", import = "lazyvim.plugins", opts = { colorscheme = "kanagawa" } },
     -- import/override with your plugins
     { import = "plugins" },
   },
@@ -54,6 +54,7 @@ require("lazy").setup({
 
 if vim.g.neovide then
   vim.o.guifont = "DankMono Nerd Font:h13"
-  vim.g.neovide_opacity = 0.9
-  vim.g.neovide_normal_opacity = 0.9
+  vim.g.neovide_opacity = 0.8
+  vim.g.neovide_normal_opacity = 0.8
+  vim.o.background = "dark"
 end

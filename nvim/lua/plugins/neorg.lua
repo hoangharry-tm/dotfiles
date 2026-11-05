@@ -97,10 +97,11 @@ return {
     },
   },
 
-  -- Render images inline (requires ImageMagick + kitty graphics protocol)
+  -- Render images inline (kitty only — disabled in Neovide)
   {
     "3rd/image.nvim",
-    lazy = false,
+    cond = not vim.g.neovide,
+    event = { "BufReadPre *.norg", "BufReadPre *.md" },
     opts = {
       backend = "kitty",
       integrations = {
