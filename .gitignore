@@ -18,3 +18,5 @@ tmux/plugins/
 !spacemacs/**
 !jupyterlab/
 !jupyterlab/**
+!zsh/
+!zsh/**

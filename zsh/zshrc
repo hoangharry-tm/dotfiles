@@ -1,0 +1,276 @@
+# Powerlevel10k instant prompt. Must stay close to the top.
+if [[ -r "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh" ]]; then
+  source "${XDG_CACHE_HOME:-$HOME/.cache}/p10k-instant-prompt-${(%):-%n}.zsh"
+fi
+
+# ============================================================
+#  HISTORY
+# ============================================================
+HISTFILE="$HOME/.zsh_history"
+HISTSIZE=100000
+SAVEHIST=100000
+
+setopt BANG_HIST
+setopt EXTENDED_HISTORY
+setopt HIST_EXPIRE_DUPS_FIRST
+setopt HIST_IGNORE_DUPS
+setopt HIST_IGNORE_ALL_DUPS
+setopt HIST_FIND_NO_DUPS
+setopt HIST_IGNORE_SPACE
+setopt HIST_SAVE_NO_DUPS
+setopt HIST_REDUCE_BLANKS
+setopt SHARE_HISTORY
+setopt INC_APPEND_HISTORY
+
+# ============================================================
+#  OH MY ZSH
+# ============================================================
+export ZSH="$HOME/.oh-my-zsh"
+ZSH_THEME="powerlevel10k/powerlevel10k"
+zstyle ':omz:update' mode auto
+
+# Docker completions (add before OMZ compinit runs)
+fpath=(/Users/hoangharry/.docker/completions $fpath)
+
+# zsh-vi-mode: leave insert mode with `jk` (Esc still works too)
+ZVM_VI_INSERT_ESCAPE_BINDKEY=jk
+
+plugins=(
+  zsh-vi-mode
+  git
+  zsh-autosuggestions
+  zsh-syntax-highlighting
+  web-search
+  virtualenv
+  extract
+  colored-man-pages
+  copyfile
+  copypath
+  macos
+  gh
+)
+
+source $ZSH/oh-my-zsh.sh
+
+# ============================================================
+#  TOOL INIT
+# ============================================================
+eval "$(zoxide init zsh)"
+# fzf/atuin keybindings are set in zvm_after_init (see KEY BINDINGS),
+# otherwise zsh-vi-mode overrides them
+
+# ============================================================
+#  SHELL OPTIONS
+# ============================================================
+setopt AUTO_CD
+setopt AUTO_LIST
+setopt AUTO_MENU
+setopt ALWAYS_TO_END
+setopt MENU_COMPLETE
+setopt COMPLETE_IN_WORD
+setopt INTERACTIVE_COMMENTS
+setopt NO_BEEP
+setopt NO_HUP
+setopt NO_LIST_BEEP
+setopt HASH_LIST_ALL
+
+# ============================================================
+#  KEY BINDINGS
+# ============================================================
+# zsh-vi-mode resets keybindings on init, so custom bindings go here
+zvm_after_init() {
+  source <(fzf --zsh)
+  eval "$(atuin init zsh)"
+  bindkey '^[[A' up-line-or-search
+  bindkey '^[[B' down-line-or-search
+  bindkey '^[[H' beginning-of-line
+  bindkey '^[[F' end-of-line
+  bindkey '^[[3~' delete-char
+}
+export KEYTIMEOUT=1
+
+# ============================================================
+#  ENVIRONMENT
+# ============================================================
+export EDITOR='nvim'
+export VISUAL='nvim'
+export PAGER='less'
+export LESS='-F -g -i -M -R -S -w -X -z-4'
+export BAT_THEME='Catppuccin Mocha'
+export LS_COLORS="$(vivid generate catppuccin-mocha 2>/dev/null)"
+export MANPAGER="sh -c 'col -bx | bat -l man -p'"
+export PYTHON="/opt/homebrew/bin/python3:$PATH"
+
+# ============================================================
+#  ALIASES
+# ============================================================
+
+# ls replacement
+alias ls='eza --icons=auto'
+alias l='eza -l --icons=auto --git --no-user --no-permissions'
+alias la='eza -la --icons=auto --git --no-user --no-permissions'
+alias lt='eza -T --icons=auto --git-ignore'
+alias ll='eza -l --icons=auto --git'
+alias lla='eza -la --icons=auto --git'
+alias tree='eza -T --icons=auto'
+
+# tool replacements
+alias cat='bat'
+alias grep='rg'
+alias find='fd'
+
+# safe ops
+alias cp='cp -iv'
+alias mv='mv -iv'
+alias rm='rm -i'
+alias mkdir='mkdir -p'
+
+# dir nav
+alias ..='cd ..'
+alias ...='cd ../..'
+alias ....='cd ../../..'
+alias .....='cd ../../../..'
+alias ~='cd ~'
+alias -- -='cd -'
+
+# git
+alias g='git'
+alias ga='git add'
+alias gc='git commit'
+alias gca='git commit -a'
+alias gco='git checkout'
+alias gcb='git checkout -b'
+alias gb='git branch'
+alias gs='git status'
+alias gst='git status -sb'
+alias gd='git diff'
+alias gds='git diff --staged'
+alias gl='git log --oneline --graph'
+alias gll='git log --oneline --graph --all'
+alias gp='git push'
+alias gpl='git pull'
+alias gcl='git clone'
+alias gm='git merge'
+alias gr='git rebase'
+alias gf='git fetch'
+alias gfa='git fetch --all'
+alias gt='git tag'
+alias lg='lazygit'
+
+# docker
+alias d='docker'
+alias dc='docker compose'
+alias dps='docker ps'
+alias dpsa='docker ps -a'
+alias di='docker images'
+alias dx='docker exec -it'
+alias dl='docker logs'
+alias dlf='docker logs -f'
+
+# npm
+alias ni='npm install'
+alias nid='npm install --save-dev'
+alias nig='npm install -g'
+alias nr='npm run'
+alias nrs='npm run start'
+alias nrd='npm run dev'
+alias nrt='npm run test'
+alias nrb='npm run build'
+alias nu='npm uninstall'
+alias nls='npm list --depth=0'
+
+# pnpm
+alias pn='pnpm'
+alias pni='pnpm install'
+alias pnr='pnpm run'
+alias pnrd='pnpm run dev'
+alias pnrb='pnpm run build'
+
+# tmux
+alias tn='tmux new -s'
+alias ta='tmux attach'
+alias tl='tmux ls'
+alias tk='tmux kill-session'
+
+# misc
+alias v='nvim'
+alias nvim-astro='NVIM_APPNAME=nvim-astrovim nvim'
+alias py='python3'
+alias ipy='ipython'
+alias src='source ~/.zshrc'
+alias zshrc='$EDITOR ~/.zshrc'
+alias p10krc='$EDITOR ~/.p10k.zsh'
+alias myip='curl -s https://api.ipify.org && echo'
+alias ports='lsof -i -P -n | grep LISTEN'
+alias path='echo -e ${PATH//:/\\n}'
+alias f='fd --type f --hidden | fzf-tmux -p --reverse | xargs nvim'
+alias viewPDF='sioyek'
+
+alias claude-personal="CLAUDE_CONFIG_DIR=~/.claude-personal claude"
+alias claude-work="CLAUDE_CONFIG_DIR=~/.claude-work claude"
+
+# ============================================================
+#  FZF
+# ============================================================
+export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
+export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
+export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
+export FZF_DEFAULT_OPTS="--height 60% --layout reverse --border --info inline --prompt '🔍 ' --pointer '▸' --marker '▸'"
+
+export FZF_CTRL_T_OPTS="--preview 'bat -n --color=always {}'"
+export FZF_ALT_C_OPTS="--preview 'eza -T --icons=auto {} | head -50'"
+
+# ============================================================
+#  RIPGREP
+# ============================================================
+alias rgi='rg --no-ignore'
+alias rgh='rg --hidden'
+alias rgf='rg --files-with-matches'
+
+# ============================================================
+#  NVM (lazy load)
+# ============================================================
+export NVM_DIR="$HOME/.nvm"
+lazy_load_nvm() {
+  unset -f nvm node npm npx
+  [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"
+  [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
+}
+nvm() { lazy_load_nvm && nvm "$@"; }
+node() { lazy_load_nvm && node "$@"; }
+npm() { lazy_load_nvm && npm "$@"; }
+npx() { lazy_load_nvm && npx "$@"; }
+
+# ============================================================
+#  PNPM
+# ============================================================
+export PNPM_HOME="/Users/hoangharry/Library/pnpm"
+case ":$PATH:" in
+  *":$PNPM_HOME:"*) ;;
+  *) export PATH="$PNPM_HOME:$PATH" ;;
+esac
+
+# ============================================================
+#  PATH
+# ============================================================
+export PATH="$HOME/.config/emacs/bin:$PATH"
+export PATH="$PATH:$HOME/go/bin"
+export PATH="$HOME/.rbenv/bin:$PATH"
+export PATH="/opt/homebrew/opt/libpq/bin:$PATH"
+export PATH="/opt/homebrew/opt/llvm/bin:$PATH"
+export PATH="/opt/homebrew/share/man:$PATH"
+
+# ============================================================
+#  POWERLEVEL10K
+# ============================================================
+[[ ! -f ~/.p10k.zsh ]] || source ~/.p10k.zsh
+
+# ============================================================
+#  RBENV
+# ============================================================
+eval "$(rbenv init - zsh)"
+
+# ============================================================
+#  LOCAL OVERRIDES (git-ignored, machine-specific)
+# ============================================================
+[[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
