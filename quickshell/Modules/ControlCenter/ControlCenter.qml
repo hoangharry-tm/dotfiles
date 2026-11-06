@@ -16,14 +16,18 @@ PanelWindow {
     // Which detail list is expanded: "", "wifi", "bluetooth", "sound"
     property string detail: ""
 
+    // First show pays for the render thread, GL context and shader setup
+    // (2-3 s). Map a 1x1 surface once at startup so the real open is cheap.
+    property bool warm: true
+
     screen: modelData
-    visible: shown
+    visible: shown || warm
     anchors.top: true
     anchors.right: true
     margins.top: Theme.popoverTop
     margins.right: Theme.edge
-    implicitWidth: Theme.panelWidth
-    implicitHeight: Math.min(content.implicitHeight + Theme.padSheet * 2, modelData.height - margins.top - Theme.edge)
+    implicitWidth: shown ? Theme.panelWidth : 1
+    implicitHeight: !shown ? 1 : Math.min(content.implicitHeight + Theme.padSheet * 2, modelData.height - margins.top - Theme.edge)
     // Ignore the bar's exclusive zone, else margins.top (already measured
     // from the screen edge) is added below the bar a second time.
     exclusionMode: ExclusionMode.Ignore
@@ -31,6 +35,12 @@ PanelWindow {
     WlrLayershell.namespace: "qs-control-center"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: shown ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+
+    Timer {
+        running: root.warm
+        interval: 3000
+        onTriggered: root.warm = false
+    }
 
     function toggleDetail(name) {
         detail = detail === name ? "" : name;
@@ -76,43 +86,56 @@ PanelWindow {
                     Layout.fillWidth: true
                     spacing: Theme.gapStack
 
-                    Tile {
+                    // Tile and its list share one edge (parent -> child).
+                    ColumnLayout {
                         Layout.fillWidth: true
-                        glyph: Network.icon
-                        title: Network.wiredConnected ? "Ethernet" : "Wi-Fi"
-                        subtitle: Network.label
-                        checked: Network.wifiEnabled || Network.wiredConnected
-                        expandable: Network.wifi !== null
-                        expanded: root.detail === "wifi"
-                        onToggled: Network.setWifi(!Network.wifiEnabled)
-                        onExpand: root.toggleDetail("wifi")
+                        spacing: 0
+
+                        Tile {
+                            Layout.fillWidth: true
+                            glyph: Network.icon
+                            title: Network.wiredConnected ? "Ethernet" : "Wi-Fi"
+                            subtitle: Network.label
+                            checked: Network.wifiEnabled || Network.wiredConnected
+                            expandable: Network.wifi !== null
+                            expanded: root.detail === "wifi"
+                            onToggled: Network.setWifi(!Network.wifiEnabled)
+                            onExpand: root.toggleDetail("wifi")
+                        }
+
+                        Loader {
+                            Layout.fillWidth: true
+                            active: root.detail === "wifi"
+                            visible: active
+                            sourceComponent: WifiList {}
+                        }
                     }
 
-                    Loader {
-                        Layout.fillWidth: true
-                        active: root.detail === "wifi"
-                        visible: active
-                        sourceComponent: WifiList {}
-                    }
-
-                    Tile {
+                    // Tile and its list share one edge (parent -> child).
+                    ColumnLayout {
                         Layout.fillWidth: true
                         visible: BluetoothState.available
-                        glyph: BluetoothState.icon
-                        title: "Bluetooth"
-                        subtitle: BluetoothState.label
-                        checked: BluetoothState.enabled
-                        expandable: true
-                        expanded: root.detail === "bluetooth"
-                        onToggled: BluetoothState.setEnabled(!BluetoothState.enabled)
-                        onExpand: root.toggleDetail("bluetooth")
-                    }
+                        spacing: 0
 
-                    Loader {
-                        Layout.fillWidth: true
-                        active: root.detail === "bluetooth"
-                        visible: active
-                        sourceComponent: BluetoothList {}
+                        Tile {
+                            Layout.fillWidth: true
+                            visible: BluetoothState.available
+                            glyph: BluetoothState.icon
+                            title: "Bluetooth"
+                            subtitle: BluetoothState.label
+                            checked: BluetoothState.enabled
+                            expandable: true
+                            expanded: root.detail === "bluetooth"
+                            onToggled: BluetoothState.setEnabled(!BluetoothState.enabled)
+                            onExpand: root.toggleDetail("bluetooth")
+                        }
+
+                        Loader {
+                            Layout.fillWidth: true
+                            active: root.detail === "bluetooth"
+                            visible: active
+                            sourceComponent: BluetoothList {}
+                        }
                     }
                 }
 
@@ -192,6 +215,7 @@ PanelWindow {
 
                     Loader {
                         Layout.fillWidth: true
+                        Layout.leftMargin: Theme.spaceMd // indented under its slider: a child
                         active: root.detail === "sound"
                         visible: active
                         sourceComponent: SoundList {}

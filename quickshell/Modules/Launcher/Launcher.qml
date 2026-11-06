@@ -109,6 +109,7 @@ PanelWindow {
                 visible: !root.grid && root.results.length > 0
                 model: root.grid ? [] : root.results
                 current: root.current
+                open: root.shown
                 onChosen: i => root.activate(i)
                 onHovered: i => root.current = i
             }

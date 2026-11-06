@@ -64,10 +64,17 @@ RowLayout {
             Layout.preferredWidth: Theme.control
             Layout.preferredHeight: Theme.control
             radius: Theme.radiusFull
-            color: pressed ? Theme.pressed : hovered ? Theme.hover : Theme.tile
+            color: "transparent"
             onClicked: {
                 Panels.close();
                 modelData.run();
+            }
+
+            GlassSurface {
+                anchors.fill: parent
+                radius: parent.radius
+                hovered: action.hovered
+                pressed: action.pressed
             }
 
             Icon {

@@ -21,6 +21,8 @@ ColumnLayout {
     Section {
         Layout.fillWidth: true
         visible: Audio.streams.length > 0
+        pad: Theme.spaceSm
+        recessed: true
 
         Label {
             Layout.leftMargin: Theme.spaceMd
@@ -48,7 +50,6 @@ ColumnLayout {
             Layout.fillWidth: true
             Layout.topMargin: Theme.spaceXs
             visible: Audio.source !== null
-            trackColor: Theme.hover
             value: Audio.micVolume
             glyph: Audio.micIcon
             dimmed: Audio.micMuted

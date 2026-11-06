@@ -8,6 +8,7 @@ ListView {
     id: root
 
     property int current: 0
+    property bool open: false   // launcher shown: rows stagger in
 
     signal chosen(int index)
     signal hovered(int index)
@@ -36,5 +37,10 @@ ListView {
         current: index === root.current
         onClicked: root.chosen(index)
         onEntered: root.hovered(index)
+
+        Enter {
+            active: root.open
+            index: parent.index
+        }
     }
 }

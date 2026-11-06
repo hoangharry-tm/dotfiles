@@ -9,7 +9,6 @@ Item {
     property alias value: slider.value
     property alias glyph: slider.glyph
     property alias dimmed: slider.dimmed
-    property alias trackColor: slider.trackColor
     property bool expandable: true
     property bool expanded: false
 
@@ -38,8 +37,15 @@ Item {
         width: root.height
         height: root.height
         radius: Theme.radiusFull
-        color: root.expanded ? Theme.pressed : hovered ? Theme.hover : Theme.tile
+        color: "transparent"
         onClicked: root.expand()
+
+        GlassSurface {
+            anchors.fill: parent
+            radius: parent.radius
+            hovered: parent.hovered
+            pressed: parent.pressed || root.expanded
+        }
 
         Icon {
             anchors.centerIn: parent

@@ -12,6 +12,8 @@ Section {
     property bool actionActive: false
     property string emptyText: ""
     property int count: 0
+    pad: Theme.spaceSm
+    recessed: true
     default property alias rows: list.data
 
     signal action

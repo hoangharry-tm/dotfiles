@@ -33,7 +33,6 @@ ColumnLayout {
     Slider {
         Layout.fillWidth: true
         Layout.preferredHeight: Theme.control
-        trackColor: Theme.hover
         value: root.node.audio.volume
         glyph: root.node.audio.muted ? "󰝟" : "󰕾"
         dimmed: root.node.audio.muted

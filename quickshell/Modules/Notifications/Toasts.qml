@@ -33,6 +33,16 @@ PanelWindow {
         width: parent.width
         spacing: Theme.gapStack
 
+        // Cards below glide up when one leaves.
+        move: Transition {
+            NumberAnimation {
+                properties: "y"
+                duration: Theme.anim
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Theme.curveDecelerate
+            }
+        }
+
         Repeater {
             model: Notifications.toasts
 
@@ -58,12 +68,14 @@ PanelWindow {
                     from: Theme.space2xl
                     to: 0
                     duration: Theme.anim
-                    easing.type: Theme.easing
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Theme.curveDecelerate
                 }
                 NumberAnimation on opacity {
                     from: 0
                     to: 1
                     duration: Theme.anim
+                    easing.type: Theme.easing
                 }
             }
         }

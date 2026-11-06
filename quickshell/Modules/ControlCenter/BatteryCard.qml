@@ -37,18 +37,19 @@ Section {
         }
     }
 
-    Rectangle {
+    GlassSurface {
         visible: Power.hasBattery
         Layout.fillWidth: true
         implicitHeight: Theme.trackHeight
         radius: Theme.radiusFull
-        color: Theme.tile
 
-        Rectangle {
+        GlassSurface {
             width: Math.max(height, parent.width * Power.percent)
             height: parent.height
             radius: Theme.radiusFull
-            color: low ? Theme.error : Power.charging ? Theme.tertiary : Theme.primary
+            on: true
+            // Frosted white normally; only a warning swaps in a hue.
+            color: low ? Theme.error : Power.charging ? Theme.tertiary : Theme.glassOn
 
             Behavior on width {
                 NumberAnimation {

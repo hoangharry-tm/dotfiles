@@ -93,6 +93,11 @@ Scope {
                     anchors.verticalCenter: parent.verticalCenter
                     glyph: root.glyph
                     size: Theme.iconLg
+
+                    // Content eases in (the pill is a glass sheet: not animated).
+                    Enter {
+                        active: osd.visible
+                    }
                 }
 
                 Rectangle {
@@ -106,6 +111,11 @@ Scope {
                     radius: Theme.trackHeight / 2
                     color: Theme.tile
 
+                    Enter {
+                        active: osd.visible
+                        index: 1
+                    }
+
                     Rectangle {
                         width: parent.width * Math.min(1, root.value)
                         height: parent.height
@@ -115,6 +125,8 @@ Scope {
                         Behavior on width {
                             NumberAnimation {
                                 duration: Theme.animFast
+                                easing.type: Easing.BezierSpline
+                                easing.bezierCurve: Theme.curveDecelerate
                             }
                         }
                     }
@@ -133,6 +145,11 @@ Scope {
                     font.family: Theme.mono
                     font.pixelSize: Theme.textXs
                     color: Theme.textMuted
+
+                    Enter {
+                        active: osd.visible
+                        index: 2
+                    }
                 }
             }
         }

@@ -79,13 +79,13 @@ Section {
             Layout.fillWidth: true
             implicitHeight: Theme.trackHeight / 2
             radius: Theme.radiusFull
-            color: Theme.tile
+            color: Theme.glassFill
 
             Rectangle {
                 width: parent.width * Media.progress
                 height: parent.height
                 radius: Theme.radiusFull
-                color: Theme.primary
+                color: Theme.glassOn
 
                 Behavior on width {
                     NumberAnimation {
@@ -121,14 +121,23 @@ Section {
                 Layout.preferredWidth: Theme.controlLg
                 Layout.preferredHeight: Theme.controlLg
                 radius: Theme.radiusFull
-                color: modelData.main ? (pressed ? Theme.primaryPressed : hovered ? Theme.primaryHover : Theme.primary) : pressed ? Theme.pressed : hovered ? Theme.hover : "transparent"
+                color: modelData.main ? "transparent" : pressed ? Theme.pressed : hovered ? Theme.hover : "transparent"
                 onClicked: modelData.run()
+
+                GlassSurface {
+                    anchors.fill: parent
+                    visible: parent.modelData.main
+                    radius: parent.radius
+                    on: true
+                    hovered: parent.hovered
+                    pressed: parent.pressed
+                }
 
                 Icon {
                     anchors.centerIn: parent
                     glyph: parent.modelData.glyph
                     size: Theme.iconLg
-                    color: parent.modelData.main ? Theme.primaryText : Theme.text
+                    color: parent.modelData.main ? Theme.onGlass : Theme.text
                 }
             }
         }

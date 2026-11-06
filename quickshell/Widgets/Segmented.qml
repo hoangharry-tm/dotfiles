@@ -1,9 +1,9 @@
 import QtQuick
 import qs.Common
 
-// Segmented control: a sliding accent pill behind equal-width options.
+// Segmented control: a sliding bright-glass pill behind equal-width options.
 // model: [{ glyph, label, value }]
-Rectangle {
+GlassSurface {
     id: root
 
     property var model: []
@@ -15,16 +15,15 @@ Rectangle {
 
     implicitHeight: Theme.control + Theme.spaceXs * 2
     radius: Theme.radiusMd // inner pill radiusSm = radiusMd - spaceXs
-    color: Theme.tile
 
-    Rectangle {
+    GlassSurface {
         visible: root.index >= 0
         x: Theme.spaceXs + Math.max(0, root.index) * root.segment
         y: Theme.spaceXs
         width: root.segment
         height: Theme.control
         radius: Theme.radiusSm
-        color: Theme.primary
+        on: true
 
         Behavior on x {
             NumberAnimation {
@@ -57,13 +56,13 @@ Rectangle {
 
                     Icon {
                         glyph: seg.modelData.glyph
-                        color: seg.on ? Theme.primaryText : Theme.textMuted
+                        color: seg.on ? Theme.onGlass : Theme.textMuted
                     }
 
                     Label {
                         anchors.verticalCenter: parent.verticalCenter
                         text: seg.modelData.label
-                        color: seg.on ? Theme.primaryText : Theme.textMuted
+                        color: seg.on ? Theme.onGlass : Theme.textMuted
                         font.pixelSize: Theme.textXs
                         font.weight: Font.DemiBold
                     }

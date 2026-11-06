@@ -1,7 +1,7 @@
 import QtQuick
 import qs.Common
 
-// A row in a detail list (networks, devices, outputs): icon, text, trailing.
+// A row in a detail list (networks, devices, outputs; dense: it is a child list): icon, text, trailing.
 Clickable {
     id: root
 
@@ -12,7 +12,7 @@ Clickable {
     property bool selected: false
     property bool busy: false
 
-    implicitHeight: subtitle ? Theme.rowHeightTall : Theme.rowHeight
+    implicitHeight: subtitle ? Theme.rowHeight : Theme.control
     radius: Theme.radiusSm
 
     Icon {

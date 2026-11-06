@@ -3,8 +3,8 @@ import qs.Common
 
 // Control Center tile. Wide: icon badge + title + status, chevron opens
 // details when `expandable`. Compact: icon badge over a short label.
-// Accent-filled when on; colors animate between hover/press/on states.
-Rectangle {
+// Clear glass; bright frosted glass with a dark glyph when on (GlassSurface).
+Item {
     id: root
 
     property string glyph: ""
@@ -18,16 +18,22 @@ Rectangle {
     signal toggled
     signal expand
 
-    readonly property color fg: checked ? Theme.primaryText : Theme.text
+    readonly property color fg: checked ? Theme.onGlass : Theme.text
+    readonly property color fgMuted: checked ? Theme.onGlassMuted : Theme.textMuted
+    // An expanded tile fuses with its list below: bottom corners go square.
+    readonly property real bottomRadius: expanded ? 0 : radius
 
     implicitHeight: compact ? stack.implicitHeight + Theme.padControl * 2 : Theme.tileHeight
-    radius: Theme.radiusMd
-    color: checked ? (main.pressed ? Theme.primaryPressed : main.containsMouse ? Theme.primaryHover : Theme.primary) : main.pressed ? Theme.pressed : main.containsMouse ? Theme.hover : Theme.tile
+    readonly property real radius: Theme.radiusMd
 
-    Behavior on color {
-        ColorAnimation {
-            duration: Theme.anim
-        }
+    GlassSurface {
+        anchors.fill: parent
+        radius: root.radius
+        bottomLeftRadius: root.bottomRadius
+        bottomRightRadius: root.bottomRadius
+        on: root.checked
+        hovered: main.containsMouse
+        pressed: main.pressed
     }
 
     // Wide layout
@@ -61,7 +67,7 @@ Rectangle {
                 width: parent.width
                 text: root.subtitle
                 visible: text !== ""
-                color: root.checked ? Theme.primaryTextMuted : Theme.textMuted
+                color: root.fgMuted
                 font.pixelSize: Theme.textXs
             }
         }

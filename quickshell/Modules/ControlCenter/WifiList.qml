@@ -11,6 +11,7 @@ DetailList {
 
     property var asking: null       // network waiting for a password
 
+    attached: true
     title: "Wi-Fi"
     actionGlyph: "󰑓"
     actionActive: Network.wifi?.scannerEnabled ?? false

@@ -13,7 +13,6 @@ Singleton {
     // Palette (Material You roles). Usage rules: DESIGN.md "Color".
     readonly property color primary: palette.primary
     readonly property color primaryText: palette.primaryText
-    readonly property color primaryContainer: palette.primaryContainer
     readonly property color secondary: palette.secondary
     readonly property color tertiary: palette.tertiary
     readonly property color error: palette.danger
@@ -33,11 +32,24 @@ Singleton {
     readonly property color tile: Qt.alpha(text, 0.06)
     readonly property color hover: Qt.alpha(text, 0.08)
     readonly property color pressed: Qt.alpha(text, 0.14)
-    // Accent states (a filled tile / selected segment) and content on it.
-    readonly property color primaryHover: Qt.lighter(primary, 1.08)
-    readonly property color primaryPressed: Qt.darker(primary, 1.12)
-    readonly property color primaryWash: Qt.alpha(primaryText, 0.14)    // badge on a primary fill
-    readonly property color primaryTextMuted: Qt.alpha(primaryText, 0.75) // secondary text on a primary fill
+    // Clear-glass recipe (Widgets/GlassSurface): neutral white veils over
+    // niri's blur, no hue. Hover/press are alpha steps, never new colours.
+    // "on" is brighter frosted white with a dark glyph (onGlass*). Light
+    // wallpapers/themes need more white to read, hence the two alpha sets.
+    readonly property bool dark: surface.hslLightness < 0.5
+    readonly property color glassFill: Qt.rgba(1, 1, 1, dark ? 0.10 : 0.40)
+    readonly property color glassFillHover: Qt.rgba(1, 1, 1, dark ? 0.16 : 0.52)
+    readonly property color glassFillPress: Qt.rgba(1, 1, 1, dark ? 0.22 : 0.62)
+    readonly property color glassOn: Qt.rgba(1, 1, 1, dark ? 0.84 : 0.92)
+    readonly property color glassOnHover: Qt.rgba(1, 1, 1, dark ? 0.90 : 0.96)
+    readonly property color glassOnPress: Qt.rgba(1, 1, 1, dark ? 0.72 : 0.82)
+    readonly property color glassRim: Qt.rgba(1, 1, 1, dark ? 0.18 : 0.60)       // 1px edge
+    readonly property color glassRimTop: Qt.rgba(1, 1, 1, dark ? 0.42 : 0.90)    // specular line on the top edge
+    readonly property color recess: Qt.rgba(0, 0, 0, dark ? 0.20 : 0.07)         // child surface: clearer/darker than its parent
+    readonly property color recessRim: Qt.rgba(1, 1, 1, dark ? 0.08 : 0.35)
+    readonly property color recessShade: Qt.rgba(0, 0, 0, dark ? 0.22 : 0.08)    // inner shadow along the top edge
+    readonly property color onGlass: Qt.rgba(0, 0, 0, 0.85)                      // glyph/text on an "on" surface
+    readonly property color onGlassMuted: Qt.rgba(0, 0, 0, 0.65)
     readonly property int hairlineWidth: 1
 
     // Type: generic families; fontconfig (hh-nix-config fonts.nix) resolves
@@ -119,6 +131,19 @@ Singleton {
     readonly property int animSlow: 340
     readonly property int animPulse: 1400   // slow breathing, e.g. privacy dot
     readonly property int easing: Easing.OutCubic
+    readonly property int animInstant: 80  // press feedback: must feel immediate
+    readonly property int animExit: 150     // leaving is quieter than entering
+    // Curves mirror niri/look.kdl: decelerate = niri cubic-bezier 0.05 0.7 0.1 1
+    // (entrances), accelerate = 0.3 0 0.8 0.15 (exits). Use with Easing.BezierSpline.
+    readonly property var curveDecelerate: [0.05, 0.7, 0.1, 1, 1, 1]
+    readonly property var curveAccelerate: [0.3, 0, 0.8, 0.15, 1, 1]
+    readonly property real pressScale: 0.96   // pressed controls dip, then spring back
+    readonly property real enterScale: 0.97   // content grows into its sheet from this
+    readonly property int enterRise: spaceSm  // content slides this far while entering
+    readonly property int stagger: 18         // delay per list item on entrance
+    readonly property int staggerMax: 6       // items past this appear together (cheap)
+    readonly property real springStiff: 3.2   // QML SpringAnimation: snappy, slight settle
+    readonly property real springDamp: 0.32
 
     FileView {
         path: (Quickshell.env("XDG_STATE_HOME") || Quickshell.env("HOME") + "/.local/state") + "/theme/quickshell.json"
@@ -131,6 +156,7 @@ Singleton {
             property string primary: "#b7c4ff"
             property string primaryText: "#1f2d61"
             property string primaryContainer: "#364479"
+            property string containerText: "#dce1ff"
             property string secondary: "#c2c5dd"
             property string tertiary: "#e3bada"
             // Names avoid "error" (a signal here) and "on…" (QML reads those as

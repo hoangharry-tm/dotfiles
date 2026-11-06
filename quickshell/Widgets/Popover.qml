@@ -86,6 +86,11 @@ PanelWindow {
         ColumnLayout {
             id: column
 
+            // Content (not the sheet) fades and rises in each time it opens.
+            Enter {
+                active: root.open
+            }
+
             x: root.padding
             y: root.padding
             width: root.cardWidth > 0 ? root.cardWidth - root.padding * 2 : implicitWidth

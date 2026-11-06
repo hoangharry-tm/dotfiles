@@ -10,6 +10,7 @@ import qs.Widgets
 DetailList {
     id: root
 
+    attached: true
     title: "Bluetooth"
     actionGlyph: "󰑓"
     actionActive: BluetoothState.scanning

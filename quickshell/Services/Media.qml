@@ -19,8 +19,8 @@ Singleton {
     // MPRIS doesn't push position updates; poll once a second, and only while
     // something is showing it (`tracking`) and a track is playing.
     property bool tracking: false
-    readonly property real length: player?.lengthSupported ? player.length : 0
-    readonly property real position: player?.positionSupported ? player.position : 0
+    readonly property real length: (player?.lengthSupported && player.length) || 0
+    readonly property real position: (player?.positionSupported && player.position) || 0 // undefined while a player is (re)appearing
     readonly property real progress: length > 0 ? Math.min(1, position / length) : 0
 
     Timer {

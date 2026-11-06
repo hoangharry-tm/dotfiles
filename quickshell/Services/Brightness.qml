@@ -15,10 +15,20 @@ Singleton {
 
     signal changedByUser
 
+    // Writes are coalesced: one brightnessctl at a time, and when it exits
+    // the latest requested value is written (intermediate drag values drop).
+    property real wanted: -1
+
     function set(v) {
-        v = Math.max(0.01, Math.min(1, v));
-        value = v;
-        setter.command = ["brightnessctl", "--class=backlight", "set", Math.round(v * 100) + "%"];
+        value = wanted = Math.max(0.01, Math.min(1, v));
+        flush();
+    }
+
+    function flush() {
+        if (setter.running || wanted < 0)
+            return;
+        setter.command = ["brightnessctl", "--class=backlight", "set", Math.round(wanted * 100) + "%"];
+        wanted = -1;
         setter.running = true;
     }
 
@@ -31,6 +41,8 @@ Singleton {
     function refresh() {
         current.reload();
         max.reload();
+        if (setter.running || wanted >= 0)
+            return; // our own write is in flight; sysfs would read stale
         const c = parseInt(current.text()), m = parseInt(max.text());
         if (m > 0) {
             value = c / m;
@@ -54,6 +66,9 @@ Singleton {
 
     Process {
         id: setter
+
+        onRunningChanged: if (!running)
+            root.flush()
     }
 
     // sysfs can't be watched for changes; poll gently.

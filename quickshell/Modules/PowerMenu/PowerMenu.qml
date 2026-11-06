@@ -88,6 +88,11 @@ PanelWindow {
 
                     spacing: Theme.spaceMd
 
+                    Enter {
+                        active: root.shown
+                        index: action.index
+                    }
+
                     Rectangle {
                         width: Theme.space2xl * 3
                         height: width
@@ -95,7 +100,7 @@ PanelWindow {
                         color: action.current ? Theme.primary : mouse.containsMouse ? Theme.glassSolid : Theme.glass
                         border.width: Theme.hairlineWidth
                         border.color: Theme.hairline
-                        scale: mouse.pressed ? 0.94 : 1
+                        scale: mouse.pressed ? Theme.pressScale : action.current ? 1 + (1 - Theme.pressScale) : 1
 
                         Behavior on color {
                             ColorAnimation {
@@ -104,8 +109,10 @@ PanelWindow {
                         }
 
                         Behavior on scale {
-                            NumberAnimation {
-                                duration: Theme.animFast
+                            SpringAnimation {
+                                spring: Theme.springStiff
+                                damping: Theme.springDamp
+                                epsilon: 0.001
                             }
                         }
 

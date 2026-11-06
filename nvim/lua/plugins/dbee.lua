@@ -1,5 +1,6 @@
 return {
   "kndndrj/nvim-dbee",
+  cmd = "Dbee", -- lazy.lua defaults to lazy=false; this plugin cost ~33 ms at startup
   dependencies = {
     "MunifTanjim/nui.nvim",
   },

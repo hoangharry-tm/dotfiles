@@ -141,9 +141,15 @@ PanelWindow {
 
                         Column {
                             required property var modelData
+                            required property int index
 
                             width: body.colW
                             spacing: Theme.gapSection
+
+                            Enter {
+                                active: root.shown
+                                index: parent.index
+                            }
 
                             Repeater {
                                 model: parent.modelData
