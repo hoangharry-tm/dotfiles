@@ -61,6 +61,8 @@ PanelWindow {
 
         MediaChip {}
 
+        RecordChip {}
+
         PrivacyDot {}
 
         SystemChip {}

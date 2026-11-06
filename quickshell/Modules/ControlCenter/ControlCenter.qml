@@ -144,10 +144,12 @@ PanelWindow {
                     }
                 }
 
-                // Quick toggles
-                RowLayout {
+                // Quick toggles: 3 equal columns, so six tiles make two full rows.
+                GridLayout {
                     Layout.fillWidth: true
-                    spacing: Theme.gapStack
+                    columns: 3
+                    columnSpacing: Theme.gapStack
+                    rowSpacing: Theme.gapStack
 
                     Tile {
                         Layout.fillWidth: true
@@ -172,12 +174,35 @@ PanelWindow {
                     Tile {
                         Layout.fillWidth: true
                         Layout.preferredWidth: 1
-                        visible: Audio.source !== null
                         compact: true
                         glyph: Audio.micIcon
                         title: Audio.micMuted ? "Mic off" : "Mic"
                         checked: Audio.micMuted
                         onToggled: Audio.toggleMicMute()
+                    }
+
+                    // Tap cycles off -> on -> auto (sunset to sunrise).
+                    Tile {
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 1
+                        compact: true
+                        glyph: NightLight.active ? "󰖔" : "󰖙"
+                        title: NightLight.mode === "auto" ? "Night auto" : "Night"
+                        checked: NightLight.active
+                        onToggled: NightLight.cycle()
+                    }
+
+                    Tile {
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 1
+                        compact: true
+                        glyph: Recorder.recording ? "󰻃" : "󰑊"
+                        title: Recorder.recording ? Recorder.elapsedLabel : "Record"
+                        checked: Recorder.recording
+                        onToggled: {
+                            Panels.close();
+                            Recorder.toggle();
+                        }
                     }
 
                     Tile {

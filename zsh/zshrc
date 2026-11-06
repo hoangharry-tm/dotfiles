@@ -88,6 +88,7 @@ _cache_init() { # _cache_init <tool> <args...>
   source "$out"
 }
 _cache_init zoxide init zsh
+(( $+commands[direnv] )) && _cache_init direnv hook zsh
 # fzf/atuin keybindings are set in zvm_after_init (see KEY BINDINGS),
 # otherwise zsh-vi-mode overrides them
 
@@ -128,7 +129,8 @@ export EDITOR='nvim'
 export VISUAL='nvim'
 export PAGER='less'
 export LESS='-F -g -i -M -R -S -w -X -z-4'
-export BAT_THEME='Catppuccin Mocha'
+# ansi: bat uses the terminal palette, so it follows the wallpaper (matugen).
+export BAT_THEME='ansi'
 _ls="$_zc/ls_colors-${${commands[vivid]:A}:h:h:t}"
 [[ -s $_ls ]] || vivid generate catppuccin-mocha >| "$_ls" 2>/dev/null
 export LS_COLORS="$(<$_ls)"
@@ -249,7 +251,7 @@ alias claude-work="CLAUDE_CONFIG_DIR=~/.claude-work claude"
 export FZF_DEFAULT_COMMAND='fd --type f --hidden --follow --exclude .git'
 export FZF_CTRL_T_COMMAND="$FZF_DEFAULT_COMMAND"
 export FZF_ALT_C_COMMAND='fd --type d --hidden --follow --exclude .git'
-export FZF_DEFAULT_OPTS="--height 60% --layout reverse --border --info inline --prompt '🔍 ' --pointer '▸' --marker '▸'"
+export FZF_DEFAULT_OPTS="--height 60% --layout reverse --border --info inline --prompt '🔍 ' --pointer '▸' --marker '▸' --color=16,fg+:-1,bg+:-1,hl:4,hl+:4,pointer:4,marker:4,prompt:4,info:8,border:8"
 
 export FZF_CTRL_T_OPTS="--preview 'bat -n --color=always {}'"
 export FZF_ALT_C_OPTS="--preview 'eza -T --icons=auto {} | head -50'"
@@ -264,16 +266,20 @@ alias rgf='rg --files-with-matches'
 # ============================================================
 #  NVM (lazy load)
 # ============================================================
-export NVM_DIR="$HOME/.nvm"
-lazy_load_nvm() {
-  unset -f nvm node npm npx
-  [ -s "/opt/homebrew/opt/nvm/nvm.sh" ] && \. "/opt/homebrew/opt/nvm/nvm.sh"
-  [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
-}
-nvm() { lazy_load_nvm && nvm "$@"; }
-node() { lazy_load_nvm && node "$@"; }
-npm() { lazy_load_nvm && npm "$@"; }
-npx() { lazy_load_nvm && npx "$@"; }
+# Why: only macOS (Homebrew) has nvm; on Nix machines node comes from Nix and
+# per-project versions from direnv, so the wrappers would just shadow `node`.
+if [[ -s /opt/homebrew/opt/nvm/nvm.sh ]]; then
+  export NVM_DIR="$HOME/.nvm"
+  lazy_load_nvm() {
+    unset -f nvm node npm npx
+    \. "/opt/homebrew/opt/nvm/nvm.sh"
+    [ -s "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm" ] && \. "/opt/homebrew/opt/nvm/etc/bash_completion.d/nvm"
+  }
+  nvm() { lazy_load_nvm && nvm "$@"; }
+  node() { lazy_load_nvm && node "$@"; }
+  npm() { lazy_load_nvm && npm "$@"; }
+  npx() { lazy_load_nvm && npx "$@"; }
+fi
 
 # ============================================================
 #  PNPM

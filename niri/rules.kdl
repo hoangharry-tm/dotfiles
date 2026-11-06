@@ -45,6 +45,7 @@ window-rule {
     match app-id=r#"^org\.gnome\.Calculator$"#
     match app-id=r#"^(qalculate-gtk|org\.qalculate\.qalculate-gtk)$"#
     match app-id=r#"^org\.gnome\.(Settings|Characters)$"#
+    match app-id=r#"^com\.saivert\.pwvucontrol$"#
     open-floating true
 }
 
@@ -72,10 +73,46 @@ window-rule {
     block-out-from "screencast"
 }
 
-// Firefox picture-in-picture: floating in the bottom-right corner,
-// small enough not to cover content.
+// Image viewers: float at a comfortable size instead of taking a column.
+window-rule {
+    match app-id=r#"^(org\.gnome\.(Loupe|eog)|imv|feh|sxiv|nsxiv|org\.kde\.gwenview)$"#
+    open-floating true
+    default-column-width { fixed 960; }
+    default-window-height { fixed 640; }
+}
+
+// Browsers get two thirds of the screen (terminals keep the 0.5 default).
+// Before the PiP rule so its fixed size still wins.
+window-rule {
+    match app-id=r#"^(firefox|chromium|google-chrome)"#
+    default-column-width { proportion 0.66667; }
+}
+
+// Spotify lives on the named workspace "music" (declared here; niri keeps
+// named workspaces alive when empty).
+workspace "music"
+window-rule {
+    match app-id="^spotify$"
+    open-on-workspace "music"
+}
+
+// Dropdown terminal (`dropdown-term`, bound in binds.kdl): 60% x 50%, hung
+// from the top edge. Parked on "scratch" while hidden; niri has no minimise.
+workspace "scratch"
+window-rule {
+    match app-id="^dropdown$"
+    open-floating true
+    default-column-width { proportion 0.6; }
+    default-window-height { proportion 0.5; }
+    default-floating-position x=0 y=12 relative-to="top"
+}
+
+// Picture-in-picture (Firefox, Chrome): floating in the bottom-right corner
+// of the focused output, small enough not to cover content. Floating
+// windows are always drawn above tiled ones.
 window-rule {
     match app-id=r#"firefox$"# title="^Picture-in-Picture$"
+    match app-id=r#"^(chromium|google-chrome)"# title="(?i)^picture in picture$"
     open-floating true
     default-floating-position x=24 y=24 relative-to="bottom-right"
     default-column-width { fixed 480; }
@@ -158,6 +195,22 @@ layer-rule {
         blur true
     }
     // elevation E3 (quickshell/DESIGN.md)
+    shadow {
+        on
+        softness 64
+        spread 0
+        offset x=0 y=16
+        color "#00000047"
+    }
+}
+
+layer-rule {
+    match namespace="^qs-polkit$"
+    geometry-corner-radius 28
+    background-effect {
+        blur true
+    }
+    // elevation E3 (quickshell/DESIGN.md): modal, like the launcher
     shadow {
         on
         softness 64

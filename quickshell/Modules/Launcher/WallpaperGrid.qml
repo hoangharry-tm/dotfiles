@@ -3,21 +3,24 @@ import Quickshell.Widgets
 import qs.Common
 import qs.Widgets
 
-// Thumbnail grid for the wallpaper picker. Thumbs decode async at thumbnail
-// size so a large folder doesn't stall the shell or balloon memory.
+// Tile grid for the wallpaper picker (thumbnails) and the emoji picker
+// (glyph tiles). Thumbs decode async at thumbnail size so a large folder
+// doesn't stall the shell or balloon memory.
 GridView {
     id: root
 
-    readonly property int columns: 4
+    property int columns: 4
+    property int maxRows: 3
+    property real ratio: 0.68 // cell height / width
     property int current: 0
 
     signal chosen(int index)
     signal hovered(int index)
 
     // Explicit from the item count: contentHeight would loop through the layout width.
-    implicitHeight: Math.min(Math.ceil(count / columns), 3) * cellHeight
+    implicitHeight: Math.min(Math.ceil(count / columns), maxRows) * cellHeight
     cellWidth: Math.floor(width / columns)
-    cellHeight: Math.round(cellWidth * 0.68)
+    cellHeight: Math.round(cellWidth * ratio)
     clip: true
     currentIndex: current
     boundsBehavior: Flickable.StopAtBounds
@@ -47,6 +50,13 @@ GridView {
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true
                 cache: false
+            }
+
+            Label {
+                anchors.centerIn: parent
+                visible: !!cell.modelData.emoji
+                text: cell.modelData.emoji ?? ""
+                font.pixelSize: Theme.textHero
             }
 
             Rectangle {

@@ -16,6 +16,7 @@ RowLayout {
     signal navigate(int dx, int dy)
     signal accepted
     signal dismissed
+    signal removeRequested // Shift+Del: delete the selected entry (clipboard)
 
     function focusInput() {
         input.forceActiveFocus();
@@ -50,6 +51,11 @@ RowLayout {
         Keys.onLeftPressed: e => { e.accepted = root.gridNav; if (root.gridNav) root.navigate(-1, 0); }
         Keys.onRightPressed: e => { e.accepted = root.gridNav; if (root.gridNav) root.navigate(1, 0); }
         Keys.onPressed: e => {
+            if (e.key === Qt.Key_Delete && (e.modifiers & Qt.ShiftModifier)) {
+                root.removeRequested();
+                e.accepted = true;
+                return;
+            }
             if (e.modifiers & Qt.ControlModifier) {
                 const d = { [Qt.Key_N]: 1, [Qt.Key_J]: 1, [Qt.Key_P]: -1, [Qt.Key_K]: -1 }[e.key];
                 if (d) {

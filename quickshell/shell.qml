@@ -22,6 +22,7 @@ import qs.Modules.ControlCenter
 import qs.Modules.Launcher
 import qs.Modules.Notifications
 import qs.Modules.Osd
+import qs.Modules.Polkit
 import qs.Modules.PowerMenu
 
 ShellRoot {
@@ -94,6 +95,13 @@ ShellRoot {
 
     Osd {}
 
+    // Polkit prompt: exists only while a request is pending.
+    LazyLoader {
+        active: Polkit.active
+
+        PolkitDialog {}
+    }
+
     // qs ipc call shell launcher|wallpapers|control|calendar|power|keybinds|close
     IpcHandler {
         target: "shell"
@@ -106,6 +114,21 @@ ShellRoot {
         function wallpapers(): void {
             Launch.seed = ":";
             Panels.toggle("launcher");
+        }
+
+        // Launcher in clipboard-history (`<`) / emoji (`.`) mode.
+        function clipboard(): void {
+            Launch.seed = "<";
+            Panels.toggle("launcher");
+        }
+
+        function emoji(): void {
+            Launch.seed = ".";
+            Panels.toggle("launcher");
+        }
+
+        function pickColor(): void {
+            Quickshell.execDetached(["pick-color"]);
         }
 
         function control(): void {
@@ -122,6 +145,11 @@ ShellRoot {
 
         function keybinds(): void {
             Panels.toggle("keybinds");
+        }
+
+        // Start/stop a screen recording (Mod+Alt+R in niri/binds.kdl).
+        function record(): void {
+            Recorder.toggle();
         }
 
         function close(): void {

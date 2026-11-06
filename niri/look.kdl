@@ -59,6 +59,9 @@ blur {
 prefer-no-csd
 
 cursor {
+    // Installed by modules/theming.nix (home.pointerCursor); keep in sync.
+    xcursor-theme "Bibata-Modern-Classic"
+    xcursor-size 24
     hide-when-typing
 }
 

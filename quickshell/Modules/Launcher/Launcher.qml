@@ -7,7 +7,8 @@ import qs.Services
 import qs.Widgets
 
 // Spotlight-style launcher: apps (ranked by fuzzy match + frecency), inline
-// calculator, `>` run, `:` wallpapers. Rendering only; logic is in Services/Launch.
+// calculator, `>` run, `:` wallpapers,
+// `<` clipboard history, `.` emoji. Rendering only; logic is in Services/Launch.
 PanelWindow {
     id: root
 
@@ -15,7 +16,7 @@ PanelWindow {
     readonly property bool shown: Panels.isOpen("launcher", modelData.name)
     readonly property var parsed: Launch.parse(search.text)
     readonly property string mode: parsed.mode
-    readonly property bool grid: mode === "wall"
+    readonly property bool grid: mode === "wall" || mode === "emoji"
     readonly property var results: Launch.items(parsed)
     property int current: 0
 
@@ -54,7 +55,17 @@ PanelWindow {
             search.focusInput();
         }
     }
-    onModeChanged: if (mode === "wall" && shown) Wallpapers.refresh()
+    // Sources refresh on entering their mode, never at startup.
+    onModeChanged: {
+        if (!shown)
+            return;
+        if (mode === "wall")
+            Wallpapers.refresh();
+        else if (mode === "clip")
+            Clipboard.refresh();
+        else if (mode === "emoji")
+            Emoji.load();
+    }
     onResultsChanged: current = 0
 
     function activate(i) {
@@ -63,6 +74,16 @@ PanelWindow {
             return;
         r.run();
         Panels.close();
+    }
+
+    // Delete the selected entry; keep the cursor where it was (results reset it).
+    function remove() {
+        const r = results[current];
+        if (!r?.remove)
+            return;
+        const at = current;
+        r.remove();
+        Qt.callLater(() => current = Math.min(at, results.length - 1));
     }
 
     function navigate(dx, dy) {
@@ -109,6 +130,7 @@ PanelWindow {
                 gridNav: root.grid
                 onNavigate: (dx, dy) => root.navigate(dx, dy)
                 onAccepted: root.activate(root.current)
+                onRemoveRequested: root.remove()
                 onDismissed: Panels.close()
             }
 
@@ -138,6 +160,9 @@ PanelWindow {
                 Layout.fillWidth: true
                 visible: root.grid && root.results.length > 0
                 model: root.grid ? root.results : []
+                columns: root.mode === "emoji" ? 8 : 4
+                maxRows: root.mode === "emoji" ? 4 : 3
+                ratio: root.mode === "emoji" ? 1 : 0.68
                 current: root.current
                 onChosen: i => root.activate(i)
                 onHovered: i => root.current = i
@@ -150,7 +175,7 @@ PanelWindow {
                 visible: root.results.length === 0
                 horizontalAlignment: Text.AlignHCenter
                 color: Theme.textMuted
-                text: root.mode === "run" ? "Type a command" : root.mode === "calc" ? "Type an expression, e.g. 12 * (3 + 4)" : root.grid ? "No wallpapers in ~/Pictures/Wallpapers" : "No results"
+                text: root.mode === "run" ? "Type a command" : root.mode === "clip" ? "Clipboard history is empty" : root.mode === "calc" ? "Type an expression, e.g. 12 * (3 + 4)" : root.grid ? "No wallpapers in ~/Pictures/Wallpapers" : "No results"
             }
 
             // Footer: key hints, plus prefix modes while the field is empty.
@@ -163,7 +188,7 @@ PanelWindow {
 
                 KeyHint {
                     key: "↵"
-                    text: root.mode === "wall" ? "apply" : root.mode === "calc" || root.results[root.current]?.id === "calc" ? "copy" : "open"
+                    text: root.mode === "wall" ? "apply" : root.mode === "calc" || root.mode === "clip" || root.mode === "emoji" || root.results[root.current]?.id === "calc" ? "copy" : "open"
                 }
                 KeyHint {
                     key: root.grid ? "←↑↓→" : "↑↓"
@@ -172,6 +197,12 @@ PanelWindow {
                 KeyHint {
                     key: "esc"
                     text: "close"
+                }
+
+                KeyHint {
+                    visible: root.mode === "clip"
+                    key: "⇧⌦"
+                    text: "delete"
                 }
 
                 Item {
@@ -192,6 +223,16 @@ PanelWindow {
                     visible: search.text === ""
                     key: ":"
                     text: "wallpapers"
+                }
+                KeyHint {
+                    visible: search.text === ""
+                    key: "<"
+                    text: "clipboard"
+                }
+                KeyHint {
+                    visible: search.text === ""
+                    key: "."
+                    text: "emoji"
                 }
             }
         }

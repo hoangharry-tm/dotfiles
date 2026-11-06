@@ -33,7 +33,8 @@ Singleton {
 
     readonly property var keyName: ({
             Return: "↵", Escape: "Esc", Tab: "⇥", Space: "Space", Delete: "Del",
-            Grave: "`", Minus: "−", Equal: "=", Slash: "∕", // U+2215: looks like "/" but isn't the "/" alternatives separator Comma: ",", Period: ".",
+            Grave: "`", Minus: "−", Equal: "=", Comma: ",", Period: ".",
+            Slash: "∕", // U+2215: looks like "/" but isn't the "/" alternatives separator
             BracketLeft: "[", BracketRight: "]", Print: "PrtSc",
             Left: "←", Right: "→", Up: "↑", Down: "↓",
             Page_Up: "PgUp", Page_Down: "PgDn",

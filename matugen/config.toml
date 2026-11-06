@@ -4,6 +4,18 @@
 
 [config]
 
+# Hues for terminals/editors. Material has no green/yellow/...; matugen
+# harmonises these toward the wallpaper's primary so ANSI colours still
+# read as red/green/etc. but belong to the palette.
+[config.custom_colors]
+red = "#e06c75"
+orange = "#d19a66"
+yellow = "#e5c07b"
+green = "#98c379"
+cyan = "#56b6c2"
+blue = "#61afef"
+magenta = "#c678dd"
+
 [templates.niri]
 input_path = "~/.config/matugen/templates/niri.kdl"
 output_path = "~/.local/state/theme/niri.kdl"
@@ -15,3 +27,33 @@ output_path = "~/.local/state/theme/quickshell.json"
 [templates.swaylock]
 input_path = "~/.config/matugen/templates/swaylock.conf"
 output_path = "~/.local/state/theme/swaylock.conf"
+
+# --- Toolkits and apps (added with modules/theming.nix) -------------------
+# GTK: libadwaita and adw-gtk3 both read @define-color overrides from
+# gtk.css. Same template, both versions. Existing files are backed up by
+# the home-manager activation step before the first write.
+[templates.gtk3]
+input_path = "~/.config/matugen/templates/gtk.css"
+output_path = "~/.config/gtk-3.0/gtk.css"
+
+[templates.gtk4]
+input_path = "~/.config/matugen/templates/gtk.css"
+output_path = "~/.config/gtk-4.0/gtk.css"
+
+[templates.qt6ct]
+input_path = "~/.config/matugen/templates/qtct.conf"
+output_path = "~/.local/state/theme/qtct.conf"
+
+# Terminal and CLI. alacritty and btop pick these up from the state dir.
+[templates.alacritty]
+input_path = "~/.config/matugen/templates/alacritty.toml"
+output_path = "~/.local/state/theme/alacritty.toml"
+
+[templates.btop]
+input_path = "~/.config/matugen/templates/btop.theme"
+output_path = "~/.config/btop/themes/matugen.theme"
+
+# Neovim: opt-in via `:colorscheme matugen` (nvim/colors/matugen.lua).
+[templates.nvim]
+input_path = "~/.config/matugen/templates/nvim.lua"
+output_path = "~/.local/state/theme/nvim.lua"
