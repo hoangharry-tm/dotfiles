@@ -1,15 +1,18 @@
 return {
-  -- luarocks.nvim is required by neorg for native Lua dependency management
   {
-    "vhyrro/luarocks.nvim",
-    priority = 1001,
-    config = true,
-  },
-  {
+    -- Lua dependencies (incl. the norg treesitter parsers) are installed by
+    -- lazy.nvim's built-in luarocks support into stdpath("data")/lazy-rocks —
+    -- no luarocks.nvim needed.
     "nvim-neorg/neorg",
-    dependencies = { "luarocks.nvim" },
     lazy = false,
     version = "*",
+    init = function()
+      -- The parser rocks ship `parser/<lang>.so` under lib/lua/5.1, which
+      -- isn't on the runtimepath by default; add it so treesitter finds them.
+      for _, rock in ipairs({ "tree-sitter-norg", "tree-sitter-norg-meta" }) do
+        vim.opt.rtp:append(vim.fn.stdpath("data") .. "/lazy-rocks/" .. rock .. "/lib/lua/5.1")
+      end
+    end,
     config = function()
       require("neorg").setup({
         load = {

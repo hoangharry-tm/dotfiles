@@ -30,7 +30,7 @@ A personal Neovim configuration built on [LazyVim](https://lazyvim.github.io/) (
 
 | File | Plugin(s) | Purpose |
 |---|---|---|
-| `neorg.lua` | nvim-neorg/neorg + luarocks.nvim | Note-taking; workspaces at `~/mh_notes` |
+| `neorg.lua` | nvim-neorg/neorg | Note-taking; workspaces at `~/mh_notes` (Lua deps via lazy.nvim's built-in luarocks) |
 | `neorg.lua` | 3rd/image.nvim | Inline image rendering via kitty graphics protocol |
 | `neorg.lua` | HakonHarnes/img-clip.nvim | Paste clipboard images into norg/markdown files |
 | `neorg.lua` | michaelb/sniprun | Run code blocks inline |
@@ -154,26 +154,24 @@ or a neorg blink.cmp source.
 
 ### Treesitter parsers (norg + norg_meta)
 
-These are not nvim-treesitter parsers — neorg ships them via luarocks. They
-were manually copied to `~/.local/share/nvim/site/parser/` so Neovim finds
-them on the runtimepath. If they break after a neorg update, re-copy:
+These are not nvim-treesitter parsers — neorg's rockspec pulls them in as the
+`tree-sitter-norg` / `tree-sitter-norg-meta` rocks, which lazy.nvim installs
+into `~/.local/share/nvim/lazy-rocks/`. The rocks put the parser at
+`lib/lua/5.1/parser/<lang>.so`, which is not on the runtimepath by default, so
+neorg's `init` in `neorg.lua` appends those dirs. No manual copying needed.
 
-```sh
-cp ~/.local/share/nvim/lazy-rocks/tree-sitter-norg/lib/lua/5.1/parser/norg.so \
-   ~/.local/share/nvim/site/parser/
-cp ~/.local/share/nvim/lazy-rocks/tree-sitter-norg-meta/lib/lua/5.1/parser/norg_meta.so \
-   ~/.local/share/nvim/site/parser/
-```
+On the Arch/Nix machine, Home Manager (hh-nix-config,
+`modules/programs/neovim.nix`) additionally links Nix-built parsers into
+`~/.local/share/nvim/site/parser/`, which comes first on the runtimepath. The
+rock binaries are prebuilt on Ubuntu and need `libstdc++`, which Nix's Neovim
+can't load on a non-NixOS system.
 
-### luarocks.nvim
+### luarocks
 
-The `dkjson` rock must be present in the plugin's `.rocks` tree. If the
-"Unable to load the luarocks package loader" error reappears, run:
-
-```sh
-~/.local/share/nvim/lazy/luarocks.nvim/.rocks/bin/luarocks install dkjson \
-  --tree ~/.local/share/nvim/lazy/luarocks.nvim/.rocks
-```
+No `luarocks.nvim`: it built its own luarocks from upstream HEAD (unpinned)
+and broke when luarocks 3.13 started requiring `dkjson`. lazy.nvim's built-in
+rocks support is used instead; it needs a Lua 5.1 `luarocks` on PATH (Nix:
+`luajitPackages.luarocks`) or falls back to installing `hererocks`.
 
 ### Image pasting and rendering (img-clip + image.nvim)
 
