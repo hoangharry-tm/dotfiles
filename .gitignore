@@ -24,3 +24,7 @@ tmux/plugins/
 !niri/**
 !alacritty/
 !alacritty/**
+!matugen/
+!matugen/**
+!quickshell/
+!quickshell/**

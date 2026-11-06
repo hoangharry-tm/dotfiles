@@ -13,11 +13,13 @@ dynamic_padding = true  # spread leftover pixels evenly instead of at the edge
 decorations = "None"    # niri draws no title bars; keep it borderless
 
 [font]
+# "monospace" resolves via fontconfig (hh-nix-config modules/fonts.nix):
+# JetBrainsMono Nerd Font Mono, then system fonts as fallback.
 size = 12.0
-normal = { family = "JetBrainsMono Nerd Font", style = "Regular" }
-bold = { family = "JetBrainsMono Nerd Font", style = "Bold" }
-italic = { family = "JetBrainsMono Nerd Font", style = "Italic" }
-bold_italic = { family = "JetBrainsMono Nerd Font", style = "Bold Italic" }
+normal = { family = "monospace", style = "Regular" }
+bold = { family = "monospace", style = "Bold" }
+italic = { family = "monospace", style = "Italic" }
+bold_italic = { family = "monospace", style = "Bold Italic" }
 
 [cursor]
 style = { shape = "Block", blinking = "Off" }

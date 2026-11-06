@@ -1,0 +1,113 @@
+// Look & feel: minimal (Muji), glassy and precise (Apple).
+// Colors live in the generated theme file; only geometry and motion here.
+
+layout {
+    // The wallpaper lives in the backdrop (rules.kdl: place-within-backdrop),
+    // so let it show through workspaces instead of niri's default gray.
+    background-color "transparent"
+
+    gaps 10
+    center-focused-column "never"
+    always-center-single-column
+
+    preset-column-widths {
+        proportion 0.33333
+        proportion 0.5
+        proportion 0.66667
+    }
+    default-column-width { proportion 0.5; }
+
+    // A thin accent hairline instead of a heavy border.
+    focus-ring {
+        width 2
+    }
+    border {
+        off
+    }
+
+    // Tabbed columns (Mod+W): a slim pill beside the tabs, hidden when alone.
+    tab-indicator {
+        hide-when-single-tab
+        place-within-column
+        width 4
+        gap 6
+        corner-radius 2
+        length total-proportion=0.5
+    }
+
+    // Soft, deep shadow: windows float above the wallpaper.
+    shadow {
+        on
+        softness 40
+        spread 2
+        offset x=0 y=12
+        color "#00000066"
+    }
+}
+
+// Frosted glass for surfaces that opt in (see rules.kdl).
+blur {
+    passes 3
+    offset 3.0
+    noise 0.02
+    saturation 1.4
+}
+
+// Ask apps to drop their own title bars; niri then knows the exact window
+// shape and draws rings/shadows around it cleanly.
+prefer-no-csd
+
+cursor {
+    hide-when-typing
+}
+
+// Overview: windows a little smaller so the wallpaper has room to breathe.
+overview {
+    zoom 0.45
+    // The wallpaper is the backdrop; a shadow behind each workspace muddies it.
+    workspace-shadow {
+        off
+    }
+}
+
+hotkey-overlay {
+    skip-at-startup
+}
+
+screenshot-path "~/Pictures/Screenshots/Screenshot from %Y-%m-%d %H-%M-%S.png"
+
+// Quick and calm, Apple-like: every spring is critically damped (ratio 1.0,
+// no overshoot); only stiffness varies, so bigger movements feel slightly
+// slower than small ones. Opens ease out; closes are short and quiet.
+animations {
+    window-open {
+        duration-ms 240
+        curve "ease-out-expo"
+    }
+    window-close {
+        duration-ms 150
+        curve "ease-out-quad"
+    }
+    window-movement {
+        spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
+    }
+    window-resize {
+        spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
+    }
+    horizontal-view-movement {
+        spring damping-ratio=1.0 stiffness=800 epsilon=0.0001
+    }
+    workspace-switch {
+        spring damping-ratio=1.0 stiffness=700 epsilon=0.0001
+    }
+    overview-open-close {
+        spring damping-ratio=1.0 stiffness=700 epsilon=0.0001
+    }
+    screenshot-ui-open {
+        duration-ms 180
+        curve "ease-out-quad"
+    }
+    config-notification-open-close {
+        spring damping-ratio=1.0 stiffness=900 epsilon=0.001
+    }
+}

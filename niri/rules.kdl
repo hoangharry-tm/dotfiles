@@ -1,0 +1,155 @@
+// https://niri-wm.github.io/niri/Configuration:-Window-Rules
+// https://niri-wm.github.io/niri/Configuration:-Layer-Rules
+
+// Every window: rounded corners, content clipped to them, and the focus
+// ring drawn around (not behind) the window so translucent windows aren't
+// tinted.
+window-rule {
+    geometry-corner-radius 12
+    clip-to-geometry true
+    draw-border-with-background false
+}
+
+// Glass terminal: Alacritty is 0.9 opaque; blur what shows through.
+window-rule {
+    match app-id="^Alacritty$"
+    background-effect {
+        blur true
+    }
+}
+
+// Work around WezTerm's initial configure bug.
+window-rule {
+    match app-id=r#"^org\.wezfurlong\.wezterm$"#
+    default-column-width {}
+}
+
+// Quick-settings popups from the Control Center (nmtui, bluetui, wiremix):
+// a floating glass terminal, centered.
+window-rule {
+    match app-id="^popup$"
+    open-floating true
+    default-column-width { fixed 760; }
+    default-window-height { fixed 520; }
+    background-effect {
+        blur true
+    }
+}
+
+// Floating utilities: small, single-purpose windows that should not join the
+// scrolling tiling layout. Centered by niri when no position is given.
+window-rule {
+    match app-id=r#"^org\.pulseaudio\.pavucontrol$"#
+    match app-id=r#"^blueman-manager"#
+    match app-id=r#"^nm-connection-editor$"#
+    match app-id=r#"^org\.gnome\.Calculator$"#
+    match app-id=r#"^(qalculate-gtk|org\.qalculate\.qalculate-gtk)$"#
+    match app-id=r#"^org\.gnome\.(Settings|Characters)$"#
+    open-floating true
+}
+
+// Dialogs and pickers: file choosers (xdg-desktop-portal-gtk), browser
+// save/upload dialogs, and any window that declares itself a dialog child.
+window-rule {
+    match app-id=r#"^xdg-desktop-portal"#
+    match title=r#"^(Open|Save)( File| As| Files)?$"#
+    match title=r#"^(File Upload|Select a File|Choose Files?)"#
+    open-floating true
+    default-column-width { fixed 880; }
+    default-window-height { fixed 560; }
+}
+
+// Authentication prompts: floating and kept out of screen recordings.
+window-rule {
+    match app-id=r#"polkit"#
+    open-floating true
+    block-out-from "screencast"
+}
+
+// Password managers: never leak into screencasts or screen sharing.
+window-rule {
+    match app-id=r#"^(org\.keepassxc\.KeePassXC|com\.bitwarden\.desktop|1Password)$"#
+    block-out-from "screencast"
+}
+
+// Firefox picture-in-picture: floating in the bottom-right corner,
+// small enough not to cover content.
+window-rule {
+    match app-id=r#"firefox$"# title="^Picture-in-Picture$"
+    open-floating true
+    default-floating-position x=24 y=24 relative-to="bottom-right"
+    default-column-width { fixed 480; }
+    default-window-height { fixed 270; }
+}
+
+// Quickshell surfaces (~/.config/quickshell): frosted glass, radii matching
+// the QML (Theme.qml). Toasts are a stack of cards in one surface, so they
+// use a more opaque fill instead of blur.
+layer-rule {
+    match namespace="^qs-bar$"
+    geometry-corner-radius 14
+    background-effect {
+        blur true
+    }
+    shadow {
+        on
+    }
+}
+
+layer-rule {
+    match namespace="^qs-control-center$"
+    geometry-corner-radius 18
+    background-effect {
+        blur true
+    }
+    shadow {
+        on
+    }
+}
+
+layer-rule {
+    match namespace="^qs-calendar$"
+    geometry-corner-radius 18
+    background-effect {
+        blur true
+    }
+    shadow {
+        on
+    }
+}
+
+layer-rule {
+    match namespace="^qs-launcher$"
+    geometry-corner-radius 24
+    background-effect {
+        blur true
+    }
+    shadow {
+        on
+    }
+}
+
+layer-rule {
+    match namespace="^qs-osd$"
+    geometry-corner-radius 26
+    background-effect {
+        blur true
+    }
+    shadow {
+        on
+    }
+}
+
+// Power menu: frost the whole screen.
+layer-rule {
+    match namespace="^qs-power$"
+    background-effect {
+        blur true
+    }
+}
+
+// Keep the wallpaper visible behind the workspaces in the overview.
+layer-rule {
+    match namespace="^awww-daemon"
+    place-within-backdrop true
+}

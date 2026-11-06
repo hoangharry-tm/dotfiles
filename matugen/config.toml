@@ -1,0 +1,17 @@
+# matugen: Material You palette from the wallpaper -> templates below.
+# Run via `wallpaper set <image>` (hh-nix-config, modules/theme.nix), which
+# also reloads the apps. Outputs are generated state, not tracked in git.
+
+[config]
+
+[templates.niri]
+input_path = "~/.config/matugen/templates/niri.kdl"
+output_path = "~/.local/state/theme/niri.kdl"
+
+[templates.quickshell]
+input_path = "~/.config/matugen/templates/quickshell.json"
+output_path = "~/.local/state/theme/quickshell.json"
+
+[templates.swaylock]
+input_path = "~/.config/matugen/templates/swaylock.conf"
+output_path = "~/.local/state/theme/swaylock.conf"

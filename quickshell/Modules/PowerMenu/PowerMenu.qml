@@ -1,0 +1,139 @@
+import QtQuick
+import QtQuick.Layouts
+import Quickshell
+import Quickshell.Wayland
+import qs.Common
+import qs.Services
+import qs.Widgets
+
+// Full-screen frosted overlay with Lock · Sleep · Log out · Restart · Shut down.
+// ←/→ to choose, Enter to confirm, Esc or click the backdrop to cancel.
+PanelWindow {
+    id: root
+
+    required property ShellScreen modelData
+    readonly property bool shown: Panels.isOpen("power", modelData.name)
+    property int selected: 0
+
+    readonly property var actions: [
+        { glyph: "󰌾", label: "Lock", command: ["lock-screen"] },
+        { glyph: "󰤄", label: "Sleep", command: ["systemctl", "suspend"] },
+        { glyph: "󰍃", label: "Log out", command: ["niri", "msg", "action", "quit", "--skip-confirmation"] },
+        { glyph: "󰜉", label: "Restart", command: ["systemctl", "reboot"] },
+        { glyph: "󰐥", label: "Shut down", command: ["systemctl", "poweroff"] }
+    ]
+
+    function run(i) {
+        Panels.close();
+        Quickshell.execDetached(actions[i].command);
+    }
+
+    screen: modelData
+    visible: shown
+    anchors.top: true
+    anchors.bottom: true
+    anchors.left: true
+    anchors.right: true
+    exclusionMode: ExclusionMode.Ignore
+    color: Qt.alpha(Theme.surface, 0.35)
+    WlrLayershell.namespace: "qs-power"
+    WlrLayershell.layer: WlrLayer.Overlay
+    WlrLayershell.keyboardFocus: shown ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+
+    onShownChanged: if (shown) {
+        selected = 0;
+        keys.forceActiveFocus();
+    }
+
+    MouseArea {
+        anchors.fill: parent
+        onClicked: Panels.close()
+    }
+
+    Item {
+        id: keys
+
+        focus: true
+        Keys.onEscapePressed: Panels.close()
+        Keys.onLeftPressed: root.selected = (root.selected + root.actions.length - 1) % root.actions.length
+        Keys.onRightPressed: root.selected = (root.selected + 1) % root.actions.length
+        Keys.onReturnPressed: root.run(root.selected)
+        Keys.onEnterPressed: root.run(root.selected)
+    }
+
+    ColumnLayout {
+        anchors.centerIn: parent
+        spacing: 28
+
+        Label {
+            Layout.alignment: Qt.AlignHCenter
+            text: "Goodbye for now"
+            font.pixelSize: Theme.textHero
+            font.weight: Font.Light
+        }
+
+        Row {
+            Layout.alignment: Qt.AlignHCenter
+            spacing: 22
+
+            Repeater {
+                model: root.actions
+
+                Column {
+                    id: action
+
+                    required property var modelData
+                    required property int index
+                    readonly property bool current: root.selected === index
+
+                    spacing: 10
+
+                    Rectangle {
+                        width: 84
+                        height: 84
+                        radius: 42
+                        color: action.current ? Theme.primary : mouse.containsMouse ? Theme.glassSolid : Theme.glass
+                        border.width: 1
+                        border.color: Theme.hairline
+                        scale: mouse.pressed ? 0.94 : 1
+
+                        Behavior on color {
+                            ColorAnimation {
+                                duration: Theme.animFast
+                            }
+                        }
+
+                        Behavior on scale {
+                            NumberAnimation {
+                                duration: Theme.animFast
+                            }
+                        }
+
+                        Icon {
+                            anchors.centerIn: parent
+                            glyph: action.modelData.glyph
+                            size: 28
+                            color: action.current ? Theme.primaryText : Theme.text
+                        }
+
+                        MouseArea {
+                            id: mouse
+
+                            anchors.fill: parent
+                            hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
+                            onEntered: root.selected = action.index
+                            onClicked: root.run(action.index)
+                        }
+                    }
+
+                    Label {
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        text: action.modelData.label
+                        color: action.current ? Theme.text : Theme.textMuted
+                    }
+                }
+            }
+        }
+    }
+}

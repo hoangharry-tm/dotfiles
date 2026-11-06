@@ -1,0 +1,14 @@
+// Session services. All of these come from Nix (hh-nix-config,
+// modules/desktop.nix and modules/theme.nix), except swaylock (pacman: it
+// needs the system PAM stack).
+//
+// qs = Quickshell: bar, Control Center, notifications, OSD, launcher, power
+// menu (~/.config/quickshell).
+
+spawn-at-startup "awww-daemon"
+// Paints the wallpaper, and repaints when a monitor is plugged in.
+spawn-at-startup "wallpaper" "watch"
+spawn-at-startup "qs"
+
+// Lock after 5 min idle, screens off after 10, and lock before sleep.
+spawn-sh-at-startup "swayidle -w timeout 300 lock-screen timeout 600 'niri msg action power-off-monitors' before-sleep lock-screen"
