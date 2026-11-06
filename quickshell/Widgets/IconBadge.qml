@@ -1,8 +1,8 @@
 import QtQuick
 import qs.Common
 
-// A round icon well. On an "on" tile (bright glass) the well turns clear
-// again and the glyph goes dark, so the tile reads as one lit object.
+// A round icon well. On an "on" tile the well fills with the vivid accent
+// and the glyph takes its ink: the one bright mark on a tonal tile.
 Rectangle {
     property string glyph: ""
     property bool on: false
@@ -10,7 +10,7 @@ Rectangle {
     width: Theme.control
     height: Theme.control
     radius: Theme.radiusFull
-    color: on ? "transparent" : Theme.glassFill
+    color: on ? Theme.primary : Theme.toneHover
 
     Behavior on color {
         ColorAnimation {
@@ -21,6 +21,6 @@ Rectangle {
     Icon {
         anchors.centerIn: parent
         glyph: parent.glyph
-        color: parent.on ? Theme.onGlass : Theme.text
+        color: parent.on ? Theme.onAccent : Theme.text
     }
 }

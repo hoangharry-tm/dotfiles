@@ -6,8 +6,9 @@ import qs.Widgets
 // A grouped card inside the Control Center. `recessed` makes it a child
 // surface one level below its parent (inset); `attached` flattens the top
 // corners so it fuses with the tile above it.
-GlassSurface {
+Surface {
     property int pad: Theme.padCard
+    variant: recessed ? "recessed" : "rest"
     property bool recessed: false
     property bool attached: false
 

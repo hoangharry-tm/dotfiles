@@ -14,6 +14,8 @@ Clickable {
 
     implicitHeight: subtitle ? Theme.rowHeight : Theme.control
     radius: Theme.radiusSm
+    active: selected
+    activeColor: Theme.toneHover
 
     Icon {
         id: leading

@@ -34,36 +34,60 @@ ShellRoot {
 
             required property ShellScreen modelData
 
-            Scrim {
-                modelData: perScreen.modelData
+            LazyLoader {
+                active: Panels.open !== "" && Panels.open !== "power" && Panels.screen === perScreen.modelData.name
+
+                Scrim {
+                    modelData: perScreen.modelData
+                }
             }
 
             Bar {
                 modelData: perScreen.modelData
             }
 
-            Calendar {
-                modelData: perScreen.modelData
+            LazyLoader {
+                active: Panels.isOpen("calendar", perScreen.modelData.name)
+
+                Calendar {
+                    modelData: perScreen.modelData
+                }
             }
 
             ControlCenter {
                 modelData: perScreen.modelData
             }
 
-            Toasts {
-                modelData: perScreen.modelData
+            LazyLoader {
+                active: Notifications.toasts.length > 0 && Panels.focusedScreen() === perScreen.modelData.name
+
+                Toasts {
+                    modelData: perScreen.modelData
+                }
             }
 
-            Launcher {
-                modelData: perScreen.modelData
+            LazyLoader {
+                active: Panels.isOpen("launcher", perScreen.modelData.name)
+
+                Launcher {
+                    modelData: perScreen.modelData
+                }
             }
 
-            PowerMenu {
-                modelData: perScreen.modelData
+            LazyLoader {
+                active: Panels.isOpen("power", perScreen.modelData.name)
+
+                PowerMenu {
+                    modelData: perScreen.modelData
+                }
             }
 
-            Cheatsheet {
-                modelData: perScreen.modelData
+            LazyLoader {
+                active: Panels.isOpen("keybinds", perScreen.modelData.name)
+
+                Cheatsheet {
+                    modelData: perScreen.modelData
+                }
             }
         }
     }

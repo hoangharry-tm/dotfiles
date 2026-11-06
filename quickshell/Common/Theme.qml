@@ -13,7 +13,11 @@ Singleton {
     // Palette (Material You roles). Usage rules: DESIGN.md "Color".
     readonly property color primary: palette.primary
     readonly property color primaryText: palette.primaryText
+    readonly property color primaryContainer: palette.primaryContainer
+    readonly property color containerText: palette.containerText
     readonly property color secondary: palette.secondary
+    readonly property color secondaryContainer: palette.secondaryContainer
+    readonly property color tertiaryContainer: palette.tertiaryContainer
     readonly property color tertiary: palette.tertiary
     readonly property color error: palette.danger
     readonly property color surface: palette.surface
@@ -32,24 +36,33 @@ Singleton {
     readonly property color tile: Qt.alpha(text, 0.06)
     readonly property color hover: Qt.alpha(text, 0.08)
     readonly property color pressed: Qt.alpha(text, 0.14)
-    // Clear-glass recipe (Widgets/GlassSurface): neutral white veils over
-    // niri's blur, no hue. Hover/press are alpha steps, never new colours.
-    // "on" is brighter frosted white with a dark glyph (onGlass*). Light
-    // wallpapers/themes need more white to read, hence the two alpha sets.
     readonly property bool dark: surface.hslLightness < 0.5
-    readonly property color glassFill: Qt.rgba(1, 1, 1, dark ? 0.10 : 0.40)
-    readonly property color glassFillHover: Qt.rgba(1, 1, 1, dark ? 0.16 : 0.52)
-    readonly property color glassFillPress: Qt.rgba(1, 1, 1, dark ? 0.22 : 0.62)
-    readonly property color glassOn: Qt.rgba(1, 1, 1, dark ? 0.84 : 0.92)
-    readonly property color glassOnHover: Qt.rgba(1, 1, 1, dark ? 0.90 : 0.96)
-    readonly property color glassOnPress: Qt.rgba(1, 1, 1, dark ? 0.72 : 0.82)
-    readonly property color glassRim: Qt.rgba(1, 1, 1, dark ? 0.18 : 0.60)       // 1px edge
-    readonly property color glassRimTop: Qt.rgba(1, 1, 1, dark ? 0.42 : 0.90)    // specular line on the top edge
-    readonly property color recess: Qt.rgba(0, 0, 0, dark ? 0.20 : 0.07)         // child surface: clearer/darker than its parent
-    readonly property color recessRim: Qt.rgba(1, 1, 1, dark ? 0.08 : 0.35)
-    readonly property color recessShade: Qt.rgba(0, 0, 0, dark ? 0.22 : 0.08)    // inner shadow along the top edge
-    readonly property color onGlass: Qt.rgba(0, 0, 0, 0.85)                      // glyph/text on an "on" surface
-    readonly property color onGlassMuted: Qt.rgba(0, 0, 0, 0.65)
+    function mix(base, over, amount) {
+        return Qt.tint(base, Qt.alpha(over, amount));
+    }
+
+    // Tonal-gradient recipe (Widgets/Surface). Every Control Center component
+    // is a diagonal two-stop gradient derived from the wallpaper palette, so
+    // it works with any wallpaper: rest = quiet low-chroma lift of the sheet,
+    // on = richer container tone (analogous primary -> tertiary), accent =
+    // vivid fills (sliders, play), recess = darker well one level below.
+    readonly property color toneRestA: Qt.alpha(mix(surfaceHigh, primaryContainer, 0.30), 0.80)
+    readonly property color toneRestB: Qt.alpha(mix(surface, primaryContainer, 0.16), 0.62)
+    readonly property color toneOnA: mix(primaryContainer, primary, dark ? 0.10 : 0.30)
+    readonly property color toneOnB: mix(mix(tertiaryContainer, primaryContainer, 0.40), tertiary, dark ? 0.08 : 0.20)
+    readonly property color toneAccentA: mix(primary, primaryContainer, 0.20)
+    readonly property color toneAccentB: mix(tertiary, primary, 0.35)
+    readonly property color toneRecessA: Qt.rgba(0, 0, 0, dark ? 0.32 : 0.10)    // top: inner shadow
+    readonly property color toneRecessB: Qt.rgba(0, 0, 0, dark ? 0.16 : 0.04)
+    readonly property color toneRim: Qt.alpha(text, 0.10)
+    readonly property color toneOnRim: Qt.alpha(primary, 0.45)
+    readonly property color toneRecessRim: Qt.alpha(text, 0.05)
+    readonly property color toneHover: Qt.alpha(text, 0.07)                      // overlay step, not a new colour
+    readonly property color tonePress: Qt.alpha(text, 0.13)
+    readonly property color onTone: containerText                                // text/glyph on "on" (AA on toneOn*)
+    readonly property color onToneMuted: Qt.alpha(containerText, 0.90)
+    readonly property color onAccent: primaryText                                // text/glyph on accent fills
+    readonly property real grainOpacity: dark ? 0.35 : 0.25                      // baked tile is 9% alpha; this scales it
     readonly property int hairlineWidth: 1
 
     // Type: generic families; fontconfig (hh-nix-config fonts.nix) resolves
@@ -129,6 +142,7 @@ Singleton {
     readonly property int animFast: 120
     readonly property int anim: 220
     readonly property int animSlow: 340
+    readonly property int animAmbient: 9000 // one drift of an "on" gradient (only while a sheet is open)
     readonly property int animPulse: 1400   // slow breathing, e.g. privacy dot
     readonly property int easing: Easing.OutCubic
     readonly property int animInstant: 80  // press feedback: must feel immediate
@@ -157,6 +171,8 @@ Singleton {
             property string primaryText: "#1f2d61"
             property string primaryContainer: "#364479"
             property string containerText: "#dce1ff"
+            property string secondaryContainer: "#424659"
+            property string tertiaryContainer: "#5b3d57"
             property string secondary: "#c2c5dd"
             property string tertiary: "#e3bada"
             // Names avoid "error" (a signal here) and "on…" (QML reads those as

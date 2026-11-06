@@ -40,7 +40,13 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: shown ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
-    onShownChanged: if (shown) {
+    // Created on demand by a LazyLoader (shell.qml), so also run on creation.
+    Component.onCompleted: if (shown) Qt.callLater(opened)
+    onShownChanged: opened()
+
+    function opened() {
+        if (!shown)
+            return;
         selected = 0;
         keys.forceActiveFocus();
     }

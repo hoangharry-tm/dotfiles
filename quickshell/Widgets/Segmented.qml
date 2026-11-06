@@ -1,9 +1,9 @@
 import QtQuick
 import qs.Common
 
-// Segmented control: a sliding bright-glass pill behind equal-width options.
+// Segmented control: a sliding "on" pill over a recessed well behind equal-width options.
 // model: [{ glyph, label, value }]
-GlassSurface {
+Surface {
     id: root
 
     property var model: []
@@ -14,16 +14,17 @@ GlassSurface {
     signal picked(var value)
 
     implicitHeight: Theme.control + Theme.spaceXs * 2
+    variant: "recessed"
     radius: Theme.radiusMd // inner pill radiusSm = radiusMd - spaceXs
 
-    GlassSurface {
+    Surface {
         visible: root.index >= 0
         x: Theme.spaceXs + Math.max(0, root.index) * root.segment
         y: Theme.spaceXs
         width: root.segment
         height: Theme.control
         radius: Theme.radiusSm
-        on: true
+        variant: "on"
 
         Behavior on x {
             NumberAnimation {
@@ -56,13 +57,13 @@ GlassSurface {
 
                     Icon {
                         glyph: seg.modelData.glyph
-                        color: seg.on ? Theme.onGlass : Theme.textMuted
+                        color: seg.on ? Theme.onTone : Theme.textMuted
                     }
 
                     Label {
                         anchors.verticalCenter: parent.verticalCenter
                         text: seg.modelData.label
-                        color: seg.on ? Theme.onGlass : Theme.textMuted
+                        color: seg.on ? Theme.onTone : Theme.textMuted
                         font.pixelSize: Theme.textXs
                         font.weight: Font.DemiBold
                     }

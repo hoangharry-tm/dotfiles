@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.Common
 
 // Screen backlight. Read from sysfs; written with brightnessctl (pacman: it
 // ships the udev rules that let users change the backlight).
@@ -34,6 +35,7 @@ Singleton {
 
     // Used by the brightness keys (via IPC) so the OSD shows.
     function step(delta) {
+        refresh(); // not polled while closed; start from the real level
         set(value + delta);
         changedByUser();
     }
@@ -71,10 +73,13 @@ Singleton {
             root.flush()
     }
 
-    // sysfs can't be watched for changes; poll gently.
+    Component.onCompleted: refresh()
+
+    // sysfs can't be watched for changes; poll gently, and only while the
+    // Control Center (the only live display of brightness) is open.
     Timer {
         interval: 2000
-        running: true
+        running: Panels.open === "control"
         repeat: true
         triggeredOnStart: true
         onTriggered: root.refresh()

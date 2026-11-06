@@ -40,7 +40,7 @@ Item {
         color: "transparent"
         onClicked: root.expand()
 
-        GlassSurface {
+        Surface {
             anchors.fill: parent
             radius: parent.radius
             hovered: parent.hovered

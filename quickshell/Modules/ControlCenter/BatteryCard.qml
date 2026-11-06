@@ -37,19 +37,21 @@ Section {
         }
     }
 
-    GlassSurface {
+    Surface {
         visible: Power.hasBattery
         Layout.fillWidth: true
         implicitHeight: Theme.trackHeight
         radius: Theme.radiusFull
+        variant: "recessed"
 
-        GlassSurface {
+        Surface {
             width: Math.max(height, parent.width * Power.percent)
             height: parent.height
             radius: Theme.radiusFull
-            on: true
-            // Frosted white normally; only a warning swaps in a hue.
-            color: low ? Theme.error : Power.charging ? Theme.tertiary : Theme.glassOn
+            variant: "accent"
+            // Accent gradient normally; only a warning swaps in a hue.
+            fillA: low ? Theme.error : Power.charging ? Theme.tertiary : Theme.toneAccentA
+            fillB: low ? Theme.error : Power.charging ? Theme.tertiary : Theme.toneAccentB
 
             Behavior on width {
                 NumberAnimation {

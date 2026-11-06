@@ -3,7 +3,7 @@ import qs.Common
 
 // Control Center tile. Wide: icon badge + title + status, chevron opens
 // details when `expandable`. Compact: icon badge over a short label.
-// Clear glass; bright frosted glass with a dark glyph when on (GlassSurface).
+// Tonal gradient; richer container tone with an accent badge when on (Surface).
 Item {
     id: root
 
@@ -18,20 +18,20 @@ Item {
     signal toggled
     signal expand
 
-    readonly property color fg: checked ? Theme.onGlass : Theme.text
-    readonly property color fgMuted: checked ? Theme.onGlassMuted : Theme.textMuted
+    readonly property color fg: checked ? Theme.onTone : Theme.text
+    readonly property color fgMuted: checked ? Theme.onToneMuted : Theme.textMuted
     // An expanded tile fuses with its list below: bottom corners go square.
     readonly property real bottomRadius: expanded ? 0 : radius
 
     implicitHeight: compact ? stack.implicitHeight + Theme.padControl * 2 : Theme.tileHeight
     readonly property real radius: Theme.radiusMd
 
-    GlassSurface {
+    Surface {
         anchors.fill: parent
         radius: root.radius
         bottomLeftRadius: root.bottomRadius
         bottomRightRadius: root.bottomRadius
-        on: root.checked
+        variant: root.checked ? "on" : "rest"
         hovered: main.containsMouse
         pressed: main.pressed
     }

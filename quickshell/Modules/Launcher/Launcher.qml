@@ -33,7 +33,11 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: shown ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
 
-    onShownChanged: {
+    // Created on demand by a LazyLoader (shell.qml), so also run on creation.
+    Component.onCompleted: if (shown) Qt.callLater(opened)
+    onShownChanged: opened()
+
+    function opened() {
         if (shown) {
             search.text = Launch.seed;
             Launch.seed = "";

@@ -70,7 +70,7 @@ RowLayout {
                 modelData.run();
             }
 
-            GlassSurface {
+            Surface {
                 anchors.fill: parent
                 radius: parent.radius
                 hovered: action.hovered

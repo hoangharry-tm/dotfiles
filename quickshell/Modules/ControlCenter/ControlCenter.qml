@@ -46,9 +46,14 @@ PanelWindow {
         detail = detail === name ? "" : name;
     }
 
+    // The slow gradient drift runs only while a panel is open.
     onShownChanged: {
-        if (!shown)
+        if (shown)
+            Ambient.hold();
+        else {
+            Ambient.release();
             detail = "";
+        }
     }
     onDetailChanged: {
         Network.setScanning(detail === "wifi");

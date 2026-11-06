@@ -128,41 +128,31 @@ single accent (small marks: selected-row text, dots; `primaryText` is text on a 
 battery. Fills: `tile` (6%) resting card/track, `hover` (8%), `pressed` (14%).
 Never use raw hex or alpha literals in modules; derive in Theme.
 
-### Material: clear glass
-One recipe, `Widgets/GlassSurface`, draws every Control Center component
-(tiles, toggles, slider tracks and fills, segmented control, play button,
-battery bar, header buttons, cards, child lists). niri already blurs the sheet,
-so each component is only a neutral white veil over that blur: no hue, no
-gradient, no coloured blocks. Tokens (`glass*`, `recess*`, `onGlass*`) come in
-a dark and a light alpha set (`Theme.dark`).
-- Rest: `glassFill` (white 10% dark / 40% light) + 1px `glassRim` + a second
-  1px `glassRimTop` specular line along the top edge (two hairlines).
-- On: `glassOn` (frosted white 84% / 92%) with dark glyphs and text
-  (`onGlass`, `onGlassMuted`, >= 4.5:1). Slider and battery fills, the segmented
-  pill and the play button are the same "on" glass.
-- Hover/press are alpha steps (`glassFillHover/Press`, `glassOnHover/Press`),
-  never new colours.
-- Recessed (child lists): `recess` black 20% / 7% with `recessRim` and an inner
-  shadow line (`recessShade`): darker than its parent tile.
-- Accent: the matugen `primary` stays for small marks only (selected-row text,
-  dots, spinner, password focus ring). Low battery and charging use
+### Material: tonal gradient + grain
+Glass was dropped for Control Center components (hard to get right over a
+blur). The sheet keeps `Widgets/Glass` + niri blur; every component on it is
+one widget, `Widgets/Surface`: a diagonal two-stop gradient derived from the
+matugen palette (so it works with any wallpaper), a static film-grain tile and
+a 1px rim. Tokens are `Theme.tone*`, `onTone*`, `onAccent`, `grainOpacity`;
+there are no per-component colours.
+- `rest`: `toneRestA/B`, a quiet low-chroma lift (surfaceHigh/surface tinted
+  with primaryContainer). Text `text`/`textMuted`.
+- `on`: `toneOnA/B`, richer container tone (primaryContainer -> tertiary
+  container, analogous). The tile's `IconBadge` fills with `primary` (the one
+  vivid mark). Text `onTone` / `onToneMuted` (containerText; >= 4.5:1).
+- `accent`: `toneAccentA/B` (primary -> tertiary) for slider/battery fills and
+  the play button; text `onAccent` (primaryText, > 5.8:1).
+- `recessed`: `toneRecessA/B`, black 32% -> 16% (inner shadow at the top) for
+  tracks, segmented wells and child lists: one level below the parent.
+- Hover/press add a translucent text-colour overlay (`toneHover/Press`), never
+  a new colour. Press dips via Clickable spring; colour steps use `animFast`.
+- Grain: `assets/grain.png` (96px, 9% alpha) tiled over the plain-rectangle
+  part of the outline (middle band + strips between corner arcs, no mask).
+  Static, so zero idle cost. Light themes use a lower `grainOpacity`.
+- Motion: `on` and `accent` surfaces slide their gradient axis with
+  `Ambient.phase` (`animAmbient` 9 s, InOutSine, loops). Ambient only runs
+  while a Control Center is open (`Ambient.hold/release`); rest/recessed
+  surfaces never move.
+- `primary` otherwise stays for small marks (selected-row text, dots, spinner,
+  media progress, password focus ring). Low battery/charging swap the fill for
   `error`/`tertiary`.
-
-### Parent / child lists
-A child list (Wi-Fi, Bluetooth, sound) is one level below its parent: fill
-`recess` (inset, darker than the sheet), rows `control` 32 high (40 with
-subtitle) at `radiusSm` inside `spaceSm` padding. Under a tile it is
-`attached`: tile bottom corners and list top corners are square, no gap, so
-they read as one object; under a slider it is indented `spaceMd`. The parent's
-chevron rotates 90 degrees when open. Use `DetailList` for all of them.
-
-### Sliders
-While dragging (and 400 ms after) the slider shows its local value; the system
-value is shown otherwise, so external changes (keys, OSD) animate in. Writers
-coalesce: `Brightness` runs one brightnessctl at a time and writes only the
-latest value.
-
-## Checklist for new UI
-Pick sizes from Sizing, gaps from Spacing aliases, radius by nesting, text from
-the scale; use `BarChip`/`Clickable`/`Glass`/`Tile`/`ListRow`; if it is a layer
-surface add a `layer-rule` with matching radius and an elevation level.
