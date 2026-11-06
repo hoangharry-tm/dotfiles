@@ -24,6 +24,12 @@ import Quickshell.Io
 //   persistHistory   bool   = false    keep notifications across restarts (Notifications)
 //   mediaGraceMs     int    = 10000    media UI lingers after a pause     (Media)
 //   recDesktopAudio  bool   = false    record what the speakers play      (Recorder)
+//   focusDefaultMin  real   = 25      Focus timer length; also the last one used (FocusTimer)
+//   lowPower         string = "auto"   "auto" (on battery) | "always" | "never" (PowerMode)
+//   dockEnabled      bool   = true     bottom dock                        (Dock)
+//   dockAutoHide     bool   = true     reveal at the bottom edge only     (Dock)
+//   dockIconSize     int    = 48       app icon px                        (Dock)
+//   dockPinned       list   = [...]    desktop-entry ids ("@settings" = built-in) (Dock)
 //
 // NOT here (owned by Nix, read-only in the panel): swayidle timings
 // (modules/services.nix), wallpaper schedule (modules/wallpaper-schedule.nix),
@@ -51,6 +57,12 @@ Singleton {
     property alias persistHistory: data.persistHistory
     property alias mediaGraceMs: data.mediaGraceMs
     property alias recDesktopAudio: data.recDesktopAudio
+    property alias dockEnabled: data.dockEnabled
+    property alias dockAutoHide: data.dockAutoHide
+    property alias dockIconSize: data.dockIconSize
+    property alias dockPinned: data.dockPinned
+    property alias focusDefaultMin: data.focusDefaultMin
+    property alias lowPower: data.lowPower
 
     FileView {
         id: file
@@ -87,6 +99,12 @@ Singleton {
             property bool persistHistory: false
             property int mediaGraceMs: 10000
             property bool recDesktopAudio: false
+            property bool dockEnabled: true
+            property bool dockAutoHide: true
+            property int dockIconSize: 48
+            property var dockPinned: ["Alacritty", "firefox", "spotify", "yazi", "@settings"]
+            property real focusDefaultMin: 25
+            property string lowPower: "auto"
         }
     }
 

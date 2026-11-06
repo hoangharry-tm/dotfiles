@@ -5,33 +5,53 @@ import Quickshell.Services.Notifications
 import qs.Common
 import qs.Services
 
-// One notification: app icon, (app ·) time, summary, body, image, actions and
-// inline reply. Swipe sideways to dismiss. `notification` is a live
+// One notification: app tile, caption (app, time, close), summary, body,
+// thumbnail, action pills and inline reply, on the Control Center's Surface
+// material. Swipe sideways (or x) to dismiss. `notification` is a live
 // Notification or a plain object restored from disk (no actions or reply).
-// Used by toasts and by the Control Center groups.
+// A NotificationGroup positions it; `shade` and `concealed` let the group
+// tuck it behind the front card (a real card, so it can fan out into a list).
 Item {
     id: root
 
     required property var notification
     property bool toast: false
     property bool showApp: true        // false inside a group whose header names the app
+    property bool expandBody: false    // full body (group opened); a hovered card also shows it all
+    property bool animateIn: false     // slide/fade in from the top-right on creation
+    property real shade: 1             // material opacity (fades down the tucked layers)
+    property bool concealed: false     // tucked behind another card: content hidden, no input
     readonly property bool hovered: hover.hovered
     readonly property bool interacting: hover.hovered || replyInput.activeFocus || drag.active
     readonly property bool critical: notification.urgency === NotificationUrgency.Critical
     // Fraction of the width a swipe must travel (or be flung past) to dismiss.
     readonly property real swipeDismiss: 0.35
+    property bool leaving: false
+    property real enter: animateIn ? 0 : 1
 
     signal closed
 
-    implicitHeight: card.implicitHeight
-    clip: false
+    implicitHeight: layout.implicitHeight + Theme.spaceMd * 2
+    enabled: !concealed
 
     // Only cards on screen keep the once-a-minute clock running.
     onVisibleChanged: visible ? Notifications.watchers++ : Notifications.watchers--
-    Component.onCompleted: if (visible)
-        Notifications.watchers++
+    Component.onCompleted: {
+        enter = 1; // Behavior animates it; a no-op when animateIn is false
+        if (visible)
+            Notifications.watchers++;
+    }
     Component.onDestruction: if (visible)
         Notifications.watchers--
+
+    // The one exit (swipe, x, middle click, an action): slide out sideways, then close.
+    function dismiss(dir = 1) {
+        if (leaving)
+            return;
+        leaving = true;
+        flyOut.to = dir * (width + Theme.spaceXl);
+        flyOut.start();
+    }
 
     function sendReply() {
         const text = replyInput.text.trim();
@@ -41,7 +61,15 @@ Item {
         replyInput.text = "";
         replyInput.focus = false;
         if (!notification.resident)
-            closed();
+            dismiss();
+    }
+
+    Behavior on enter {
+        NumberAnimation {
+            duration: Theme.anim
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: Theme.curveDecelerate
+        }
     }
 
     HoverHandler {
@@ -58,12 +86,10 @@ Item {
         onActiveChanged: {
             if (active)
                 return;
-            if (Math.abs(card.x) > root.width * root.swipeDismiss) {
-                flyOut.to = card.x < 0 ? -root.width : root.width;
-                flyOut.start();
-            } else {
+            if (Math.abs(card.x) > root.width * root.swipeDismiss)
+                root.dismiss(card.x < 0 ? -1 : 1);
+            else
                 back.start();
-            }
         }
     }
 
@@ -89,220 +115,283 @@ Item {
         onFinished: root.closed()
     }
 
-    Rectangle {
+    // The swipe target. The entrance is a Translate so it never fights the drag's x.
+    Item {
         id: card
 
         width: parent.width
-        implicitHeight: layout.implicitHeight + Theme.spaceMd * 2
-        radius: root.toast ? Theme.radiusLg : Theme.radiusMd
-        color: root.toast ? Theme.glassSolid : Theme.tile
-        // Critical: an accent rim; toasts have no blur so keep a hairline.
-        border.width: root.critical ? Theme.trackThin : root.toast ? Theme.hairlineWidth : 0
-        border.color: root.critical ? Theme.tertiary : Theme.hairline
-        opacity: 1 - Math.min(Math.abs(x) / root.width, 1) * 0.6
+        height: parent.height
+        opacity: (1 - Math.min(Math.abs(x) / root.width, 1) * 0.6) * root.enter
+        transform: Translate {
+            x: (1 - root.enter) * Theme.spaceXl
+            y: (root.enter - 1) * Theme.spaceSm
+        }
+
+        // Base under the translucent tone: toasts are not blurred, so without it
+        // the wallpaper shows through; it also keeps tucked layers from bleeding.
+        Rectangle {
+            anchors.fill: parent
+            radius: root.toast ? Theme.radiusLg : Theme.radiusMd
+            color: Theme.glassSolid
+            opacity: root.shade
+        }
+
+        Surface {
+            anchors.fill: parent
+            variant: "aurora"
+            seed: Theme.hash(root.notification.appName || "")
+            radius: root.toast ? Theme.radiusLg : Theme.radiusMd
+            hovered: root.hovered
+            opacity: root.shade
+        }
+
+        // Critical: a thin accent rim.
+        Rectangle {
+            anchors.fill: parent
+            visible: root.critical
+            radius: root.toast ? Theme.radiusLg : Theme.radiusMd
+            color: "transparent"
+            border.width: Theme.trackThin
+            border.color: Theme.tertiary
+            opacity: root.shade
+        }
 
         // Click: default action + focus the app. Under the content, so buttons win.
         MouseArea {
             anchors.fill: parent
             acceptedButtons: Qt.LeftButton | Qt.MiddleButton
-            onClicked: m => m.button === Qt.MiddleButton ? root.closed() : Notifications.activate(root.notification)
+            onClicked: m => m.button === Qt.MiddleButton ? root.dismiss() : Notifications.activate(root.notification)
         }
 
-        RowLayout {
+        ColumnLayout {
             id: layout
 
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.margins: Theme.spaceMd
-            spacing: Theme.spaceMd
+            spacing: Theme.spaceXs
+            // Tucked cards show material only; their text would bleed through the front card.
+            opacity: root.concealed ? 0 : 1
+            visible: opacity > 0
 
-            Item {
-                visible: root.showApp
-                Layout.alignment: Qt.AlignTop
-                Layout.preferredWidth: Theme.iconApp
-                Layout.preferredHeight: Theme.iconApp
-
-                readonly property string source: Notifications.appIconOf(root.notification)
-
-                IconImage {
-                    anchors.fill: parent
-                    source: parent.source
-                    visible: parent.source !== ""
-                }
-
-                Icon {
-                    anchors.centerIn: parent
-                    glyph: "󰂚"
-                    size: Theme.iconLg
-                    visible: parent.source === ""
+            Behavior on opacity {
+                NumberAnimation {
+                    duration: Theme.animFast
                 }
             }
 
-            ColumnLayout {
+            // Sonoma layout: app tile | caption + summary + body | thumbnail.
+            RowLayout {
                 Layout.fillWidth: true
-                spacing: Theme.spaceXs
+                spacing: Theme.spaceMd
 
-                RowLayout {
+                // Uniform tile whatever the icon's shape or resolution; an app
+                // initial stands in when the icon is missing or fails to load.
+                Rectangle {
+                    id: tile
+
+                    readonly property string source: root.showApp ? Notifications.appIconOf(root.notification) : ""
+                    readonly property bool hasIcon: source !== "" && appIcon.status !== Image.Error
+
+                    visible: root.showApp
+                    Layout.alignment: Qt.AlignTop
+                    Layout.preferredWidth: Theme.controlLg
+                    Layout.preferredHeight: Theme.controlLg
+                    radius: Theme.radiusSm
+                    color: hasIcon ? Theme.tile : Theme.primaryContainer
+
+                    IconImage {
+                        id: appIcon
+
+                        anchors.centerIn: parent
+                        implicitSize: Theme.iconApp
+                        source: tile.source
+                        visible: tile.hasIcon
+                    }
+
+                    Label {
+                        anchors.centerIn: parent
+                        visible: !tile.hasIcon
+                        text: (root.notification.appName || "?").charAt(0).toUpperCase()
+                        color: Theme.containerText
+                        font.pixelSize: Theme.textLg
+                        font.weight: Font.DemiBold
+                    }
+                }
+
+                ColumnLayout {
                     Layout.fillWidth: true
+                    Layout.alignment: Qt.AlignTop
+                    spacing: Theme.spaceXs
+
+                    // Caption: "App  time", close on hover. The button's negative
+                    // margins keep the line text-high.
+                    RowLayout {
+                        Layout.fillWidth: true
+                        spacing: Theme.gapInline
+
+                        Label {
+                            Layout.fillWidth: true
+                            text: (root.showApp ? (root.notification.appName || "Notification") + "  ·  " : "") + Notifications.timeAgo(root.notification)
+                            elide: Text.ElideRight
+                            color: Theme.textMuted
+                            font.pixelSize: Theme.textXs
+                            font.weight: Font.DemiBold
+                        }
+
+                        Icon {
+                            visible: root.critical
+                            glyph: "󰀦"
+                            size: Theme.iconSm
+                            color: Theme.tertiary
+                        }
+
+                        Clickable {
+                            Layout.preferredWidth: Theme.controlSm
+                            Layout.preferredHeight: Theme.controlSm
+                            Layout.topMargin: -Theme.spaceXs
+                            Layout.bottomMargin: -Theme.spaceXs
+                            radius: Theme.radiusFull
+                            enabled: root.hovered
+                            opacity: root.hovered ? 1 : 0
+                            onClicked: root.dismiss()
+
+                            Behavior on opacity {
+                                NumberAnimation {
+                                    duration: Theme.animFast
+                                }
+                            }
+
+                            Icon {
+                                anchors.centerIn: parent
+                                glyph: "󰅖"
+                                size: Theme.iconSm
+                            }
+                        }
+                    }
 
                     Label {
                         Layout.fillWidth: true
-                        text: root.showApp ? (root.notification.appName || "Notification") : Notifications.timeAgo(root.notification)
-                        color: Theme.textMuted
-                        font.pixelSize: Theme.textXs
+                        text: root.notification.summary
+                        font.weight: Font.Medium
                     }
 
                     Label {
-                        visible: root.showApp
-                        text: Notifications.timeAgo(root.notification)
+                        Layout.fillWidth: true
+                        visible: text !== ""
+                        text: root.notification.body
+                        textFormat: Text.StyledText
                         color: Theme.textMuted
-                        font.pixelSize: Theme.textXs
-                    }
-
-                    Clickable {
-                        Layout.preferredWidth: Theme.controlSm
-                        Layout.preferredHeight: Theme.controlSm
-                        radius: Theme.radiusFull
-                        opacity: root.hovered ? 1 : 0
-                        onClicked: root.closed()
-
-                        Behavior on opacity {
-                            NumberAnimation {
-                                duration: Theme.animFast
-                            }
-                        }
-
-                        Icon {
-                            anchors.centerIn: parent
-                            glyph: "󰅖"
-                            size: Theme.iconSm
-                        }
+                        lineHeight: Theme.lineHeight
+                        wrapMode: Text.Wrap
+                        maximumLineCount: root.expandBody || root.hovered ? 100 : 2
+                        onLinkActivated: link => Qt.openUrlExternally(link)
                     }
                 }
 
-                Label {
-                    Layout.fillWidth: true
-                    text: root.notification.summary
-                    font.weight: Font.DemiBold
-                    maximumLineCount: 2
-                    wrapMode: Text.Wrap
-                }
-
-                Label {
-                    Layout.fillWidth: true
-                    visible: text !== ""
-                    text: root.notification.body
-                    textFormat: Text.StyledText
-                    color: Theme.textMuted
-                    lineHeight: Theme.lineHeight
-                    wrapMode: Text.Wrap
-                    maximumLineCount: root.toast ? 3 : 5
-                    onLinkActivated: link => Qt.openUrlExternally(link)
-                }
-
-                Flow {
-                    Layout.fillWidth: true
-                    Layout.topMargin: Theme.spaceSm
-                    spacing: Theme.spaceSm
-                    visible: actions.count > 0
-
-                    Repeater {
-                        id: actions
-
-                        model: (root.notification.actions ?? []).filter(a => a.identifier !== "default" && a.text)
-
-                        Clickable {
-                            required property var modelData
-
-                            width: actionLabel.implicitWidth + Theme.padControl * 2
-                            height: Theme.control
-                            radius: Theme.radiusFull
-                            color: hovered ? Theme.pressed : Theme.tile
-                            onClicked: {
-                                modelData.invoke();
-                                if (!root.notification.resident)
-                                    root.closed();
-                            }
-
-                            Label {
-                                id: actionLabel
-
-                                anchors.centerIn: parent
-                                text: parent.modelData.text
-                                font.pixelSize: Theme.textSm
-                            }
-                        }
-                    }
-                }
-
-                // Inline reply (the sender advertises it per notification).
-                Rectangle {
-                    Layout.fillWidth: true
-                    Layout.topMargin: Theme.spaceSm
-                    visible: root.notification.hasInlineReply === true
-                    implicitHeight: Theme.control
-                    radius: Theme.radiusFull
+                // Scaled at decode time (sourceSize) so a huge image never sits
+                // in memory at full resolution.
+                ClippingRectangle {
+                    visible: !!root.notification.image
+                    Layout.alignment: Qt.AlignTop
+                    Layout.preferredWidth: Theme.controlLg + Theme.spaceXl
+                    Layout.preferredHeight: Theme.controlLg + Theme.spaceXl
+                    radius: Theme.radiusSm
                     color: Theme.tile
 
-                    TextInput {
-                        id: replyInput
-
-                        anchors.left: parent.left
-                        anchors.right: send.left
-                        anchors.leftMargin: Theme.padControl
-                        anchors.verticalCenter: parent.verticalCenter
-                        color: Theme.text
-                        font.family: Theme.font
-                        font.pixelSize: Theme.textMd
-                        clip: true
-                        selectByMouse: true
-                        onAccepted: root.sendReply()
-                        Keys.onEscapePressed: focus = false
-
-                        Label {
-                            visible: !parent.text && !parent.activeFocus
-                            text: root.notification.inlineReplyPlaceholder || "Reply"
-                            color: Theme.textMuted
-                        }
+                    Image {
+                        anchors.fill: parent
+                        source: root.notification.image ?? ""
+                        sourceSize.width: width * Screen.devicePixelRatio
+                        sourceSize.height: height * Screen.devicePixelRatio
+                        fillMode: Image.PreserveAspectCrop
+                        asynchronous: true
                     }
+                }
+            }
+
+            Flow {
+                Layout.fillWidth: true
+                Layout.topMargin: Theme.spaceSm
+                spacing: Theme.spaceSm
+                visible: actions.count > 0
+
+                Repeater {
+                    id: actions
+
+                    model: (root.notification.actions ?? []).filter(a => a.identifier !== "default" && a.text)
 
                     Clickable {
-                        id: send
+                        required property var modelData
 
-                        anchors.right: parent.right
-                        anchors.top: parent.top
-                        anchors.bottom: parent.bottom
-                        width: Theme.control
+                        width: actionLabel.implicitWidth + Theme.padControl * 2
+                        height: Theme.control
                         radius: Theme.radiusFull
-                        opacity: replyInput.text.trim() === "" ? 0.5 : 1
-                        onClicked: root.sendReply()
+                        color: hovered ? Theme.pressed : Theme.tile
+                        onClicked: {
+                            modelData.invoke();
+                            if (!root.notification.resident)
+                                root.dismiss();
+                        }
 
-                        Icon {
+                        Label {
+                            id: actionLabel
+
                             anchors.centerIn: parent
-                            glyph: "󰒊"
+                            text: parent.modelData.text
+                            font.pixelSize: Theme.textSm
                         }
                     }
                 }
             }
 
-            // Image content, scaled at decode time (sourceSize) so a huge
-            // image never sits in memory at full resolution.
-            ClippingRectangle {
-                visible: !!root.notification.image
-                Layout.alignment: Qt.AlignTop
-                Layout.preferredWidth: Theme.controlLg + Theme.spaceXl
-                Layout.preferredHeight: Theme.controlLg + Theme.spaceXl
-                radius: Theme.radiusSm
+            // Inline reply (the sender advertises it per notification).
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.topMargin: Theme.spaceSm
+                visible: root.notification.hasInlineReply === true
+                implicitHeight: Theme.control
+                radius: Theme.radiusFull
                 color: Theme.tile
 
-                Image {
-                    anchors.fill: parent
-                    source: root.notification.image ?? ""
-                    sourceSize.width: width * Screen.devicePixelRatio
-                    sourceSize.height: height * Screen.devicePixelRatio
-                    fillMode: Image.PreserveAspectCrop
-                    asynchronous: true
+                TextInput {
+                    id: replyInput
+
+                    anchors.left: parent.left
+                    anchors.right: send.left
+                    anchors.leftMargin: Theme.padControl
+                    anchors.verticalCenter: parent.verticalCenter
+                    color: Theme.text
+                    font.family: Theme.font
+                    font.pixelSize: Theme.textMd
+                    clip: true
+                    selectByMouse: true
+                    onAccepted: root.sendReply()
+                    Keys.onEscapePressed: focus = false
+
+                    Label {
+                        visible: !parent.text && !parent.activeFocus
+                        text: root.notification.inlineReplyPlaceholder || "Reply"
+                        color: Theme.textMuted
+                    }
+                }
+
+                Clickable {
+                    id: send
+
+                    anchors.right: parent.right
+                    anchors.top: parent.top
+                    anchors.bottom: parent.bottom
+                    width: Theme.control
+                    radius: Theme.radiusFull
+                    opacity: replyInput.text.trim() === "" ? 0.5 : 1
+                    onClicked: root.sendReply()
+
+                    Icon {
+                        anchors.centerIn: parent
+                        glyph: "󰒊"
+                    }
                 }
             }
         }

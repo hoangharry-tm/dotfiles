@@ -1,14 +1,66 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell.Io
 import qs.Common
 import qs.Modules.Launcher
 import qs.Services
+import qs.Widgets
 
 ColumnLayout {
     id: root
 
     // Sources refresh on entering the page, like the launcher's modes.
-    Component.onCompleted: Wallpapers.refresh()
+    Component.onCompleted: {
+        Wallpapers.refresh();
+        status.running = true;
+        previews.running = true;
+    }
+
+    // Colour mode and style live in ~/.local/state/theme, owned by the
+    // `wallpaper` script (modules/theme.nix); the page mirrors them.
+    property string mode: "dark"
+    property string style: "default"
+    property var styles: []
+
+    // Runs `wallpaper <args>` (regenerates the palette, ~1 s) and updates the
+    // control immediately; swatches follow once the new palette is built.
+    function run(args, apply) {
+        apply();
+        setter.command = ["wallpaper"].concat(args);
+        setter.running = true;
+    }
+
+    Process {
+        id: status
+
+        command: ["wallpaper", "status"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const [m, s] = text.trim().split(" ");
+                root.mode = m || "dark";
+                root.style = s || "default";
+            }
+        }
+    }
+
+    Process {
+        id: previews
+
+        command: ["wallpaper", "previews"]
+        stdout: StdioCollector {
+            onStreamFinished: root.styles = text.split("\n").filter(l => l).map(l => {
+                    const [name, ...colors] = l.split("\t");
+                    return { name, colors };
+                })
+        }
+    }
+
+    Process {
+        id: setter
+
+        onRunningChanged: if (!running)
+            previews.running = true
+    }
 
     Group {
         title: "Wallpaper"
@@ -31,9 +83,80 @@ ColumnLayout {
     Group {
         title: "Colours"
 
-        ReadOnlyRow {
-            title: "Palette"
-            value: "matugen, from the wallpaper"
+        SettingRow {
+            title: "Mode"
+            subtitle: root.mode === "auto" ? "Light by day (sunrise to sunset)" : ""
+
+            Segmented {
+                width: Theme.launcherWidth / 2
+                model: [
+                    { glyph: "󰖨", label: "Light", value: "light" },
+                    { glyph: "󰖔", label: "Dark", value: "dark" },
+                    { glyph: "󰔛", label: "Auto", value: "auto" }
+                ]
+                current: root.mode
+                onPicked: v => root.run(["mode", v], () => root.mode = v)
+            }
+        }
+
+        // Style: matugen scheme type. Chips preview primary, secondary and
+        // tertiary for the current wallpaper and mode.
+        Flow {
+            Layout.fillWidth: true
+            Layout.margins: Theme.spaceSm
+            spacing: Theme.spaceXs
+
+            Repeater {
+                model: root.styles
+
+                Clickable {
+                    id: chip
+
+                    required property var modelData
+                    readonly property bool on: modelData.name === root.style
+
+                    implicitWidth: chipRow.implicitWidth + Theme.padControl * 2
+                    implicitHeight: Theme.control
+                    radius: Theme.radiusSm
+                    color: on ? Theme.primaryWash : hovered ? Theme.hover : "transparent"
+                    onClicked: root.run(["scheme", modelData.name], () => root.style = modelData.name)
+
+                    Row {
+                        id: chipRow
+
+                        anchors.centerIn: parent
+                        spacing: Theme.gapInline
+
+                        Row {
+                            anchors.verticalCenter: parent.verticalCenter
+                            spacing: -Theme.spaceXs
+
+                            Repeater {
+                                model: chip.modelData.colors
+
+                                Rectangle {
+                                    required property color modelData
+
+                                    width: Theme.spaceMd
+                                    height: width
+                                    radius: Theme.radiusFull
+                                    color: modelData
+                                    border.width: Theme.hairlineWidth
+                                    border.color: Theme.hairline
+                                }
+                            }
+                        }
+
+                        Label {
+                            anchors.verticalCenter: parent.verticalCenter
+                            text: chip.modelData.name
+                            color: chip.on ? Theme.text : Theme.textMuted
+                            font.pixelSize: Theme.textXs
+                            font.weight: chip.on ? Font.DemiBold : Font.Normal
+                        }
+                    }
+                }
+            }
         }
 
         ReadOnlyRow {

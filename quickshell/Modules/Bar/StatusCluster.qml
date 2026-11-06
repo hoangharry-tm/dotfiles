@@ -21,14 +21,13 @@ BarChip {
     onClicked: Panels.toggle("control", screenName)
     onMiddleClicked: Audio.toggleMute()
     onRightClicked: Notifications.dnd = !Notifications.dnd
-    onScrolled: d => Audio.setVolume(Audio.volume + (d > 0 ? 0.05 : -0.05))
 
     spacing: Theme.spaceMd
 
     // Collapse: only the battery percentage goes (level 9); the icons stay.
     // Computed from the data, not implicitWidth, which changes with `level`.
     readonly property int pctLevel: 9
-    readonly property var parts: [true, showBluetooth, true, Notifications.dnd, Power.hasBattery]
+    readonly property var parts: [true, showBluetooth, true, Notifications.dnd, PowerMode.lowPower, Power.hasBattery]
     widthAt: l => {
         const n = parts.filter(Boolean).length;
         const pct = Power.hasBattery && l < pctLevel ? Theme.spaceXs + pctLabel.implicitWidth : 0;
@@ -54,6 +53,12 @@ BarChip {
         visible: Notifications.dnd
         glyph: "󰂛"
         color: Theme.textMuted
+    }
+
+    Icon {
+        visible: PowerMode.lowPower
+        glyph: "󰌪" // leaf: low power is on
+        color: Theme.tertiary
     }
 
     RowLayout {

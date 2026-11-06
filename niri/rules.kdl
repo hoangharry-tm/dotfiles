@@ -10,11 +10,31 @@ window-rule {
     draw-border-with-background false
 }
 
-// Glass terminal: Alacritty is 0.9 opaque; blur what shows through.
+// Glass app windows: translucent apps get the shared blur from look.kdl
+// (`blur {}`; `blur { off }` there disables all of it). Radius 12 comes from
+// the catch-all rule at the top, so the blur follows the rounded corners.
+// Opaque apps (browsers, video) are deliberately not listed: blur would cost
+// GPU for nothing.
 window-rule {
     match app-id="^Alacritty$"
+    match app-id="^dropdown$"
+    match app-id="^yazi$"
     background-effect {
         blur true
+    }
+}
+
+// Glass popups: right-click / context menus (xdg-popup) of every window, GTK,
+// Qt and Firefox alike. Popover level per DESIGN.md: radius 12 (Theme.radiusMd,
+// menus are small cards), slight transparency so the blur reads but text keeps
+// contrast. Menus draw their own shadow, niri adds none to popups.
+window-rule {
+    popups {
+        opacity 0.94
+        geometry-corner-radius 12
+        background-effect {
+            blur true
+        }
     }
 }
 
@@ -215,6 +235,23 @@ layer-rule {
     }
 }
 
+// Dock (quickshell Modules/Dock): floating sheet at the bottom centre.
+layer-rule {
+    match namespace="^qs-dock$"
+    geometry-corner-radius 16
+    background-effect {
+        blur true
+    }
+    // elevation E2 (quickshell/DESIGN.md)
+    shadow {
+        on
+        softness 40
+        spread 0
+        offset x=0 y=8
+        color "#00000040"
+    }
+}
+
 // Alt+Tab switcher (quickshell Modules/Switcher).
 layer-rule {
     match namespace="^qs-switcher$"
@@ -307,5 +344,16 @@ layer-rule {
         spread 0
         offset x=0 y=16
         color "#00000047"
+    }
+}
+
+// Popups of layer-shell clients (qs-* sheets, tray menus): same glass.
+layer-rule {
+    popups {
+        opacity 0.94
+        geometry-corner-radius 12
+        background-effect {
+            blur true
+        }
     }
 }

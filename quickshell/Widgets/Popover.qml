@@ -49,6 +49,8 @@ PanelWindow {
     color: "transparent"
     WlrLayershell.namespace: "qs-popover"
     WlrLayershell.layer: WlrLayer.Overlay
+    // Cards with text fields get the keyboard once clicked, never on hover.
+    WlrLayershell.keyboardFocus: interactive ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
     // Passive cards let clicks through to what is underneath.
     mask: interactive ? null : passthrough
 

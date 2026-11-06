@@ -185,6 +185,7 @@ binds {
     Ctrl+Print { screenshot-screen; }
     // Start/stop a screen recording (Mod+Shift+R and Mod+Ctrl+R are taken).
     Mod+Alt+R hotkey-overlay-title="Record the Screen" { spawn "qs" "ipc" "call" "shell" "record"; }
+    Mod+P hotkey-overlay-title="Focus Timer: Open / Play-Pause" { spawn "qs" "ipc" "call" "focus" "toggle"; }
     Alt+Print  { screenshot-window; }
 
     // Shortcut Inhibit — escape hatch if an app inhibits shortcuts

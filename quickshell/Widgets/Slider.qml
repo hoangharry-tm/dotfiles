@@ -68,7 +68,9 @@ Item {
                 update(m.x);
         }
         onReleased: settle.restart()
-        onWheel: w => commit(root.shown + (w.angleDelta.y > 0 ? 0.05 : -0.05))
+        // No scroll-to-adjust: touchpad scrolling over the Control Center
+        // kept nudging volume/brightness by accident (user request).
+        onWheel: w => w.accepted = false
 
         function update(x) {
             commit(x / root.width);

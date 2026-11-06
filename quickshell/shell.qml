@@ -20,6 +20,8 @@ import qs.Modules.Calendar
 import qs.Modules.Cheatsheet
 import qs.Modules.ControlCenter
 import qs.Modules.Desktop
+import qs.Modules.Dock
+import qs.Modules.FocusTimer
 import qs.Modules.Launcher
 import qs.Modules.Lock
 import qs.Modules.Notifications
@@ -55,6 +57,32 @@ ShellRoot {
                 active: DesktopState.enabled
 
                 DesktopWidgets {
+                    modelData: perScreen.modelData
+                }
+            }
+
+            // Auto-hide dock: a 4 px edge strip is always there (zero idle
+            // cost); the sheet is only loaded while revealed.
+            LazyLoader {
+                active: Settings.dockEnabled && Settings.dockAutoHide
+
+                DockTrigger {
+                    modelData: perScreen.modelData
+                }
+            }
+
+            LazyLoader {
+                active: Settings.dockEnabled && (!Settings.dockAutoHide || Dock.screen === perScreen.modelData.name)
+
+                DockBar {
+                    modelData: perScreen.modelData
+                }
+            }
+
+            LazyLoader {
+                active: Panels.isOpen("timer", perScreen.modelData.name)
+
+                TimerPanel {
                     modelData: perScreen.modelData
                 }
             }
@@ -234,6 +262,41 @@ ShellRoot {
         }
     }
 
+    // qs ipc call focus toggle|pause|resume|reset|open|set <minutes> (Focus timer).
+    IpcHandler {
+        target: "focus"
+
+        function pause(): void {
+            FocusTimer.pause();
+        }
+
+        // Play: starts from idle with the chosen duration.
+        function resume(): void {
+            FocusTimer.play();
+        }
+
+        function reset(): void {
+            FocusTimer.reset();
+        }
+
+        function open(): void {
+            FocusTimer.openCard();
+        }
+
+        function set(minutes: real): void {
+            FocusTimer.setMinutes(minutes);
+        }
+
+        // One key for everything (niri Mod+P): open the card when idle, else
+        // play/pause.
+        function toggle(): void {
+            if (FocusTimer.active)
+                FocusTimer.toggle();
+            else
+                Panels.toggle("timer");
+        }
+    }
+
     // qs ipc call ime toggle (EN/VI). niri binds go through here, not
     // fcitx5-remote directly, so the bar chip updates on the keypress.
     IpcHandler {
@@ -250,6 +313,11 @@ ShellRoot {
 
         function dnd(): void {
             Notifications.dnd = !Notifications.dnd;
+        }
+
+        // Read-only check (the call above toggles): prints true/false.
+        function isDnd(): bool {
+            return Notifications.dnd;
         }
 
         function clear(): void {

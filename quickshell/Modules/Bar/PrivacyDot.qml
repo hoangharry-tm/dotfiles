@@ -3,7 +3,8 @@ import qs.Common
 import qs.Services
 import qs.Widgets
 
-// Appears only while an app is capturing the mic or screen/camera.
+// Appears only while an app is capturing the mic or camera. Screen sharing
+// has its own chip (ScreencastChip), fed by niri.
 BarChip {
     id: root
 
@@ -11,15 +12,11 @@ BarChip {
     // Never collapsed: it is a safety/recording indicator.
 
     Icon {
-        glyph: Privacy.videoActive ? "󰄀" : "󰍬"
+        glyph: Privacy.cameraActive ? "󰄀" : "󰍬"
         color: Theme.tertiary
 
-        SequentialAnimation on opacity {
-            running: root.visible
-            loops: Animation.Infinite
-            NumberAnimation { to: 0.45; duration: Theme.animPulse; easing.type: Easing.InOutSine }
-            NumberAnimation { to: 1; duration: Theme.animPulse; easing.type: Easing.InOutSine }
-        }
+        // Shared stepped pulse (Common/Pulse.qml): no per-frame repaints.
+        opacity: root.visible ? Pulse.opacity : 1
     }
 
     Popover {
@@ -36,11 +33,17 @@ BarChip {
         }
 
         InfoRow {
-            visible: Privacy.videoActive
+            visible: Privacy.cameraActive
             glyph: "󰄀"
-            label: "Screen / camera"
-            value: Privacy.videoApps.join(", ")
+            label: "Camera"
+            value: Privacy.cameraApps.join(", ")
             valueColor: Theme.tertiary
         }
     }
+
+    onVisibleChanged: visible ? Pulse.hold() : Pulse.release()
+    Component.onCompleted: if (visible)
+        Pulse.hold()
+    Component.onDestruction: if (visible)
+        Pulse.release()
 }

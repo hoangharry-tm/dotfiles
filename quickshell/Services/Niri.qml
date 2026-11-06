@@ -23,6 +23,37 @@ Singleton {
         mru = [id].concat(mru.filter(i => i !== id));
     }
 
+    // Active screencasts [{id (session), streamId, kind, target: {output|window}, pwNode, pid}],
+    // from the CastsChanged / CastStartedOrChanged / CastStopped events (no
+    // polling; seeded once from `niri msg casts`). Cursor-only streams are
+    // dropped: they ride along with a real cast and are not "sharing".
+    property var casts: []
+
+    function _cast(c) {
+        if (c.kind === "ExtImageCopyCaptureCursor")
+            return null;
+        // Externally tagged enum: "Nothing" | {"Output":{name}} | {"Window":{id}}.
+        const t = typeof c.target === "string" ? c.target : Object.keys(c.target)[0];
+        const d = typeof c.target === "string" ? {} : c.target[t] ?? {};
+        return {
+            id: c.session_id,
+            streamId: c.stream_id,
+            kind: c.kind,
+            output: t === "Output" ? d.name : "",
+            window: t === "Window" ? d.id : -1,
+            pwNode: c.pw_node_id ?? -1,
+            pid: c.pid ?? -1
+        };
+    }
+
+    function _setCasts(list) {
+        casts = list.map(_cast).filter(c => c !== null);
+    }
+
+    function stopCast(sessionId) {
+        action("StopCast", { session_id: sessionId });
+    }
+
     readonly property var focusedWindow: windows[focusedWindowId] ?? null
 
     function workspacesOn(output) {
@@ -99,6 +130,18 @@ Singleton {
             mru = mru.filter(i => i !== data.id);
             break;
         }
+        case "CastsChanged":
+            _setCasts(data.casts);
+            break;
+        case "CastStartedOrChanged": {
+            const c = _cast(data.cast);
+            if (c)
+                casts = casts.filter(x => x.streamId !== c.streamId).concat([c]);
+            break;
+        }
+        case "CastStopped":
+            casts = casts.filter(x => x.streamId !== data.stream_id);
+            break;
         case "WindowFocusChanged":
             focusedWindowId = data.id ?? -1;
             touch(data.id);
@@ -127,6 +170,20 @@ Singleton {
                 } catch (e) {
                     // The first reply is {"Ok":"Handled"}; ignore anything unparseable.
                 }
+            }
+        }
+    }
+
+    // One-shot seed in case the stream does not replay existing casts.
+    Process {
+        running: true
+        command: ["niri", "msg", "--json", "casts"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    if (root.casts.length === 0)
+                        root._setCasts(JSON.parse(text));
+                } catch (e) {}
             }
         }
     }

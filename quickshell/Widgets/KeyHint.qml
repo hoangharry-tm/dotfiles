@@ -5,6 +5,7 @@ import qs.Common
 Row {
     property string key: ""
     property string text: ""
+    property color color: Theme.textMuted
 
     spacing: Theme.spaceSm
 
@@ -27,7 +28,7 @@ Row {
     Label {
         anchors.verticalCenter: parent.verticalCenter
         text: parent.text
-        color: Theme.textMuted
+        color: parent.color
         font.pixelSize: Theme.textXs
     }
 }

@@ -12,3 +12,6 @@ include "startup.kdl"
 include "binds.kdl"
 
 include optional=true "~/.local/state/theme/niri.kdl"
+
+// Low-power override (blur off, short animations); written by quickshell's PowerMode, empty otherwise. Keep last.
+include optional=true "~/.local/state/theme/niri-power.kdl"

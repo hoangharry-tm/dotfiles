@@ -17,6 +17,10 @@ RowLayout {
     signal accepted(bool alt) // alt = Shift+Enter (secondary action)
     signal dismissed
     signal removeRequested // Shift+Del: delete the selected entry (clipboard)
+    signal pinRequested // Ctrl+P (clipboard keys only)
+    signal openRequested // Ctrl+O (clipboard keys only)
+    signal clearRequested // Ctrl+Shift+Del (clipboard keys only)
+    property bool clipKeys: false // Ctrl+P pins instead of moving up
 
     function focusInput() {
         input.forceActiveFocus();
@@ -51,6 +55,16 @@ RowLayout {
         Keys.onLeftPressed: e => { e.accepted = root.gridNav; if (root.gridNav) root.navigate(-1, 0); }
         Keys.onRightPressed: e => { e.accepted = root.gridNav; if (root.gridNav) root.navigate(1, 0); }
         Keys.onPressed: e => {
+            if (root.clipKeys && e.key === Qt.Key_Delete && (e.modifiers & Qt.ShiftModifier) && (e.modifiers & Qt.ControlModifier)) {
+                root.clearRequested();
+                e.accepted = true;
+                return;
+            }
+            if (root.clipKeys && (e.modifiers & Qt.ControlModifier) && (e.key === Qt.Key_P || e.key === Qt.Key_O)) {
+                e.key === Qt.Key_P ? root.pinRequested() : root.openRequested();
+                e.accepted = true;
+                return;
+            }
             if (e.key === Qt.Key_Delete && (e.modifiers & Qt.ShiftModifier)) {
                 root.removeRequested();
                 e.accepted = true;

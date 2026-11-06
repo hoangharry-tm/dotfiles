@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.Services
 
 // Design tokens. Colors are generated from the wallpaper by matugen
 // (`wallpaper set`) into ~/.local/state/theme/quickshell.json and reloaded
@@ -45,6 +46,20 @@ Singleton {
         return Qt.tint(base, Qt.alpha(over, amount));
     }
 
+    // Hue turn (degrees) keeping saturation, lightness, alpha; greys pass through.
+    function rotate(c, deg) {
+        return c.hslHue < 0 ? c : Qt.hsla(((c.hslHue * 360 + deg) % 360 + 360) % 360 / 360, c.hslSaturation, c.hslLightness, c.a);
+    }
+    // Stable non-negative hash of a string (djb2), to seed per-app variation.
+    function hash(str) {
+        let h = 5381;
+        for (let i = 0; i < str.length; i++)
+            h = ((h << 5) + h + str.charCodeAt(i)) & 0x7fffffff;
+        // Avalanche: djb2 alone makes near-identical names near-identical seeds.
+        h = Math.imul(h ^ (h >>> 15), 0x2c1b3c6d) >>> 0;
+        return (Math.imul(h ^ (h >>> 12), 0x297a2d39) >>> 0) & 0x7fffffff;
+    }
+
     // Tonal-gradient recipe (Widgets/Surface). Every Control Center component
     // is a diagonal two-stop gradient derived from the wallpaper palette, so
     // it works with any wallpaper: rest = quiet low-chroma lift of the sheet,
@@ -58,6 +73,16 @@ Singleton {
     readonly property color toneAccentB: mix(tertiary, primary, 0.35)
     readonly property color toneRecessA: Qt.rgba(0, 0, 0, dark ? 0.32 : 0.10)    // top: inner shadow
     readonly property color toneRecessB: Qt.rgba(0, 0, 0, dark ? 0.16 : 0.04)
+    // aurora (notification cards): secondary -> primary -> tertiary container
+    // diagonal, plus two low-alpha blooms. All from the palette, so any wallpaper works.
+    readonly property color toneAuroraA: Qt.alpha(mix(surfaceHigh, secondaryContainer, 0.35), 0.85)
+    readonly property color toneAuroraM: Qt.alpha(mix(surfaceHigh, primaryContainer, 0.40), 0.85)
+    readonly property color toneAuroraB: Qt.alpha(mix(surfaceHigh, tertiaryContainer, 0.35), 0.85)
+    // Blooms use the container roles (muted), never vivid primary/tertiary: calm, low contrast.
+    readonly property color bloomColorA: primaryContainer
+    readonly property color bloomColorB: tertiaryContainer
+    readonly property real bloomA: 0.30
+    readonly property real bloomB: 0.24
     readonly property color toneRim: Qt.alpha(text, 0.10)
     readonly property color toneOnRim: Qt.alpha(primary, 0.45)
     readonly property color toneRecessRim: Qt.alpha(text, 0.05)
@@ -80,6 +105,7 @@ Singleton {
     readonly property int textLg: 15        // titles, result names
     readonly property int textXl: 20        // headings, search input
     readonly property int textHero: 32      // display (power menu)
+    readonly property int textTimer: 40     // timer readout (Light weight, tabular figures)
     readonly property int textDisplay: 96   // desktop clock (Light weight only)
     readonly property color textShadow: Qt.rgba(0, 0, 0, 0.45) // legibility on any wallpaper (desktop widgets)
     readonly property real lineHeight: 1.25 // wrapped body text only (single lines: leave 1, it shifts glyphs down)
@@ -123,6 +149,7 @@ Singleton {
     readonly property int controlSm: 24         // dismiss, small buttons
     readonly property int control: 32           // bar chips, icon buttons
     readonly property int controlLg: 40         // list rows, inputs in popovers
+    readonly property int controlXl: 56         // the one primary round button of a card (timer play/pause)
     readonly property int rowHeight: 40         // detail-list row (48 with subtitle)
     readonly property int rowHeightTall: 48
     readonly property int resultHeight: 56      // launcher result row
@@ -139,23 +166,30 @@ Singleton {
     readonly property int barMargin: edge       // bar <-> screen top (and sides)
     readonly property int panelWidth: 400
     readonly property int launcherWidth: 640
+    readonly property int launcherWidthWide: 880 // launcher in a two-pane mode (clipboard list + preview)
     readonly property int popoverWidth: 320     // bar hover cards
     readonly property int calendarWidth: 336
+    readonly property int timerRing: 176        // timer card progress ring
     readonly property int popoverGap: spaceSm   // bar bottom edge <-> any popover
     readonly property int popoverTop: barMargin + barHeight + popoverGap   // screen top <-> popover top
 
     // Motion
-    readonly property int animFast: 120
-    readonly property int anim: 220
-    readonly property int animSlow: 340
+    // 0 in low power (Services/PowerMode): every duration below collapses, in one place.
+    readonly property real motionScale: PowerMode.lowPower ? 0 : 1
+    readonly property int animFast: Math.round(120 * motionScale)
+    readonly property int anim: Math.round(220 * motionScale)
+    readonly property int animSlow: Math.round(340 * motionScale)
     readonly property int animAmbient: 9000 // one drift of an "on" gradient (only while a sheet is open)
     readonly property int animSpin: 1000    // one turn of a busy spinner
+    readonly property int pressDelay: 120 // ms: Flickable press hold-off (scroll vs click)
+    readonly property int holdDelay: 400    // press-and-hold: first repeat
+    readonly property int holdRepeat: 80    // press-and-hold: repeat rate
     readonly property int hoverOpen: 350    // hover card appears after this long
     readonly property int hoverClose: 200   // ...and leaves this long after the pointer
     readonly property int animPulse: 1400   // slow breathing, e.g. privacy dot
     readonly property int easing: Easing.OutCubic
-    readonly property int animInstant: 80  // press feedback: must feel immediate
-    readonly property int animExit: 150     // leaving is quieter than entering
+    readonly property int animInstant: Math.round(80 * motionScale)  // press feedback: must feel immediate
+    readonly property int animExit: Math.round(150 * motionScale)     // leaving is quieter than entering
     // Curves mirror niri/look.kdl: decelerate = niri cubic-bezier 0.05 0.7 0.1 1
     // (entrances), accelerate = 0.3 0 0.8 0.15 (exits). Use with Easing.BezierSpline.
     readonly property var curveDecelerate: [0.05, 0.7, 0.1, 1, 1, 1]
@@ -165,6 +199,14 @@ Singleton {
     readonly property int enterRise: spaceSm  // content slides this far while entering
     readonly property int stagger: 18         // delay per list item on entrance
     readonly property int staggerMax: 6       // items past this appear together (cheap)
+    // Notification stack: layers tucked under the front card, fanned into a list on hover.
+    readonly property int stackLayers: 3      // cards that peek beneath the front one
+    readonly property int stackPeek: spaceSm  // visible edge of each tucked card
+    readonly property int fanCards: 4         // cards a fanned toast group shows before it scrolls (3 felt cramped, 5 fills half a laptop)
+    readonly property int toastGroups: 4      // most app stacks shown as toasts; older fold into "+M more apps"
+    readonly property int toastGroupEst: 112  // typical collapsed stack height, to budget how many groups fit
+    readonly property real stackShrink: 0.04  // scale lost per layer
+    readonly property real stackFade: 0.22    // material opacity lost per layer
     readonly property real springStiff: 3.2   // QML SpringAnimation: snappy, slight settle
     readonly property real springDamp: 0.32
 

@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import qs.Common
 import qs.Services
+import qs.Widgets
 
 ColumnLayout {
     spacing: Theme.gapSection
@@ -40,6 +41,26 @@ ColumnLayout {
         ReadOnlyRow {
             title: "Turn displays off"
             value: after("niri msg action power-off-monitors")
+        }
+    }
+
+    Group {
+        title: "Battery"
+
+        SettingRow {
+            title: "Low power"
+            subtitle: "Power-saver profile, no blur, minimal animation. Auto = on battery"
+
+            Segmented {
+                width: Theme.launcherWidth / 2
+                model: [
+                    { glyph: "󰁹", label: "Auto", value: "auto" },
+                    { glyph: "󰌪", label: "Always", value: "always" },
+                    { glyph: "󰂎", label: "Never", value: "never" }
+                ]
+                current: Settings.lowPower
+                onPicked: v => Settings.lowPower = v
+            }
         }
     }
 

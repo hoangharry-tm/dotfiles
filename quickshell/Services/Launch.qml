@@ -52,6 +52,8 @@ Singleton {
     readonly property var actions: [
         { id: "pick-color", title: "Pick colour", subtitle: "Sample a pixel, copy its hex", glyph: "󰴱", keywords: "pick colour color picker eyedropper hex", run: () => Quickshell.execDetached(["pick-color"]) },
         // Deferred: the launcher closes the open panel right after run().
+        { id: "focus-timer", title: "Focus timer", subtitle: "Count down with Focus on", glyph: "󱎫", keywords: "focus timer countdown pomodoro stopwatch alarm", run: () => Qt.callLater(() => FocusTimer.openCard()) },
+        // Deferred: the launcher closes the open panel right after run().
         { id: "settings", title: "Settings", subtitle: "Shell preferences", glyph: "󰒓", keywords: "settings preferences options config", run: () => Qt.callLater(() => Panels.toggle("settings")) },
         { id: "files", title: "Files", subtitle: "Browse files with yazi", glyph: "󰉋", keywords: "files file manager yazi browse folder", run: () => Quickshell.execDetached(["alacritty", "--class", "yazi", "-e", "yazi"]) },
         { id: "screen-ocr", title: "Copy text from screen", subtitle: "Select a region, OCR it (eng + vie)", glyph: "󰊄", keywords: "copy text screen ocr tesseract recognize", run: () => Quickshell.execDetached(["screen-ocr"]) },
@@ -76,7 +78,7 @@ Singleton {
         case "wall":
             return Wallpapers.filter(p.query).map(f => ({ id: f.path, title: f.name, image: f.thumb, run: () => Wallpapers.apply(f.path) }));
         case "clip":
-            return Clipboard.filter(p.query).map(e => ({ id: e.line, title: e.text, subtitle: e.image ? "Image" : "", glyph: e.image ? "󰋩" : "󰅍", run: () => Clipboard.copy(e), remove: () => Clipboard.remove(e) }));
+            return Clipboard.items(p.query);
         case "emoji":
             return Emoji.filter(p.query);
         default:

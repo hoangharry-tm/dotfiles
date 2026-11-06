@@ -18,7 +18,6 @@ BarChip {
     }
     widthAt: l => chipWidth(Theme.icon + (l < 4 ? Theme.gapInline + Math.min(title.implicitWidth, titleCap(l)) : 0))
     onClicked: Media.toggle()
-    onScrolled: d => d > 0 ? Media.previous() : Media.next()
 
     // Position is only polled while the chip is visible and a track plays.
     Binding {

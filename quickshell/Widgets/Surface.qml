@@ -9,6 +9,10 @@ import qs.Common
 //   on       richer container tone; its gradient axis drifts slowly while a
 //            sheet is open (Ambient.phase); pair text with Theme.onTone*
 //   accent   vivid fill for sliders/play; pair with Theme.onAccent
+//   aurora   notification cards: three container tones on the diagonal plus two soft
+//            blooms (primary/tertiary container). `seed` (hash of the app name) turns the hue
+//            +-30 degrees and moves the blooms, so apps differ but share one palette.
+//            Static: no drift, no animation beyond the hover wash.
 //   recessed darker well, one level below its parent (child lists, tracks)
 // Hover/press add a translucent text-colour overlay step. The grain is a
 // pre-baked 96px tile (assets/grain.png), so it costs nothing at idle.
@@ -24,13 +28,21 @@ Item {
     property real bottomLeftRadius: radius
     property real bottomRightRadius: radius
     // Override per use (e.g. battery warning); default comes from the variant.
-    property color fillA: variant === "on" ? Theme.toneOnA : variant === "accent" ? Theme.toneAccentA : variant === "recessed" ? Theme.toneRecessA : Theme.toneRestA
-    property color fillB: variant === "on" ? Theme.toneOnB : variant === "accent" ? Theme.toneAccentB : variant === "recessed" ? Theme.toneRecessB : Theme.toneRestB
+    property int seed: 0
+    readonly property bool aurora: variant === "aurora"
+    readonly property real hueTurn: aurora ? (seed % 61) - 30 : 0
+    readonly property real bloomX: 0.15 + (Math.floor(seed / 61) % 71) / 100          // 0.15..0.85 of the width
+    readonly property real bloomY: (Math.floor(seed / 4331) % 2) ? 0.1 : 0.9         // top or bottom edge
+    property color fillA: aurora ? Theme.rotate(Theme.toneAuroraA, hueTurn) : variant === "on" ? Theme.toneOnA : variant === "accent" ? Theme.toneAccentA : variant === "recessed" ? Theme.toneRecessA : Theme.toneRestA
+    property color fillB: aurora ? Theme.rotate(Theme.toneAuroraB, hueTurn) : variant === "on" ? Theme.toneOnB : variant === "accent" ? Theme.toneAccentB : variant === "recessed" ? Theme.toneRecessB : Theme.toneRestB
     property color rim: variant === "on" ? Theme.toneOnRim : variant === "recessed" ? Theme.toneRecessRim : Theme.toneRim
     readonly property bool drifts: variant === "on" || variant === "accent"
     readonly property color wash: pressed ? Theme.tonePress : hovered ? Theme.toneHover : "transparent"
     property color stopA: Qt.tint(fillA, wash)
     property color stopB: Qt.tint(fillB, wash)
+    property color stopM: Qt.tint(Theme.rotate(Theme.toneAuroraM, hueTurn), wash)
+    readonly property color bloom1: Theme.rotate(Theme.bloomColorA, hueTurn)
+    readonly property color bloom2: Theme.rotate(Theme.bloomColorB, hueTurn)
 
     Behavior on stopA {
         ColorAnimation {
@@ -38,6 +50,11 @@ Item {
         }
     }
     Behavior on stopB {
+        ColorAnimation {
+            duration: Theme.animFast
+        }
+    }
+    Behavior on stopM {
         ColorAnimation {
             duration: Theme.animFast
         }
@@ -62,6 +79,10 @@ Item {
                     color: root.stopA
                 }
                 GradientStop {
+                    position: 0.5
+                    color: root.aurora ? root.stopM : Qt.rgba((root.stopA.r + root.stopB.r) / 2, (root.stopA.g + root.stopB.g) / 2, (root.stopA.b + root.stopB.b) / 2, (root.stopA.a + root.stopB.a) / 2)
+                }
+                GradientStop {
                     position: 1
                     color: root.stopB
                 }
@@ -76,6 +97,52 @@ Item {
                 topRightRadius: Math.max(0, root.topRightRadius - Theme.hairlineWidth / 2)
                 bottomLeftRadius: Math.max(0, root.bottomLeftRadius - Theme.hairlineWidth / 2)
                 bottomRightRadius: Math.max(0, root.bottomRightRadius - Theme.hairlineWidth / 2)
+            }
+        }
+    }
+
+    // Aurora blooms: soft radial glows over the diagonal, same rounded outline.
+    Repeater {
+        model: root.aurora ? [
+            { cx: root.bloomX, cy: root.bloomY, color: root.bloom1, alpha: Theme.bloomA },
+            { cx: 1 - root.bloomX, cy: 1 - root.bloomY, color: root.bloom2, alpha: Theme.bloomB }
+        ] : []
+
+        Shape {
+            id: bloom
+
+            required property var modelData
+
+            anchors.fill: parent
+            preferredRendererType: Shape.CurveRenderer
+
+            ShapePath {
+                strokeWidth: -1
+                fillGradient: RadialGradient {
+                    centerX: root.width * bloom.modelData.cx
+                    centerY: root.height * bloom.modelData.cy
+                    centerRadius: root.width * 0.55
+                    focalX: centerX
+                    focalY: centerY
+
+                    GradientStop {
+                        position: 0
+                        color: Qt.alpha(bloom.modelData.color, bloom.modelData.alpha)
+                    }
+                    GradientStop {
+                        position: 1
+                        color: Qt.alpha(bloom.modelData.color, 0)
+                    }
+                }
+
+                PathRectangle {
+                    width: root.width
+                    height: root.height
+                    topLeftRadius: root.topLeftRadius
+                    topRightRadius: root.topRightRadius
+                    bottomLeftRadius: root.bottomLeftRadius
+                    bottomRightRadius: root.bottomRightRadius
+                }
             }
         }
     }

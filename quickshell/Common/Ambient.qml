@@ -1,6 +1,7 @@
 pragma Singleton
 
 import QtQuick
+import qs.Services
 
 // One shared slow clock for ambient gradient drift. It only runs while a
 // sheet that uses it is open (`hold`/`release`), so idle cost is zero.
@@ -26,7 +27,7 @@ Item {
     Timer {
         interval: 100
         repeat: true
-        running: root.users > 0
+        running: root.users > 0 && !PowerMode.lowPower // static gradient saves repaints
         onTriggered: root.t = (root.t + interval) % (2 * Theme.animAmbient)
     }
 }

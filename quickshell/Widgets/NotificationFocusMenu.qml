@@ -56,6 +56,14 @@ Rectangle {
         spacing: 0
 
         MenuRow {
+            text: "Focus timer…"
+            onClicked: {
+                root.open = false;
+                FocusTimer.openCard();
+            }
+        }
+
+        MenuRow {
             text: "Focus for 1 hour"
             onClicked: {
                 Notifications.focusFor(60);

@@ -8,7 +8,7 @@ import qs.Services
 Singleton {
     id: root
 
-    // "", "control", "calendar", "launcher", "power"
+    // "", "control", "calendar", "launcher", "power", "timer"
     property string open: ""
     property string screen: ""
 

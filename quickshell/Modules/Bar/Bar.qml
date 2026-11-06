@@ -96,6 +96,12 @@ PanelWindow {
 
         RecordChip {}
 
+        FocusTimerChip {
+            level: rightRow.level
+        }
+
+        ScreencastChip {}
+
         PrivacyDot {}
 
         InputMethodChip {

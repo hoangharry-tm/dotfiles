@@ -64,7 +64,7 @@ PanelWindow {
         }
 
         ShadowLabel {
-            visible: Media.shown
+            visible: Media.shown && !PowerMode.lowPower // fewer redraws on battery
             Layout.maximumWidth: Theme.launcherWidth
             text: "♪  " + Media.title + (Media.artist ? "  —  " + Media.artist : "")
             font.pixelSize: Theme.textMd

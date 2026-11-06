@@ -75,6 +75,17 @@ Singleton {
         return scored.slice(0, limit).map(x => item(x.e));
     }
 
+    // Window app_id -> desktop entry / icon path. Shared by the Alt+Tab
+    // switcher and the dock so both resolve icons identically.
+    function entryFor(appId) {
+        return appId ? DesktopEntries.heuristicLookup(appId) : null;
+    }
+
+    function iconFor(appId, entry) {
+        const name = (entry ?? entryFor(appId))?.icon || (appId ?? "").toLowerCase();
+        return name ? Quickshell.iconPath(name, true) : "";
+    }
+
     function launch(app) {
         Usage.record(app.id);
         if (app.runInTerminal)

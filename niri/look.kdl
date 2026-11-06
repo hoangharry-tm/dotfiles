@@ -46,7 +46,10 @@ layout {
     }
 }
 
-// Frosted glass for surfaces that opt in (see rules.kdl).
+// Frosted glass: THE one material for qs-* sheets, app windows and popups
+// (rules.kdl). Blur params are global in niri 26.04, so every surface shares
+// them. Low-power mode: a later include may set `blur { off }` (overrides all
+// window/layer/popup blur) or lower `passes` here; nothing else needs touching.
 blur {
     passes 3
     offset 3.0

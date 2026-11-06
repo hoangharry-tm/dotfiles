@@ -74,6 +74,9 @@ PanelWindow {
             contentHeight: content.implicitHeight
             clip: true
             boundsBehavior: Flickable.StopAtBounds
+            // Hold presses briefly: a scroll/drag that starts on a control (power
+            // mode, tiles) must scroll the page, never land as a click on it.
+            pressDelay: Theme.pressDelay
 
             ColumnLayout {
                 id: content

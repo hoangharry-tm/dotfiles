@@ -59,6 +59,24 @@ ColumnLayout {
     }
 
     Group {
+        title: "Focus timer"
+
+        SettingRow {
+            title: "Default duration"
+            subtitle: "Also remembers the last one you set; Focus is on while it runs"
+
+            SettingSlider {
+                from: 5
+                to: 120
+                step: 5
+                current: Settings.focusDefaultMin
+                suffix: " min"
+                onPicked: v => Settings.focusDefaultMin = v
+            }
+        }
+    }
+
+    Group {
         title: "History"
 
         SettingRow {

@@ -17,13 +17,8 @@ BarChip {
         radius: Theme.radiusFull
         color: Theme.error
 
-        // Runs only while the chip is visible, so idle cost stays zero.
-        SequentialAnimation on opacity {
-            running: root.visible
-            loops: Animation.Infinite
-            NumberAnimation { to: 0.35; duration: Theme.animPulse; easing.type: Easing.InOutSine }
-            NumberAnimation { to: 1; duration: Theme.animPulse; easing.type: Easing.InOutSine }
-        }
+        // Shared stepped pulse (Common/Pulse.qml): no per-frame repaints.
+        opacity: root.visible ? Pulse.opacity : 1
     }
 
     Label {
@@ -31,4 +26,10 @@ BarChip {
         font.pixelSize: Theme.textSm
         font.features: { "tnum": 1 }
     }
+
+    onVisibleChanged: visible ? Pulse.hold() : Pulse.release()
+    Component.onCompleted: if (visible)
+        Pulse.hold()
+    Component.onDestruction: if (visible)
+        Pulse.release()
 }

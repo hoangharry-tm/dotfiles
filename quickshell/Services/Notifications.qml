@@ -36,7 +36,6 @@ Singleton {
     property int watchers: 0                // visible cards that show a relative time
 
     readonly property int maxHistory: 50
-    readonly property int maxToastGroups: 3
     readonly property int maxToasts: 12
     readonly property bool scheduleEnabled: Settings.scheduleEnabled
     readonly property string scheduleStart: Settings.scheduleStart
@@ -52,7 +51,7 @@ Singleton {
     readonly property var historyIndex: indexOf(history)
     readonly property var toastIndex: indexOf(toasts)
     readonly property var groupKeys: historyIndex.keys
-    readonly property var toastKeys: toastIndex.keys.slice(0, maxToastGroups)
+    readonly property var toastKeys: toastIndex.keys
 
     // Cards shown for a group when `expanded`, else only the latest.
     function itemsIn(index, key) {

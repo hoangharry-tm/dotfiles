@@ -24,7 +24,7 @@ Singleton {
 
     Process {
         command: ["media-cava"]
-        running: root.users > 0 && Media.playing
+        running: root.users > 0 && Media.playing && !PowerMode.lowPower // no spectrum on battery
 
         stdout: SplitParser {
             // One frame per line: "12;40;..;" (trailing delimiter).

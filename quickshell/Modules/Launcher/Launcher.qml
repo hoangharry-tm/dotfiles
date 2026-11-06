@@ -17,6 +17,7 @@ PanelWindow {
     readonly property var parsed: Launch.parse(search.text)
     readonly property string mode: parsed.mode
     readonly property bool grid: mode === "wall" || mode === "emoji"
+    readonly property bool clipMode: mode === "clip"
     readonly property var results: Launch.items(parsed)
     property int current: 0
 
@@ -26,7 +27,7 @@ PanelWindow {
     visible: shown
     anchors.top: true
     margins.top: Math.round(modelData.height * 0.2)
-    implicitWidth: Theme.launcherWidth
+    implicitWidth: clipMode ? Theme.launcherWidthWide : Theme.launcherWidth // resizing is fine; the sheet itself is never scaled
     implicitHeight: sheet.implicitHeight
     exclusiveZone: 0
     color: "transparent"
@@ -69,8 +70,24 @@ PanelWindow {
             FileSearch.refreshRecent();
     }
     // Kick off async sources (fd, qalc) once per query change, never per frame.
-    onParsedChanged: Launch.update(parsed)
-    onResultsChanged: current = 0
+    onParsedChanged: {
+        Launch.update(parsed);
+        Clipboard.confirmClear = false;
+    }
+    onResultsChanged: {
+        current = 0;
+        syncPreview();
+    }
+    onCurrentChanged: {
+        Clipboard.confirmClear = false;
+        syncPreview();
+    }
+
+    // Clipboard preview follows the selection; nothing is decoded in other modes.
+    function syncPreview() {
+        if (shown && clipMode)
+            Clipboard.inspect(results[current]?.entry ?? null);
+    }
 
     // alt (Shift+Enter) runs the item's secondary action when it has one.
     function activate(i, alt = false) {
@@ -91,6 +108,24 @@ PanelWindow {
         Qt.callLater(() => current = Math.min(at, results.length - 1));
     }
 
+    // Clipboard extras: pin/unpin, open link or path, two-step clear all.
+    function pin() {
+        results[current]?.pin?.();
+    }
+
+    function openLink() {
+        if (results[current]?.entry && Clipboard.openIt(results[current].entry))
+            Panels.close();
+    }
+
+    function clearAll() {
+        if (!Clipboard.confirmClear) {
+            Clipboard.confirmClear = true;
+            return;
+        }
+        Clipboard.clearAll();
+    }
+
     function navigate(dx, dy) {
         const n = results.length;
         if (n === 0)
@@ -98,7 +133,7 @@ PanelWindow {
         const step = grid ? dx + dy * wallGrid.columns : dx + dy;
         // Wrap in lists (Spotlight feel); clamp in the grid so rows don't jump.
         current = grid ? Math.max(0, Math.min(n - 1, current + step)) : (current + step + n) % n;
-        (grid ? wallGrid : list).positionViewAtIndex(current, ListView.Contain);
+        (grid ? wallGrid : clipMode ? clipPane : list).positionViewAtIndex(current, ListView.Contain);
     }
 
     Glass {
@@ -131,11 +166,15 @@ PanelWindow {
                 Layout.rightMargin: Theme.spaceMd
                 placeholder: Launch.modes[root.mode].placeholder
                 glyph: Launch.modes[root.mode].glyph
-                chip: root.mode === "apps" ? "" : Launch.modes[root.mode].label
+                chip: root.mode === "apps" ? "" : root.clipMode ? Clipboard.chipLabel(root.parsed.query) : Launch.modes[root.mode].label
+                clipKeys: root.clipMode
                 gridNav: root.grid
                 onNavigate: (dx, dy) => root.navigate(dx, dy)
                 onAccepted: alt => root.activate(root.current, alt)
                 onRemoveRequested: root.remove()
+                onPinRequested: root.pin()
+                onOpenRequested: root.openLink()
+                onClearRequested: root.clearAll()
                 onDismissed: Panels.close()
             }
 
@@ -151,10 +190,21 @@ PanelWindow {
                 id: list
 
                 Layout.fillWidth: true
-                visible: !root.grid && root.results.length > 0
+                visible: !root.grid && !root.clipMode && root.results.length > 0
                 model: root.grid ? [] : root.results
                 current: root.current
                 open: root.shown
+                onChosen: i => root.activate(i)
+                onHovered: i => root.current = i
+            }
+
+            ClipboardPane {
+                id: clipPane
+
+                Layout.fillWidth: true
+                visible: root.clipMode && root.results.length > 0
+                model: root.clipMode ? root.results : []
+                current: root.current
                 onChosen: i => root.activate(i)
                 onHovered: i => root.current = i
             }
@@ -193,7 +243,7 @@ PanelWindow {
 
                 KeyHint {
                     key: "↵"
-                    text: root.mode === "wall" ? "apply" : root.mode === "calc" || root.mode === "clip" || root.mode === "emoji" || root.results[root.current]?.id === "calc" ? "copy" : "open"
+                    text: root.mode === "wall" ? "apply" : root.clipMode ? "paste" : root.mode === "calc" || root.mode === "emoji" || root.results[root.current]?.id === "calc" ? "copy" : "open"
                 }
                 KeyHint {
                     key: root.grid ? "←↑↓→" : "↑↓"
@@ -205,9 +255,36 @@ PanelWindow {
                 }
 
                 KeyHint {
-                    visible: root.mode === "clip"
+                    visible: root.clipMode
+                    key: "⇧↵"
+                    text: "copy"
+                }
+                KeyHint {
+                    visible: root.clipMode
+                    key: "⌃P"
+                    text: results[current]?.entry?.pinned ? "unpin" : "pin"
+                }
+                KeyHint {
+                    visible: root.clipMode && (results[current]?.kind === "link" || results[current]?.kind === "path")
+                    key: "⌃O"
+                    text: "open"
+                }
+                KeyHint {
+                    visible: root.clipMode
                     key: "⇧⌦"
                     text: "delete"
+                }
+                KeyHint {
+                    visible: root.clipMode && !Clipboard.confirmClear
+                    key: "⌃⇧⌦"
+                    text: "clear all"
+                }
+                // Confirm step: the same chord again wipes cliphist (pins stay).
+                KeyHint {
+                    visible: root.clipMode && Clipboard.confirmClear
+                    key: "⌃⇧⌦"
+                    text: "again to clear ALL history"
+                    color: Theme.error
                 }
                 KeyHint {
                     visible: root.mode === "file"

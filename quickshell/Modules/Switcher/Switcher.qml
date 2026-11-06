@@ -23,11 +23,7 @@ PanelWindow {
     readonly property int visibleRows: Math.min(rows, maxRows)
 
     function iconFor(w) {
-        const id = w.app_id ?? "";
-        if (!id)
-            return "";
-        const entry = DesktopEntries.heuristicLookup(id);
-        return Quickshell.iconPath(entry?.icon || id.toLowerCase(), true);
+        return Apps.iconFor(w.app_id);
     }
 
     screen: Quickshell.screens.find(s => s.name === Switcher.screen) ?? Quickshell.screens[0]

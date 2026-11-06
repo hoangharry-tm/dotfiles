@@ -19,6 +19,7 @@ PanelWindow {
         { glyph: "󰒓", title: "General", page: "GeneralPage" },
         { glyph: "󰸉", title: "Appearance", page: "AppearancePage" },
         { glyph: "󰕮", title: "Bar", page: "BarPage" },
+        { glyph: "󰍜", title: "Dock", page: "DockPage" },
         { glyph: "󰂚", title: "Notifications & Focus", page: "NotificationsPage" },
         { glyph: "󰖔", title: "Night Light", page: "NightLightPage" },
         { glyph: "󰍎", title: "Location & Weather", page: "LocationPage" },
@@ -115,6 +116,9 @@ PanelWindow {
                         contentHeight: page.item ? page.item.implicitHeight : 0
                         clip: true
                         boundsBehavior: Flickable.StopAtBounds
+                        // Hold presses briefly: a scroll/drag that starts on a control (power
+                        // mode, tiles) must scroll the page, never land as a click on it.
+                        pressDelay: Theme.pressDelay
 
                         // One page alive at a time; a page loads its data when created.
                         Loader {
