@@ -28,3 +28,7 @@ tmux/plugins/
 !matugen/**
 !quickshell/
 !quickshell/**
+!greeter/
+!greeter/**
+!plymouth/
+!plymouth/**

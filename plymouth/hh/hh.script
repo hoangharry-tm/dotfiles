@@ -1,0 +1,47 @@
+# hh boot splash: flat dark background, small spinner, and the LUKS prompt
+# (a script theme must draw it itself, or the passphrase prompt is invisible).
+# Colors are fixed (matugen's default surface/text), not wallpaper-derived:
+# the initramfs can't read ~/.local/state.
+Window.SetBackgroundTopColor(0.098, 0.071, 0.047);
+Window.SetBackgroundBottomColor(0.098, 0.071, 0.047);
+
+cx = Window.GetWidth() / 2;
+cy = Window.GetHeight() / 2;
+
+base = Image("spinner.png");
+spin = Sprite();
+spin.SetX(cx - base.GetWidth() / 2);
+spin.SetY(cy - base.GetHeight() / 2);
+
+angle = 0;
+fun refresh() {
+    angle += 0.12;          # one turn ~1 s at 50 Hz
+    spin.SetImage(base.Rotate(angle));
+}
+Plymouth.SetRefreshFunction(refresh);
+
+# Passphrase prompt: label + bullets under the spinner.
+prompt = Sprite();
+bullets = Sprite();
+fun show_text(sprite, text, y) {
+    img = Image.Text(text, 0.937, 0.878, 0.839);
+    sprite.SetImage(img);
+    sprite.SetX(cx - img.GetWidth() / 2);
+    sprite.SetY(y);
+}
+fun password(prompt_text, count) {
+    spin.SetOpacity(0.4);
+    prompt.SetOpacity(1);
+    bullets.SetOpacity(1);
+    show_text(prompt, prompt_text, cy + base.GetHeight());
+    s = " ";
+    for (i = 0; i < count; i++) s += "*";
+    show_text(bullets, s, cy + base.GetHeight() + 32);
+}
+fun password_done() {
+    prompt.SetOpacity(0);
+    bullets.SetOpacity(0);
+    spin.SetOpacity(1);
+}
+Plymouth.SetDisplayPasswordFunction(password);
+Plymouth.SetDisplayNormalFunction(password_done);

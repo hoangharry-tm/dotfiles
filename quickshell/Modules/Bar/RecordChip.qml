@@ -7,7 +7,8 @@ import qs.Widgets
 BarChip {
     id: root
 
-    visible: Recorder.recording
+    wanted: Recorder.recording
+    // Never collapsed: it is a safety/recording indicator.
     onClicked: Recorder.stop()
 
     Rectangle {

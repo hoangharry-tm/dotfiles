@@ -1,12 +1,13 @@
 import QtQuick
 import QtQuick.Layouts
+import Quickshell
 import qs.Common
 import qs.Services
 import qs.Widgets
 
-// Notification history with Clear.
+// Notification history, grouped by app, with Clear.
 ColumnLayout {
-    spacing: Theme.gapStack
+    spacing: Theme.gapSection // between app groups
 
     RowLayout {
         Layout.fillWidth: true
@@ -50,14 +51,15 @@ ColumnLayout {
     }
 
     Repeater {
-        model: Notifications.history
+        model: ScriptModel {
+            values: Notifications.groupKeys
+        }
 
-        NotificationCard {
-            required property var modelData
+        NotificationGroup {
+            required property string modelData
 
             Layout.fillWidth: true
-            notification: modelData
-            onClosed: Notifications.dismiss(modelData)
+            groupKey: modelData
         }
     }
 }

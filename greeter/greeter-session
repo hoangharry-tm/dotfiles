@@ -1,0 +1,13 @@
+#!/bin/sh
+# Runs inside the greeter's niri. Starts the Quickshell greeter, then quits
+# niri. A clean exit (0, after Greetd.launch) leaves a marker so the greetd
+# wrapper (greeter-wrapper) knows login worked; anything else falls back
+# to tuigreet there.
+# Deployed to /etc/greetd/ with GREETD_QS/GREETD_STATE baked in by
+# scripts/system-setup.sh.
+. /etc/greetd/greeter.env
+
+# Why: greeter user has no HOME config; theme + wallpaper live here.
+export XDG_STATE_HOME="$GREETD_STATE"
+"$GREETD_QS/bin/quickshell" -p /etc/greetd/qs && : >"${XDG_RUNTIME_DIR:-/tmp}/greeter-ok"
+exec niri msg action quit --skip-confirmation

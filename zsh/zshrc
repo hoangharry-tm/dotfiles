@@ -315,6 +315,19 @@ export PATH="/opt/homebrew/share/man:$PATH"
 (( $+commands[rbenv] )) && _cache_init rbenv init - zsh
 
 # ============================================================
+#  YAZI (`y` cds to the directory yazi was left in)
+# ============================================================
+if (( $+commands[yazi] )); then
+  y() {
+    local tmp="$(mktemp -t yazi-cwd.XXXXXX)" cwd
+    yazi "$@" --cwd-file="$tmp"
+    cwd="$(<"$tmp")"
+    [[ -n "$cwd" && "$cwd" != "$PWD" ]] && builtin cd -- "$cwd"
+    rm -f -- "$tmp"
+  }
+fi
+
+# ============================================================
 #  LOCAL OVERRIDES (git-ignored, machine-specific)
 # ============================================================
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local

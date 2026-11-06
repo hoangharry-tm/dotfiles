@@ -49,6 +49,10 @@ output_path = "~/.local/state/theme/qtct.conf"
 input_path = "~/.config/matugen/templates/alacritty.toml"
 output_path = "~/.local/state/theme/alacritty.toml"
 
+[templates.yazi]
+input_path = "~/.config/matugen/templates/yazi.toml"
+output_path = "~/.config/yazi/theme.toml"
+
 [templates.btop]
 input_path = "~/.config/matugen/templates/btop.theme"
 output_path = "~/.config/btop/themes/matugen.theme"
@@ -57,3 +61,9 @@ output_path = "~/.config/btop/themes/matugen.theme"
 [templates.nvim]
 input_path = "~/.config/matugen/templates/nvim.lua"
 output_path = "~/.local/state/theme/nvim.lua"
+
+# fcitx5 candidate popup (modules/input-method.nix selects Theme=matugen).
+# Reload with `fcitx5-remote -r` after a wallpaper change.
+[templates.fcitx5]
+input_path = "~/.config/matugen/templates/fcitx5.conf"
+output_path = "~/.local/share/fcitx5/themes/matugen/theme.conf"

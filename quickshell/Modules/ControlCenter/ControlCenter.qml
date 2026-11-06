@@ -159,6 +159,25 @@ PanelWindow {
                         title: "Focus"
                         checked: Notifications.dnd
                         onToggled: Notifications.dnd = !Notifications.dnd
+                        onHeld: focusMenu.open = !focusMenu.open
+                        z: focusMenu.open ? 1 : 0 // menu draws over the tiles below
+
+                        NotificationFocusMenu {
+                            id: focusMenu
+
+                            anchors.top: parent.bottom
+                            anchors.topMargin: Theme.spaceXs
+                            anchors.left: parent.left
+                        }
+
+                        Connections {
+                            target: root
+
+                            function onShownChanged() {
+                                if (!root.shown)
+                                    focusMenu.open = false;
+                            }
+                        }
                     }
 
                     Tile {
@@ -257,6 +276,15 @@ PanelWindow {
                     visible: Power.hasBattery || Power.hasPerformance
                 }
 
+                WeatherCard {
+                    Layout.fillWidth: true
+                    visible: Weather.ready
+                }
+
+                BackupRow {
+                    Layout.fillWidth: true
+                }
+
                 MediaCard {
                     Layout.fillWidth: true
                     visible: Media.active
@@ -265,6 +293,7 @@ PanelWindow {
 
                 NotificationList {
                     Layout.fillWidth: true
+                    visible: root.shown // pauses the cards' minute clock when closed
                 }
             }
         }

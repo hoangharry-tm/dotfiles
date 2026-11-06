@@ -1,0 +1,13 @@
+#!/bin/sh
+# greetd's `command`. Tries the Quickshell greeter inside niri; if it can't
+# run or dies before a login, falls back to tuigreet so you can always log
+# in. Revert entirely from a TTY: `systemctl disable greetd`.
+. /etc/greetd/greeter.env
+
+rm -f "${XDG_RUNTIME_DIR:-/tmp}/greeter-ok"
+if [ -x "$GREETD_QS/bin/quickshell" ] && [ -r /etc/greetd/qs/shell.qml ]; then
+    niri -c /etc/greetd/niri.kdl
+    [ -e "${XDG_RUNTIME_DIR:-/tmp}/greeter-ok" ] && exit 0
+fi
+exec tuigreet --time --remember --remember-session \
+    --asterisks --cmd niri-session

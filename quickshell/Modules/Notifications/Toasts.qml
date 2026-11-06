@@ -5,15 +5,15 @@ import qs.Common
 import qs.Services
 import qs.Widgets
 
-// Incoming notifications, top-right of the focused screen. Hover pauses the
-// timeout; they also stay in the Control Center history.
+// Incoming notifications, top-right of the focused screen: at most 3 app
+// stacks. Hover pauses the timeout; they also stay in the Control Center.
 PanelWindow {
     id: root
 
     required property ShellScreen modelData
 
     screen: modelData
-    visible: Notifications.toasts.length > 0 && Panels.focusedScreen() === modelData.name && !Panels.isOpen("control", modelData.name)
+    visible: Notifications.toastKeys.length > 0 && Panels.focusedScreen() === modelData.name && !Panels.isOpen("control", modelData.name)
     anchors.top: true
     anchors.right: true
     margins.top: Theme.popoverTop
@@ -26,6 +26,8 @@ PanelWindow {
     color: "transparent"
     WlrLayershell.namespace: "qs-toasts"
     WlrLayershell.layer: WlrLayer.Overlay
+    // Only takes focus when a reply field is clicked.
+    WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
 
     Column {
         id: stack
@@ -44,22 +46,28 @@ PanelWindow {
         }
 
         Repeater {
-            model: Notifications.toasts
+            // Keys, so a new toast does not rebuild (and re-animate) the others.
+            model: ScriptModel {
+                values: Notifications.toastKeys
+            }
 
-            NotificationCard {
-                id: card
+            NotificationGroup {
+                id: group
 
-                required property var modelData
+                required property string modelData
 
                 width: stack.width
-                notification: modelData
+                groupKey: modelData
                 toast: true
-                onClosed: Notifications.dismiss(modelData)
 
+                // Expiry pauses while hovered, dragged or typed in; a critical
+                // notification keeps the whole group up. Restarts on a new one.
                 Timer {
-                    interval: Notifications.timeoutOf(card.modelData) * 1000
-                    running: interval > 0 && !card.hovered
-                    onTriggered: Notifications.hide(card.modelData)
+                    readonly property int secs: Notifications.groupTimeout(group.items)
+
+                    interval: secs * 1000
+                    running: secs > 0 && !group.interacting
+                    onTriggered: Notifications.hideAll(group.items)
                 }
 
                 // Slide in from the right

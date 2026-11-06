@@ -9,7 +9,6 @@ Item {
 
     property int users: 0
     // 0..1..0, eased: "on" surfaces slide their gradient axis with it.
-    property real phase: 0
 
     function hold() {
         users++;
@@ -18,19 +17,16 @@ Item {
         users = Math.max(0, users - 1);
     }
 
-    SequentialAnimation on phase {
-        running: root.users > 0
-        loops: Animation.Infinite
+    // Stepped at 10 Hz instead of animated per frame: an Animation repaints
+    // every Surface at 60 fps (~40% CPU with the Control Center open), while
+    // a 9 s drift changes too little per 100 ms for the steps to be visible.
+    property real t: 0
+    readonly property real phase: 0.5 - 0.5 * Math.cos(t * Math.PI / Theme.animAmbient)
 
-        NumberAnimation {
-            to: 1
-            duration: Theme.animAmbient
-            easing.type: Easing.InOutSine
-        }
-        NumberAnimation {
-            to: 0
-            duration: Theme.animAmbient
-            easing.type: Easing.InOutSine
-        }
+    Timer {
+        interval: 100
+        repeat: true
+        running: root.users > 0
+        onTriggered: root.t = (root.t + interval) % (2 * Theme.animAmbient)
     }
 }

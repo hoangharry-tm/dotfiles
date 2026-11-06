@@ -25,6 +25,16 @@ BarChip {
 
     spacing: Theme.spaceMd
 
+    // Collapse: only the battery percentage goes (level 9); the icons stay.
+    // Computed from the data, not implicitWidth, which changes with `level`.
+    readonly property int pctLevel: 9
+    readonly property var parts: [true, showBluetooth, true, Notifications.dnd, Power.hasBattery]
+    widthAt: l => {
+        const n = parts.filter(Boolean).length;
+        const pct = Power.hasBattery && l < pctLevel ? Theme.spaceXs + pctLabel.implicitWidth : 0;
+        return chipWidth(n * Theme.icon + (n - 1) * Theme.spaceMd + pct);
+    }
+
     Icon {
         glyph: Network.icon
         color: Network.active || Network.wiredConnected ? Theme.text : Theme.textMuted
@@ -56,6 +66,9 @@ BarChip {
         }
 
         Label {
+            id: pctLabel
+
+            visible: root.level < root.pctLevel
             text: Math.round(Power.percent * 100) + "%"
         }
     }

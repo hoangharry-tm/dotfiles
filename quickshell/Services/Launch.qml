@@ -36,7 +36,10 @@ Singleton {
 
     // Actions offered in the apps list when the query matches a keyword.
     readonly property var actions: [
-        { id: "pick-color", title: "Pick colour", subtitle: "Sample a pixel, copy its hex", glyph: "󰴱", keywords: "pick colour color picker eyedropper hex", run: () => Quickshell.execDetached(["pick-color"]) }
+        { id: "pick-color", title: "Pick colour", subtitle: "Sample a pixel, copy its hex", glyph: "󰴱", keywords: "pick colour color picker eyedropper hex", run: () => Quickshell.execDetached(["pick-color"]) },
+        { id: "files", title: "Files", subtitle: "Browse files with yazi", glyph: "󰉋", keywords: "files file manager yazi browse folder", run: () => Quickshell.execDetached(["alacritty", "--class", "yazi", "-e", "yazi"]) },
+        { id: "screen-ocr", title: "Copy text from screen", subtitle: "Select a region, OCR it (eng + vie)", glyph: "󰊄", keywords: "copy text screen ocr tesseract recognize", run: () => Quickshell.execDetached(["screen-ocr"]) },
+        { id: "screen-qr", title: "Scan QR code", subtitle: "Select a region, decode the QR code", glyph: "󰐲", keywords: "scan qr code barcode zbar", run: () => Quickshell.execDetached(["screen-qr"]) }
     ]
 
     function actionItems(query) {

@@ -89,6 +89,25 @@ centered, status right.
 Widths: panelWidth 400 (control center, toasts), launcherWidth 640,
 calendarWidth 336, popoverWidth 320 (bar hover cards).
 
+## Bar: responsive priorities
+The clock is truly centred and never overlapped. Each side gets the room
+between its screen edge and the clock, minus `barGap`; `Widgets/ResponsiveRow`
+picks the lowest collapse level whose summed item widths fit. Items report
+`widthAt(level)` from content metrics (never laid-out sizes), so there is no
+feedback loop and no per-frame work; it re-runs only when a width input
+changes (tray icon, track title, scale, output). Labels that can grow elide
+right. Levels, least important first:
+- Right (0-9): 1 weather drops its temperature, 2 media title shortens,
+  3 visualiser goes, 4 media is a glyph only, 5 weather chip goes (the Control
+  Center has it), 6 input-method chip goes, 7 tray folds into a "..." chip,
+  8 system chip goes, 9 battery % goes. Wi-Fi/Bluetooth/volume/battery icons,
+  recording and privacy indicators never collapse.
+- Left (0-2): workspace pills show 3, 2, then 1 icon; the window title is
+  elastic and elides first, keeping a minimum of `control * 3`.
+- Last resort: the clock drops the weekday ("6 Nov · 09:57").
+Workspace pills: the active pill with icons is a `hairlineWidth` primary ring
+(no fill); empty workspaces stay dots.
+
 ## Bar popovers
 One placement rule: a popover's top is `popoverGap` (8) below the bar's bottom
 edge (`popoverTop` from the screen top), centered on its trigger and clamped to

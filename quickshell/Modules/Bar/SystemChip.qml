@@ -8,6 +8,9 @@ import qs.Widgets
 BarChip {
     id: root
 
+    // Collapse: hidden from level 8 (hover card is a secondary view).
+    widthAt: l => l >= 8 ? 0 : implicitWidth
+
     readonly property bool busy: System.cpu > 0.8 || System.mem > 0.9 || System.temp > 85
 
     Icon {

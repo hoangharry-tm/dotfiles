@@ -14,9 +14,9 @@ Singleton {
     // --- Settings: change these -------------------------------------------
     readonly property int warmTemp: 3500   // K while tinted
     readonly property int dayTemp: 6500    // K in daylight (auto only)
-    // Location for "auto" sunset/sunrise (default: Ho Chi Minh City).
-    readonly property real latitude: 10.8
-    readonly property real longitude: 106.7
+    // Location for "auto" sunset/sunrise comes from Services/Location.qml.
+    readonly property real latitude: Location.latitude
+    readonly property real longitude: Location.longitude
     // ----------------------------------------------------------------------
 
     property string mode: "off"

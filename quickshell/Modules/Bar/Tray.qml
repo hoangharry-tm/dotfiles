@@ -1,19 +1,28 @@
 import QtQuick
 import Quickshell
 import Quickshell.Services.SystemTray
-import Quickshell.Widgets
 import qs.Common
 import qs.Widgets
 
 // Status-notifier tray icons (Discord, …). Items that merely duplicate the
-// shell's own indicators (Wi-Fi, Bluetooth, volume) are hidden.
+// shell's own indicators (Wi-Fi, Bluetooth, volume) are hidden. Collapse
+// (level 7+): all icons fold into one "…" chip whose card holds them.
 Row {
     id: root
 
-    required property var bar
+    property int level: 0
 
     // Substrings of tray ids that our status cluster already covers.
     readonly property var redundant: ["nm-applet", "networkmanager", "blueman", "bluetooth", "pasystray", "pavucontrol", "volume"]
+    readonly property var items: SystemTray.items.values.filter(i => !isRedundant(i))
+    readonly property int overflowFrom: 7
+    readonly property bool folded: level >= overflowFrom
+
+    // Responsive hooks (see ResponsiveRow). An icon-only chip is
+    // max(control, icon + 2 * padControl) wide, as BarChip computes.
+    readonly property bool wanted: items.length > 0
+    readonly property real chipW: Math.max(Theme.control, Theme.icon + Theme.padControl * 2)
+    readonly property var widthAt: l => l >= overflowFrom ? chipW : items.length * chipW + (items.length - 1) * spacing
 
     function isRedundant(item) {
         const id = (item.id || "").toLowerCase();
@@ -21,48 +30,42 @@ Row {
     }
 
     spacing: Theme.barGap
+    visible: wanted
 
     Repeater {
-        model: SystemTray.items.values.filter(i => !root.isRedundant(i))
+        model: root.folded ? [] : root.items
 
-        BarChip {
-            id: item
+        TrayItem {}
+    }
 
-            required property SystemTrayItem modelData
-            readonly property string tip: modelData.tooltipTitle || modelData.title
+    BarChip {
+        id: more
 
-            onClicked: modelData.onlyMenu ? openMenu() : modelData.activate()
-            onRightClicked: openMenu()
-            onMiddleClicked: modelData.secondaryActivate()
-            onScrolled: d => modelData.scroll(d, false)
+        visible: root.folded
+        active: card.open
 
-            function openMenu() {
-                if (!modelData.hasMenu)
-                    return;
-                const p = root.bar.itemPosition(item);
-                // y: chip bottom, then the bar inset, then the shared popover gap
-                modelData.display(root.bar, p.x, p.y + item.height + Theme.barInset + Theme.popoverGap);
-            }
+        Icon {
+            glyph: "󰇘"
+            color: Theme.textMuted
+        }
 
-            IconImage {
-                implicitSize: Theme.icon
-                source: item.modelData.icon
-            }
+        Popover {
+            id: card
 
-            Popover {
-                target: item
-                shown: item.hovered && item.tip !== ""
-                padding: Theme.padControl
+            target: more
+            shown: more.hovered
+            interactive: true
+            padding: Theme.spaceSm
 
-                Label {
-                    text: item.tip
-                }
+            Row {
+                spacing: Theme.barGap
 
-                Label {
-                    visible: item.modelData.tooltipDescription !== ""
-                    text: item.modelData.tooltipDescription
-                    color: Theme.textMuted
-                    font.pixelSize: Theme.textXs
+                Repeater {
+                    model: root.folded ? root.items : []
+
+                    TrayItem {
+                        clear: 0
+                    }
                 }
             }
         }

@@ -76,6 +76,8 @@ Singleton {
     readonly property int textLg: 15        // titles, result names
     readonly property int textXl: 20        // headings, search input
     readonly property int textHero: 32      // display (power menu)
+    readonly property int textDisplay: 96   // desktop clock (Light weight only)
+    readonly property color textShadow: Qt.rgba(0, 0, 0, 0.45) // legibility on any wallpaper (desktop widgets)
     readonly property real lineHeight: 1.25 // wrapped body text only (single lines: leave 1, it shifts glyphs down)
 
     // Icons (glyph em-size): sit on the same optical size as body text + 3.

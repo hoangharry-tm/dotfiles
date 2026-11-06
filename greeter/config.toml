@@ -1,0 +1,7 @@
+# /etc/greetd/config.toml (deployed by scripts/system-setup.sh)
+[terminal]
+vt = 1
+
+[default_session]
+command = "/etc/greetd/greeter-wrapper"
+user = "greeter"

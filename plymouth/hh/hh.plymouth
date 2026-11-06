@@ -1,0 +1,8 @@
+[Plymouth Theme]
+Name=hh
+Description=Dark, centered spinner; matches the desktop shell
+ModuleName=script
+
+[script]
+ImageDir=/usr/share/plymouth/themes/hh
+ScriptFile=/usr/share/plymouth/themes/hh/hh.script

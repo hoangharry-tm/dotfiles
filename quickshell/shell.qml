@@ -19,7 +19,9 @@ import qs.Modules.Bar
 import qs.Modules.Calendar
 import qs.Modules.Cheatsheet
 import qs.Modules.ControlCenter
+import qs.Modules.Desktop
 import qs.Modules.Launcher
+import qs.Modules.Lock
 import qs.Modules.Notifications
 import qs.Modules.Osd
 import qs.Modules.Polkit
@@ -45,6 +47,14 @@ ShellRoot {
 
             Bar {
                 modelData: perScreen.modelData
+            }
+
+            LazyLoader {
+                active: DesktopState.enabled
+
+                DesktopWidgets {
+                    modelData: perScreen.modelData
+                }
             }
 
             LazyLoader {
@@ -94,6 +104,8 @@ ShellRoot {
     }
 
     Osd {}
+
+    LockScreen {}
 
     // Polkit prompt: exists only while a request is pending.
     LazyLoader {
@@ -150,6 +162,20 @@ ShellRoot {
         // Start/stop a screen recording (Mod+Alt+R in niri/binds.kdl).
         function record(): void {
             Recorder.toggle();
+        }
+
+        // Wallpaper-layer clock/weather widgets on/off (persisted).
+        function desktopWidgets(): void {
+            DesktopState.toggle();
+        }
+
+        // Session lock (swayidle / lock-screen); preview = same UI, no real lock.
+        function lock(): void {
+            Lock.lock();
+        }
+
+        function lockPreview(): void {
+            Lock.showPreview();
         }
 
         function close(): void {

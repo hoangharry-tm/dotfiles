@@ -12,6 +12,17 @@ Section {
     // Position polling runs only while this card is on screen.
     property bool live: false
 
+    // Tint the card with the (palette-harmonised) album-art accent.
+    fillA: Qt.tint(Theme.toneRestA, Qt.alpha(Media.tone, Media.hasTint ? 0.22 : 0))
+    fillB: Qt.tint(Theme.toneRestB, Qt.alpha(Media.tone, Media.hasTint ? 0.12 : 0))
+
+    // Lyrics are fetched and cava runs only while the card is on screen.
+    onLiveChanged: live ? Lyrics.hold() : Lyrics.release()
+    Component.onCompleted: if (live)
+        Lyrics.hold()
+    Component.onDestruction: if (live)
+        Lyrics.release()
+
     Binding {
         target: Media
         property: "tracking"
@@ -60,6 +71,36 @@ Section {
                 font.pixelSize: Theme.textXs
             }
         }
+
+        Visualizer {
+            visible: Media.playing && root.live
+            implicitHeight: Theme.controlLg
+            barGap: Theme.spaceXs
+            color: Media.tone
+            Layout.alignment: Qt.AlignVCenter
+        }
+    }
+
+    // Lyrics: current line, next dimmed. Hidden when the track has none.
+    Column {
+        Layout.fillWidth: true
+        visible: Lyrics.found
+        spacing: Theme.spaceXs
+
+        Label {
+            width: parent.width
+            text: Lyrics.current || "♪"
+            font.weight: Font.DemiBold
+            horizontalAlignment: Text.AlignHCenter
+        }
+
+        Label {
+            width: parent.width
+            text: Lyrics.next
+            color: Theme.textMuted
+            font.pixelSize: Theme.textXs
+            horizontalAlignment: Text.AlignHCenter
+        }
     }
 
     // Progress
@@ -85,7 +126,7 @@ Section {
                 width: parent.width * Media.progress
                 height: parent.height
                 radius: Theme.radiusFull
-                color: Theme.primary
+                color: Media.tone
 
                 Behavior on width {
                     NumberAnimation {

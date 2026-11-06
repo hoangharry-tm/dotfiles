@@ -17,8 +17,15 @@ RowLayout {
     readonly property string appId: window?.app_id ?? ""
     readonly property var entry: appId ? DesktopEntries.heuristicLookup(appId) : null
 
+    // Responsive hooks (see ResponsiveRow). The title is elastic (it elides
+    // first), so its planning width is only its minimum: icon + a short stub.
+    property int level: 0
+    readonly property bool wanted: window !== null
+    readonly property real minWidth: Theme.padControl + Theme.icon + Theme.gapInline + Theme.control * 3
+    readonly property var widthAt: l => minWidth
+
     spacing: Theme.gapInline
-    visible: window !== null
+    visible: wanted
 
     IconImage {
         Layout.leftMargin: Theme.padControl
@@ -29,7 +36,8 @@ RowLayout {
 
     Label {
         Layout.fillWidth: true
-        Layout.maximumWidth: 300
+        Layout.maximumWidth: 300 // content cap
+        Layout.minimumWidth: 0
         text: root.window?.title ?? ""
         color: Theme.textMuted
     }

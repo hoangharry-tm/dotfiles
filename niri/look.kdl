@@ -67,10 +67,14 @@ cursor {
 
 // Overview: windows a little smaller so the wallpaper has room to breathe.
 overview {
-    zoom 0.45
-    // The wallpaper is the backdrop; a shadow behind each workspace muddies it.
+    zoom 0.5
+    // backdrop-color comes from the matugen include (theme/niri.kdl). A soft
+    // E2-style shadow lifts each workspace off the backdrop.
     workspace-shadow {
-        off
+        softness 40
+        spread 0
+        offset x=0 y=8
+        color "#00000040"
     }
 }
 

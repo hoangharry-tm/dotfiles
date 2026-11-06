@@ -1,0 +1,28 @@
+// Minimal niri config for the greeter session only (greetd runs
+// `niri -c /etc/greetd/niri.kdl` as the greeter user). No binds, no
+// animations, no decorations: the greeter's layer surface is the whole UI.
+// Deployed to /etc/greetd/ by scripts/system-setup.sh.
+
+input {
+    keyboard {
+        xkb {
+            layout "us"
+        }
+    }
+    touchpad {
+        tap
+    }
+}
+
+// greeter-session starts quickshell, then quits niri when it exits.
+spawn-at-startup "/etc/greetd/greeter-session"
+
+animations {
+    off
+}
+
+hotkey-overlay {
+    skip-at-startup
+}
+
+prefer-no-csd

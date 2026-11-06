@@ -10,7 +10,13 @@ import qs.Widgets
 BarChip {
     id: root
 
-    visible: Media.active
+    // Collapse (see ResponsiveRow): title shortens at level 2, the title goes
+    // at 4 (glyph only); the visualiser lives in the hover card. Never hidden outright.
+    wanted: Media.shown
+    function titleCap(l) {
+        return l < 2 ? 180 : Theme.control * 3;
+    }
+    widthAt: l => chipWidth(Theme.icon + (l < 4 ? Theme.gapInline + Math.min(title.implicitWidth, titleCap(l)) : 0))
     onClicked: Media.toggle()
     onScrolled: d => d > 0 ? Media.previous() : Media.next()
 
@@ -23,11 +29,14 @@ BarChip {
 
     Icon {
         glyph: Media.playing ? "󰎈" : "󰏤"
-        color: Media.playing ? Theme.primary : Theme.textMuted
+        color: Media.playing ? Media.tone : Theme.textMuted
     }
 
     Label {
-        Layout.maximumWidth: 180
+        id: title
+
+        visible: root.level < 4
+        Layout.maximumWidth: root.titleCap(root.level)
         text: Media.title
         color: Theme.textMuted
     }
@@ -41,7 +50,7 @@ BarChip {
         height: Theme.trackThin
         radius: Theme.trackThin / 2
         width: (parent.width - Theme.padControl * 2) * Media.progress
-        color: Qt.alpha(Theme.primary, Media.playing ? 0.8 : 0.35)
+        color: Qt.alpha(Media.tone, Media.playing ? 0.8 : 0.35)
     }
 
     // Interactive: stays open while the pointer is on the card.
@@ -105,6 +114,15 @@ BarChip {
                     color: Theme.textMuted
                     font.pixelSize: Theme.textXs
                 }
+            }
+
+            // Lives in the hover card, not on the bar: a 20 fps repaint of
+            // every bar window (one per monitor) cost ~10% CPU, the card
+            // is a single short-lived window.
+            Visualizer {
+                visible: Media.playing
+                color: Media.tone
+                Layout.alignment: Qt.AlignVCenter
             }
         }
 

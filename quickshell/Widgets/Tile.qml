@@ -17,6 +17,7 @@ Item {
 
     signal toggled
     signal expand
+    signal held         // right-click or long-press: a secondary menu
 
     readonly property color fg: checked ? Theme.onTone : Theme.text
     readonly property color fgMuted: checked ? Theme.onToneMuted : Theme.textMuted
@@ -105,7 +106,9 @@ Item {
         anchors.rightMargin: chevron.visible ? chevron.width + Theme.spaceSm * 2 : 0
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: root.toggled()
+        acceptedButtons: Qt.LeftButton | Qt.RightButton
+        onClicked: m => m.button === Qt.RightButton ? root.held() : root.toggled()
+        onPressAndHold: root.held()
     }
 
     Clickable {

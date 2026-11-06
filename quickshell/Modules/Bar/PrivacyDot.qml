@@ -8,7 +8,8 @@ import qs.Widgets
 BarChip {
     id: root
 
-    visible: Privacy.active
+    wanted: Privacy.active
+    // Never collapsed: it is a safety/recording indicator.
 
     Icon {
         glyph: Privacy.videoActive ? "󰄀" : "󰍬"
