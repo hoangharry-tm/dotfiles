@@ -16,6 +16,9 @@ Singleton {
         scan.running = true;
     }
 
+    // Warm the list (and thumbnail cache) once, so the first open is ready.
+    Component.onCompleted: refresh()
+
     function filter(query) {
         const q = query.trim().toLowerCase();
         return q ? files.filter(f => f.name.toLowerCase().includes(q)) : files;
@@ -28,12 +31,18 @@ Singleton {
     Process {
         id: scan
 
-        command: ["find", root.dir, "-maxdepth", "1", "-type", "f", "-regextype", "posix-extended", "-iregex", ".*\\.(jpe?g|png|webp|avif|bmp)"]
+        // `wallpaper thumbs` lists the images with cached 320px thumbnails
+        // (modules/theme.nix), so the grid never decodes 4K originals.
+        command: ["wallpaper", "thumbs", root.dir]
         stdout: StdioCollector {
-            onStreamFinished: root.files = text.split("\n").filter(l => l).sort().map(p => ({
-                        path: p,
-                        name: p.split("/").pop().replace(/\.[^.]+$/, "")
-                    }))
+            onStreamFinished: root.files = text.split("\n").filter(l => l).map(l => {
+                    const [path, thumb] = l.split("\t");
+                    return {
+                        path: path,
+                        thumb: thumb || path,
+                        name: path.split("/").pop().replace(/\.[^.]+$/, "")
+                    };
+                })
         }
     }
 }

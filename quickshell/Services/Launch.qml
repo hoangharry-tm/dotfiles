@@ -38,7 +38,7 @@ Singleton {
         case "calc":
             return [calcItem(p.query)].filter(x => x);
         case "wall":
-            return Wallpapers.filter(p.query).map(f => ({ id: f.path, title: f.name, image: f.path, run: () => Wallpapers.apply(f.path) }));
+            return Wallpapers.filter(p.query).map(f => ({ id: f.path, title: f.name, image: f.thumb, run: () => Wallpapers.apply(f.path) }));
         default:
             const apps = Apps.search(p.query);
             const c = p.query && Calc.looksLikeMath(p.query) ? calcItem(p.query) : null;
