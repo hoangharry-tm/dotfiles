@@ -1,0 +1,39 @@
+# Alacritty (Arch/niri). Installed by Nix (hh-nix-config,
+# modules/programs/alacritty.nix), wrapped with nixGL for GPU access.
+
+[general]
+# Official palette from kanagawa.nvim (extras/alacritty/kanagawa_wave.toml)
+import = ["~/.config/alacritty/themes/kanagawa_wave.toml"]
+live_config_reload = true
+
+[window]
+opacity = 0.9
+padding = { x = 10, y = 10 }
+dynamic_padding = true  # spread leftover pixels evenly instead of at the edge
+decorations = "None"    # niri draws no title bars; keep it borderless
+
+[font]
+size = 12.0
+normal = { family = "JetBrainsMono Nerd Font", style = "Regular" }
+bold = { family = "JetBrainsMono Nerd Font", style = "Bold" }
+italic = { family = "JetBrainsMono Nerd Font", style = "Italic" }
+bold_italic = { family = "JetBrainsMono Nerd Font", style = "Bold Italic" }
+
+[cursor]
+style = { shape = "Block", blinking = "Off" }
+unfocused_hollow = true
+
+[scrolling]
+history = 10000
+
+[selection]
+save_to_clipboard = true
+
+[mouse]
+hide_when_typing = true
+
+[[keyboard.bindings]]
+# Shift+Enter inserts a newline without submitting (e.g. in Claude Code)
+key = "Return"
+mods = "Shift"
+chars = "\u001B\r"

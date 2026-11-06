@@ -22,3 +22,5 @@ tmux/plugins/
 !zsh/**
 !niri/
 !niri/**
+!alacritty/
+!alacritty/**
