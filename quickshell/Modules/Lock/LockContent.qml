@@ -34,7 +34,7 @@ Item {
     // Scrim keeps text legible on bright wallpapers.
     Rectangle {
         anchors.fill: parent
-        color: Qt.alpha(Theme.surface, 0.35)
+        color: Theme.scrim
     }
 
     SystemClock {
@@ -132,7 +132,7 @@ Item {
                 passwordCharacter: "•"
                 enabled: !Lock.busy
                 clip: true
-                selectionColor: Qt.alpha(Theme.primary, 0.4)
+                selectionColor: Theme.selection
 
                 Keys.onReturnPressed: Lock.submit(text)
                 Keys.onEnterPressed: Lock.submit(text)

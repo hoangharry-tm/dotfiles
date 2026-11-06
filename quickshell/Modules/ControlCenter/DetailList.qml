@@ -44,7 +44,7 @@ Section {
                     running: root.actionActive
                     from: 0
                     to: 360
-                    duration: 1400
+                    duration: Theme.animPulse
                     loops: Animation.Infinite
                     onRunningChanged: if (!running)
                         parent.rotation = 0

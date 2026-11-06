@@ -1,5 +1,4 @@
 import QtQuick
-import Quickshell
 import Quickshell.Services.SystemTray
 import qs.Common
 import qs.Widgets

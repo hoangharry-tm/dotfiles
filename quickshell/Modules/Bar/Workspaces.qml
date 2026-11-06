@@ -74,7 +74,7 @@ Row {
                 // (no fill); dots stay solid since they have no room for a ring.
                 color: ws.apps.length ? "transparent" : ws.active ? Theme.primary : Theme.outline
                 border.width: ws.apps.length && ws.active ? Theme.hairlineWidth : 0
-                border.color: Qt.alpha(Theme.primary, 0.7)
+                border.color: Theme.primaryRing
                 opacity: ws.active || ws.apps.length ? 1 : 0.6
 
                 Behavior on color {

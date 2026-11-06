@@ -3,7 +3,6 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import qs.Common
-import qs.Services
 import qs.Widgets
 
 // Who and how long (uptime), plus session shortcuts (wallpaper, lock, power).
@@ -52,6 +51,7 @@ RowLayout {
     Repeater {
         model: [
             { glyph: "󰸉", tip: "Wallpaper", run: () => Quickshell.execDetached(["wallpaper", "pick"]) },
+            { glyph: "󰒓", tip: "Settings", run: () => Panels.toggle("settings") },
             { glyph: "󰌾", tip: "Lock", run: () => Quickshell.execDetached(["lock-screen"]) },
             { glyph: "󰐥", tip: "Power", run: () => Panels.toggle("power") }
         ]

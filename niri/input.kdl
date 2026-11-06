@@ -35,3 +35,32 @@ output "HDMI-A-2" {
 output "eDP-1" {
     position x=1920 y=0
 }
+
+// Gestures. Touchpad swipes are built into niri and not configurable: 3
+// fingers move the view (up/down = workspaces, left/right = columns), 4
+// fingers up/down open/close the overview. Content follows the fingers
+// (Mac-like) independent of natural-scroll, so with natural scrolling off
+// the wheel and the swipes still differ; the swipes feel like macOS.
+gestures {
+    // Drag a window to a screen edge: scroll the strip / switch workspace.
+    dnd-edge-view-scroll {
+        trigger-width 48
+        delay-ms 100
+        max-speed 1500
+    }
+    dnd-edge-workspace-switch {
+        trigger-height 48
+        delay-ms 100
+        max-speed 1500
+    }
+
+    // Overview from the bottom-right corner of each output. Not top-left:
+    // the bar sits on the top edge with the workspace pills at its left,
+    // and a hot corner there fires whenever you aim at them. Bottom-right
+    // is bar-free, away from the seam between the two monitors (the laptop
+    // panel's left edge touches HDMI's right edge), and the PiP window rule
+    // leaves a 24px margin there.
+    hot-corners {
+        bottom-right
+    }
+}

@@ -10,6 +10,7 @@ binds {
     Mod+Backslash hotkey-overlay-title="Dropdown Terminal" { spawn "dropdown-term"; }
     Mod+Space hotkey-overlay-title="Search Apps" { spawn "qs" "ipc" "call" "shell" "launcher"; }
     Mod+D hotkey-overlay-title=null { spawn "qs" "ipc" "call" "shell" "launcher"; }
+    Mod+Ctrl+Comma hotkey-overlay-title="Settings" { spawn "qs" "ipc" "call" "shell" "settings"; } // Mod+Comma is consume-window-into-column
     Mod+Slash hotkey-overlay-title="Keybindings" { spawn "qs" "ipc" "call" "shell" "keybinds"; }
     Mod+N hotkey-overlay-title="Control Center" { spawn "qs" "ipc" "call" "shell" "control"; }
     Mod+Shift+W hotkey-overlay-title="Pick a Wallpaper" { spawn "qs" "ipc" "call" "shell" "wallpapers"; }
@@ -48,6 +49,10 @@ binds {
     // Recent — jump back to the previous window / workspace (like Alt-Tab / Cmd-`)
     Mod+Tab   { focus-window-previous; }
     Mod+Grave { focus-workspace-previous; }
+
+    // Alt-Tab switcher (quickshell Modules/Switcher): hold Alt and tap Tab to cycle
+    Alt+Tab       allow-when-locked=false repeat=false hotkey-overlay-title=null { spawn "qs" "ipc" "call" "switcher" "next"; }
+    Alt+Shift+Tab allow-when-locked=false repeat=false hotkey-overlay-title=null { spawn "qs" "ipc" "call" "switcher" "prev"; }
 
     // Focus
     Mod+Left  { focus-column-left; }
@@ -194,4 +199,8 @@ binds {
     // columns
     Mod+Alt+Left  { move-window-to-monitor-left; }
     Mod+Alt+Right { move-window-to-monitor-right; }
+
+    // Whole workspace to the other monitor
+    Mod+Shift+Alt+Left  { move-workspace-to-monitor-left; }
+    Mod+Shift+Alt+Right { move-workspace-to-monitor-right; }
 }

@@ -28,7 +28,7 @@ PopupWindow {
 
         property bool done: false
 
-        interval: 350
+        interval: Theme.hoverOpen
         running: root.shown
         onTriggered: done = true
         onRunningChanged: if (!running && !root.shown)

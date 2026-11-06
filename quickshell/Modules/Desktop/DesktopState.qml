@@ -2,26 +2,13 @@ pragma Singleton
 
 import QtQuick
 import Quickshell
-import Quickshell.Io
+import qs.Services
 
-// Whether the desktop widgets show; persisted so a restart keeps it.
+// Whether the desktop widgets show; persisted in Services/Settings.qml.
 Singleton {
-    id: root
-
-    property bool enabled: true
+    readonly property bool enabled: Settings.desktopWidgets
 
     function toggle() {
-        enabled = !enabled;
-        store.setText(enabled ? "on" : "off");
-    }
-
-    FileView {
-        id: store
-
-        path: (Quickshell.env("XDG_STATE_HOME") || Quickshell.env("HOME") + "/.local/state") + "/quickshell/desktopwidgets"
-        blockLoading: true
-        printErrors: false
-        atomicWrites: true
-        onLoaded: root.enabled = text().trim() !== "off"
+        Settings.desktopWidgets = !Settings.desktopWidgets;
     }
 }

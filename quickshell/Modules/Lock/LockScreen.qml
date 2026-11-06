@@ -1,7 +1,6 @@
 import QtQuick
 import Quickshell
 import Quickshell.Wayland
-import qs.Common
 import qs.Services
 
 // Session lock (ext-session-lock): the compositor hides everything else

@@ -71,7 +71,6 @@ PanelWindow {
                 }
 
                 // Slide in from the right
-                x: 0
                 NumberAnimation on x {
                     from: Theme.space2xl
                     to: 0

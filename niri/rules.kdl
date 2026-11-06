@@ -90,7 +90,16 @@ window-rule {
 
 // Spotify lives on the named workspace "music" (declared here; niri keeps
 // named workspaces alive when empty).
-workspace "music"
+// Pinned with open-on-output: niri moves a named workspace to the remaining
+// monitor on unplug (windows come along, appended after that monitor's own
+// workspaces) and back when its output reappears. Unnamed ones aren't restored.
+// Media and scratch on the laptop panel, a "main" dev workspace on the monitor.
+workspace "music" {
+    open-on-output "eDP-1"
+}
+workspace "main" {
+    open-on-output "HDMI-A-2"
+}
 window-rule {
     match app-id="^spotify$"
     open-on-workspace "music"
@@ -98,7 +107,9 @@ window-rule {
 
 // Dropdown terminal (`dropdown-term`, bound in binds.kdl): 60% x 50%, hung
 // from the top edge. Parked on "scratch" while hidden; niri has no minimise.
-workspace "scratch"
+workspace "scratch" {
+    open-on-output "eDP-1"
+}
 window-rule {
     match app-id="^dropdown$"
     open-floating true
@@ -204,6 +215,23 @@ layer-rule {
     }
 }
 
+// Alt+Tab switcher (quickshell Modules/Switcher).
+layer-rule {
+    match namespace="^qs-switcher$"
+    geometry-corner-radius 28
+    background-effect {
+        blur true
+    }
+    // elevation E3 (quickshell/DESIGN.md)
+    shadow {
+        on
+        softness 64
+        spread 0
+        offset x=0 y=16
+        color "#00000047"
+    }
+}
+
 layer-rule {
     match namespace="^qs-polkit$"
     geometry-corner-radius 28
@@ -252,6 +280,22 @@ layer-rule {
 
 layer-rule {
     match namespace="^qs-keybinds$"
+    geometry-corner-radius 28
+    background-effect {
+        blur true
+    }
+    // elevation E3 (quickshell/DESIGN.md): large modal sheet
+    shadow {
+        on
+        softness 64
+        spread 0
+        offset x=0 y=16
+        color "#00000047"
+    }
+}
+
+layer-rule {
+    match namespace="^qs-settings$"
     geometry-corner-radius 28
     background-effect {
         blur true

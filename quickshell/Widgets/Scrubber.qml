@@ -7,7 +7,6 @@ Item {
     id: root
 
     property real value: 0               // 0..1
-    property bool enabled: true
 
     signal seeked(real fraction)
 

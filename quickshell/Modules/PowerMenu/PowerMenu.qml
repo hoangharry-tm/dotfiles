@@ -3,7 +3,6 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 import qs.Common
-import qs.Services
 import qs.Widgets
 
 // Full-screen frosted overlay with Lock · Sleep · Log out · Restart · Shut down.
@@ -35,7 +34,7 @@ PanelWindow {
     anchors.left: true
     anchors.right: true
     exclusionMode: ExclusionMode.Ignore
-    color: Qt.alpha(Theme.surface, 0.35)
+    color: Theme.scrim
     WlrLayershell.namespace: "qs-power"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: shown ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None

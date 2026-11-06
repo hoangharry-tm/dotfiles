@@ -59,7 +59,7 @@ PanelWindow {
     // Debounce both edges: open after hover settles, close after the pointer
     // has really left (long enough to cross the gap into the card).
     Timer {
-        interval: 350
+        interval: Theme.hoverOpen
         running: root.want && !root.open
         onTriggered: {
             root.host = root.target.QsWindow.window?.screen ?? null;
@@ -68,7 +68,7 @@ PanelWindow {
     }
 
     Timer {
-        interval: 200
+        interval: Theme.hoverClose
         running: !root.want && root.open
         onTriggered: root.open = false
     }

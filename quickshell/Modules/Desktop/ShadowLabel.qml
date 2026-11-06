@@ -7,26 +7,26 @@ import qs.Widgets
 Item {
     id: root
 
-    property alias text: top.text
-    property alias font: top.font
-    property alias color: top.color
-    property alias horizontalAlignment: top.horizontalAlignment
+    property alias text: face.text
+    property alias font: face.font
+    property alias color: face.color
+    property alias horizontalAlignment: face.horizontalAlignment
 
-    implicitWidth: top.implicitWidth
-    implicitHeight: top.implicitHeight
+    implicitWidth: face.implicitWidth
+    implicitHeight: face.implicitHeight
 
     Label {
         x: Theme.hairlineWidth
         y: Theme.spaceXs / 2
         width: parent.width
-        text: top.text
-        font: top.font
+        text: face.text
+        font: face.font
         color: Theme.textShadow
-        horizontalAlignment: top.horizontalAlignment
+        horizontalAlignment: face.horizontalAlignment
     }
 
     Label {
-        id: top
+        id: face
 
         width: parent.width
     }

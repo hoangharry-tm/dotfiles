@@ -10,12 +10,11 @@ Section {
     id: root
 
     readonly property string dir: (Quickshell.env("XDG_STATE_HOME") || Quickshell.env("HOME") + "/.local/state") + "/backup"
-    property bool enabled: marker.loaded
     property bool ok: true
     property real last: 0
     property real now: Date.now() / 1000
 
-    visible: enabled
+    visible: marker.present
 
     // Minute tick keeps "x ago" fresh without rereading the file.
     Timer {
@@ -29,11 +28,11 @@ Section {
         id: marker
 
         path: root.dir + "/enabled"
-        property bool loaded: false
+        property bool present: false
         printErrors: false
         watchChanges: true
-        onLoaded: loaded = true
-        onLoadFailed: loaded = false
+        onLoaded: present = true
+        onLoadFailed: present = false
     }
 
     FileView {

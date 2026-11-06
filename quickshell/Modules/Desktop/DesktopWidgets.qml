@@ -4,7 +4,6 @@ import Quickshell
 import Quickshell.Wayland
 import qs.Common
 import qs.Services
-import qs.Widgets
 
 // Wallpaper-layer clock, date, weather and now-playing, bottom-left.
 // Click-through (empty input region), no focus, no animation: the only

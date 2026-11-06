@@ -1,6 +1,7 @@
 import QtQuick
 import Quickshell
 import qs.Common
+import qs.Services
 import qs.Widgets
 
 // Date and time; click for the calendar. Last-resort collapse (level 1)
@@ -10,7 +11,7 @@ BarChip {
 
     required property string screenName
 
-    readonly property string time: Qt.formatDateTime(clock.date, "HH:mm")
+    readonly property string time: Qt.formatDateTime(clock.date, Settings.clock24h ? "HH:mm" : "h:mm AP")
     readonly property var texts: [Qt.formatDateTime(clock.date, "ddd d MMM") + "  \u00b7  " + time, Qt.formatDateTime(clock.date, "d MMM") + "  \u00b7  " + time]
     // Both widths from text metrics, so the bar can pick a level before it lays out.
     readonly property var widths: [chipWidth(full.width), chipWidth(short.width)]

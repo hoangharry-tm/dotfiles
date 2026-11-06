@@ -10,7 +10,7 @@ import Quickshell.Io
 Singleton {
     id: root
 
-    property bool desktopAudio: false   // capture what the speakers play
+    readonly property bool desktopAudio: Settings.recDesktopAudio   // capture what the speakers play
     property bool recording: false
     property int elapsed: 0             // seconds
     property string file: ""

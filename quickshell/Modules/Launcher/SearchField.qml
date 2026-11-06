@@ -14,7 +14,7 @@ RowLayout {
     property string chip: ""      // shown when a prefix mode is active
 
     signal navigate(int dx, int dy)
-    signal accepted
+    signal accepted(bool alt) // alt = Shift+Enter (secondary action)
     signal dismissed
     signal removeRequested // Shift+Del: delete the selected entry (clipboard)
 
@@ -37,12 +37,12 @@ RowLayout {
         color: Theme.text
         font.family: Theme.font
         font.pixelSize: Theme.textXl
-        selectionColor: Qt.alpha(Theme.primary, 0.4)
+        selectionColor: Theme.selection
         clip: true
 
         Keys.onEscapePressed: root.dismissed()
-        Keys.onReturnPressed: root.accepted()
-        Keys.onEnterPressed: root.accepted()
+        Keys.onReturnPressed: e => root.accepted(!!(e.modifiers & Qt.ShiftModifier))
+        Keys.onEnterPressed: e => root.accepted(!!(e.modifiers & Qt.ShiftModifier))
         Keys.onTabPressed: root.navigate(1, 0)
         Keys.onBacktabPressed: root.navigate(-1, 0)
         Keys.onUpPressed: root.navigate(0, -1)
@@ -81,7 +81,7 @@ RowLayout {
         implicitWidth: chipLabel.implicitWidth + Theme.spaceLg
         implicitHeight: Theme.controlSm
         radius: Theme.radiusFull
-        color: Qt.alpha(Theme.primary, 0.16)
+        color: Theme.primaryWash
 
         Label {
             id: chipLabel

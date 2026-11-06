@@ -23,13 +23,57 @@ Singleton {
         return /^[\d\s.+\-*\/%^()a-z,]+$/i.test(s) && /\d/.test(s) && /[+\-*\/%^]|\w\(/.test(s);
     }
 
+    // --- qalc backend (units, currency): async, debounced, cancellable ---
+    property string remoteExpr: ""   // expression the cached result belongs to
+    property string remoteText: ""
+    property bool ratesChecked: false
+
+    // "5 km to mi", "20 usd to vnd", "3 h in min": number, then a conversion word.
+    function looksLikeUnits(s) {
+        return /^[-+]?[\d.,]+\s*[^\d\s].*\s(to|in|->|→)\s+[^\s\d]+$/i.test(s);
+    }
+
+    // qalc result for `expr` once it arrives, else "" (UI shows nothing meanwhile).
+    function remote(expr) {
+        return remoteExpr === expr ? remoteText : "";
+    }
+
+    function ask(expr) {
+        if (!expr) {
+            qalc.cancel();
+            return;
+        }
+        if (!ratesChecked) {
+            ratesChecked = true;
+            Quickshell.execDetached(["qalc-rates"]); // no-op if refreshed within a day
+        }
+        // "to -mi": the minus stops qalc splitting into mixed units (3 mi + 188 yd + ...).
+        const q = expr.replace(/\b(to|in)\s+([a-zA-Z_]\w*)\s*$/i, "$1 -$2");
+        qalc.run(["qalc", "-t", "--", q], expr);
+    }
+
+    Debounced {
+        id: qalc
+
+        onDone: (output, tag) => {
+            const line = output.split("\n")[0].trim();
+            root.remoteText = line === tag ? "" : line;
+            root.remoteExpr = tag;
+        }
+    }
+
     // Returns the result as a string, or "" if the input isn't a valid expression.
     function evaluate(input) {
         const toks = input.toLowerCase().replace(/,/g, ".").match(/\d+\.?\d*|\.\d+|[a-z]+|[-+*\/%^()]|\S/g) ?? [];
         let i = 0;
         const fail = () => { throw new Error("bad"); };
         const peek = () => toks[i];
-        const take = t => (toks[i] === t ? (i++, true) : false);
+        const take = t => {
+            if (toks[i] !== t)
+                return false;
+            i++;
+            return true;
+        };
 
         function expr() {
             let v = term();

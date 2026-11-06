@@ -13,6 +13,16 @@ Singleton {
     property var windows: ({})      // id -> window
     property int focusedWindowId: -1
 
+    // Most-recently-used window ids, newest first. Maintained from focus
+    // events (no polling); consumed by the Alt+Tab switcher.
+    property var mru: []
+
+    function touch(id) {
+        if (id === null || id === undefined || id < 0 || mru[0] === id)
+            return;
+        mru = [id].concat(mru.filter(i => i !== id));
+    }
+
     readonly property var focusedWindow: windows[focusedWindowId] ?? null
 
     function workspacesOn(output) {
@@ -65,24 +75,33 @@ Singleton {
                     focusedWindowId = w.id;
             }
             windows = map;
+            // Seed history from niri's own focus timestamps (newest first).
+            const stamp = w => w.focus_timestamp ? w.focus_timestamp.secs * 1e9 + w.focus_timestamp.nanos : -1;
+            mru = data.windows.slice().sort((a, b) => stamp(b) - stamp(a)).map(w => w.id);
             break;
         }
         case "WindowOpenedOrChanged": {
             const map = Object.assign({}, windows);
             map[data.window.id] = data.window;
             windows = map;
-            if (data.window.is_focused)
+            if (data.window.is_focused) {
                 focusedWindowId = data.window.id;
+                touch(data.window.id);
+            } else if (!mru.includes(data.window.id)) {
+                mru = mru.concat([data.window.id]);   // new unfocused windows rank last
+            }
             break;
         }
         case "WindowClosed": {
             const map = Object.assign({}, windows);
             delete map[data.id];
             windows = map;
+            mru = mru.filter(i => i !== data.id);
             break;
         }
         case "WindowFocusChanged":
             focusedWindowId = data.id ?? -1;
+            touch(data.id);
             break;
         }
     }

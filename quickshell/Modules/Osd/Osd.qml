@@ -14,6 +14,9 @@ Scope {
     property real value: 0
     property bool showValue: true
     property bool ready: false        // ignore the initial values at startup
+    // Held true across repeated presses: restart() briefly stops the timer,
+    // so binding visibility to hide.running replayed the entrance each press.
+    property bool shown: false
 
     function show(g, v, withValue) {
         if (!ready)
@@ -21,6 +24,7 @@ Scope {
         glyph = g;
         value = v;
         showValue = withValue !== false;
+        shown = true;
         hide.restart();
     }
 
@@ -34,6 +38,7 @@ Scope {
         id: hide
 
         interval: 1400
+        onTriggered: root.shown = false
     }
 
     Connections {
@@ -70,7 +75,7 @@ Scope {
             required property ShellScreen modelData
 
             screen: modelData
-            visible: hide.running && Panels.focusedScreen() === modelData.name
+            visible: root.shown && Panels.focusedScreen() === modelData.name
             anchors.bottom: true
             margins.bottom: Theme.space2xl * 2
             implicitWidth: root.showValue ? 280 : Theme.fieldHeight

@@ -49,7 +49,7 @@ Shadows are wide, low-alpha, zero spread; they blend instead of outlining.
 |---|---|---|---|---|
 | E1 | bar | 24 | 2 | #00000033 |
 | E2 | control center, calendar, OSD, tiled windows | 40 (windows 48) | 8 | #00000040 (windows #00000047) |
-| E3 | launcher (modal) | 64 | 16 | #00000047 |
+| E3 | launcher, switcher, polkit, keybinds, settings (modal) | 64 | 16 | #00000047 |
 
 Bar popovers use E2 via `qs-popover`. Tooltips and toasts are QML-drawn (xdg popup / unruled), so they are flat:
 `glassSolid` fill + hairline, no shadow.
@@ -145,7 +145,11 @@ Roles come from the wallpaper (matugen). text = primary content; textMuted =
 secondary/inactive (>= 4.5:1 on glass; don't mute below that); primary = the
 single accent (small marks: selected-row text, dots; `primaryText` is text on a primary fill); tertiary = attention (privacy, busy); error = destructive/low
 battery. Fills: `tile` (6%) resting card/track, `hover` (8%), `pressed` (14%).
-Never use raw hex or alpha literals in modules; derive in Theme.
+Never use raw hex or alpha literals in modules; derive in Theme. Shared
+alpha tokens: `selection` (text selection), `primaryWash` (quiet primary
+fill), `primaryRing` (focus/current ring), `scrim` (dim behind full-screen
+overlays). Timing tokens beyond Motion: `animSpin` (busy spinner turn),
+`hoverOpen`/`hoverClose` (hover card delays).
 
 ### Material: tonal gradient + grain
 Glass was dropped for Control Center components (hard to get right over a
@@ -175,3 +179,12 @@ there are no per-component colours.
 - `primary` otherwise stays for small marks (selected-row text, dots, spinner,
   media progress, password focus ring). Low battery/charging swap the fill for
   `error`/`tertiary`.
+
+## Linting
+`./lint.sh` runs qmllint over everything (it builds a temp copy with
+generated qmldirs so `import qs.*` resolves; needs `QS_QML` = Quickshell's
+`lib/qt-6/qml`, `QT_QML` = qtdeclarative's, and `qmllint` on PATH). Warning
+levels are in `.qmllint.ini`: Quickshell-specific false positives
+(uncreatable PanelWindow, anchors, `.values`, unqualified ids) are off;
+everything else, including unused imports, id shadowing and property
+overrides, must be clean. CI: `.github/workflows/lint.yml` in the dotfiles repo.

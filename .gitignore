@@ -32,3 +32,5 @@ tmux/plugins/
 !greeter/**
 !plymouth/
 !plymouth/**
+!.github/
+!.github/**

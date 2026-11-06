@@ -26,6 +26,8 @@ import qs.Modules.Notifications
 import qs.Modules.Osd
 import qs.Modules.Polkit
 import qs.Modules.PowerMenu
+import qs.Modules.Settings
+import qs.Modules.Switcher
 
 ShellRoot {
     // Per-screen surfaces
@@ -94,6 +96,14 @@ ShellRoot {
             }
 
             LazyLoader {
+                active: Panels.isOpen("settings", perScreen.modelData.name)
+
+                SettingsWindow {
+                    modelData: perScreen.modelData
+                }
+            }
+
+            LazyLoader {
                 active: Panels.isOpen("keybinds", perScreen.modelData.name)
 
                 Cheatsheet {
@@ -107,6 +117,30 @@ ShellRoot {
 
     LockScreen {}
 
+    // Alt+Tab strip: exists only while open (one on the focused output).
+    LazyLoader {
+        active: Switcher.open
+
+        Switcher {}
+    }
+
+    // qs ipc call switcher next|prev (Alt+Tab / Alt+Shift+Tab in niri/binds.kdl)
+    IpcHandler {
+        target: "switcher"
+
+        function next(): void {
+            Switcher.step(1);
+        }
+
+        function prev(): void {
+            Switcher.step(-1);
+        }
+
+        function cancel(): void {
+            Switcher.close();
+        }
+    }
+
     // Polkit prompt: exists only while a request is pending.
     LazyLoader {
         active: Polkit.active
@@ -114,7 +148,7 @@ ShellRoot {
         PolkitDialog {}
     }
 
-    // qs ipc call shell launcher|wallpapers|control|calendar|power|keybinds|close
+    // qs ipc call shell launcher|wallpapers|control|calendar|power|keybinds|settings|close
     IpcHandler {
         target: "shell"
 
@@ -157,6 +191,10 @@ ShellRoot {
 
         function keybinds(): void {
             Panels.toggle("keybinds");
+        }
+
+        function settings(): void {
+            Panels.toggle("settings");
         }
 
         // Start/stop a screen recording (Mod+Alt+R in niri/binds.kdl).

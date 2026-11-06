@@ -17,7 +17,7 @@ Singleton {
 
     // Media UI shows while playing, and for `graceMs` after a pause so a brief
     // pause doesn't blink it away (single-shot timer, no polling).
-    readonly property int graceMs: 10000
+    readonly property int graceMs: Settings.mediaGraceMs
     readonly property bool shown: active && (playing || grace.running)
     Timer {
         id: grace

@@ -33,11 +33,24 @@ Singleton {
         setter.running = true;
     }
 
-    // Used by the brightness keys (via IPC) so the OSD shows.
+    // Brightness keys (via IPC). Relative steps go to brightnessctl, which
+    // reads the real level itself; reading sysfs here returned the level from
+    // before the previous press (FileView reload lags), so steps jumped around
+    // (100 -> 90 -> 95). Presses during a write are summed, never dropped.
+    property int pendingSteps: 0 // in percent
+
     function step(delta) {
-        refresh(); // not polled while closed; start from the real level
-        set(value + delta);
-        changedByUser();
+        pendingSteps += Math.round(delta * 100);
+        flushSteps();
+    }
+
+    function flushSteps() {
+        if (stepper.running || pendingSteps === 0)
+            return;
+        const d = pendingSteps;
+        pendingSteps = 0;
+        stepper.command = ["brightnessctl", "-m", "--class=backlight", "--min-value=1%", "set", Math.abs(d) + "%" + (d > 0 ? "+" : "-")];
+        stepper.running = true;
     }
 
     function refresh() {
@@ -64,6 +77,26 @@ Singleton {
 
         path: root.device + "/max_brightness"
         blockLoading: true
+    }
+
+    // -m prints "device,class,current,percent%,max": take the new level from
+    // brightnessctl itself, then show the OSD.
+    Process {
+        id: stepper
+
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const f = text.trim().split(",");
+                const c = parseInt(f[2]), m = parseInt(f[4]);
+                if (m > 0) {
+                    root.value = c / m;
+                    root.available = true;
+                    root.changedByUser();
+                }
+            }
+        }
+        onRunningChanged: if (!running)
+            root.flushSteps()
     }
 
     Process {

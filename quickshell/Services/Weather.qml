@@ -101,7 +101,7 @@ Singleton {
         ready = true;
     }
 
-    readonly property string url: "https://api.open-meteo.com/v1/forecast?latitude=" + Location.latitude + "&longitude=" + Location.longitude + "&timezone=" + encodeURIComponent(Location.timezone) + "&current=temperature_2m,apparent_temperature,weather_code,relative_humidity_2m,wind_speed_10m,is_day" + "&hourly=temperature_2m,weather_code&forecast_hours=12" + "&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset&forecast_days=5"
+    readonly property string url: "https://api.open-meteo.com/v1/forecast?latitude=" + Location.latitude + "&longitude=" + Location.longitude + "&timezone=" + encodeURIComponent(Location.timezone) + "&current=temperature_2m,apparent_temperature,weather_code,relative_humidity_2m,wind_speed_10m,is_day" + "&hourly=temperature_2m,weather_code&forecast_hours=12" + "&daily=weather_code,temperature_2m_max,temperature_2m_min,sunrise,sunset&forecast_days=5" + (Settings.weatherFahrenheit ? "&temperature_unit=fahrenheit" : "")
 
     property int failures: 0
     readonly property bool stale: Date.now() - fetchedAt >= refreshMs
@@ -123,8 +123,10 @@ Singleton {
     // Back online (or location changed): fetch now if the data is stale.
     onOnlineChanged: if (online && stale)
         refresh()
-    onUrlChanged: if (ready)
-        fetchedAt = 0
+    onUrlChanged: if (ready) {
+        fetchedAt = 0;
+        refresh(); // unit/location changed: show the new numbers now
+    }
 
     Process {
         id: fetcher

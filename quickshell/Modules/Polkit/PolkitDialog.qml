@@ -115,7 +115,7 @@ PanelWindow {
                     color: Theme.text
                     font.family: Theme.font
                     font.pixelSize: Theme.textLg
-                    selectionColor: Qt.alpha(Theme.primary, 0.4)
+                    selectionColor: Theme.selection
                     clip: true
                     echoMode: root.flow?.responseVisible ? TextInput.Normal : TextInput.Password
                     enabled: root.flow?.isResponseRequired ?? false

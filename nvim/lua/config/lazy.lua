@@ -17,7 +17,14 @@ vim.opt.rtp:prepend(lazypath)
 require("lazy").setup({
   spec = {
     -- add LazyVim and import its plugins
-    { "LazyVim/LazyVim", import = "lazyvim.plugins", opts = { colorscheme = "kanagawa" } },
+    { "LazyVim/LazyVim", import = "lazyvim.plugins", opts = {
+      -- Wallpaper palette on Linux (file written by matugen); kanagawa elsewhere (macOS).
+      colorscheme = function()
+        local state = vim.env.XDG_STATE_HOME or (vim.env.HOME .. "/.local/state")
+        local ok = vim.uv.fs_stat(state .. "/theme/nvim.lua") ~= nil
+        vim.cmd.colorscheme(ok and "matugen" or "kanagawa")
+      end,
+    } },
     -- import/override with your plugins
     { import = "plugins" },
   },

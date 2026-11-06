@@ -4,8 +4,8 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// THE single place to set where you are. Used by NightLight (sunset/sunrise)
-// and Weather (forecast). Edit the fixed values below; they are the default.
+// THE single place for where you are. Used by NightLight (sunset/sunrise)
+// and Weather (forecast). The auto/fixed values live in Services/Settings.qml.
 //
 // Auto-detect (`autoDetect: true`): look the location up by IP (ipinfo.io)
 // at shell start, at most once every 6 h, and cache it in
@@ -15,13 +15,11 @@ import Quickshell.Io
 Singleton {
     id: root
 
-    // --- Settings: change these -------------------------------------------
-    readonly property bool autoDetect: true
-    readonly property real fixedLatitude: 10.8
-    readonly property real fixedLongitude: 106.7
-    readonly property string fixedCity: "Ho Chi Minh City"
-    readonly property string fixedTimezone: "Asia/Ho_Chi_Minh"
-    // ----------------------------------------------------------------------
+    readonly property bool autoDetect: Settings.locAutoDetect
+    readonly property real fixedLatitude: Settings.locLatitude
+    readonly property real fixedLongitude: Settings.locLongitude
+    readonly property string fixedCity: Settings.locCity
+    readonly property string fixedTimezone: Settings.locTimezone
 
     // Last successful lookup (from the cache, then refreshed); wins when set.
     property var detected: null
@@ -39,6 +37,8 @@ Singleton {
         id: cache
 
         path: root.autoDetect ? root.cachePath : ""
+        // Turning auto-detect on later: the path change reloads the cache,
+        // which looks the location up when it is stale or missing.
         printErrors: false
         atomicWrites: true
         onLoaded: {

@@ -8,9 +8,10 @@ import Quickshell.Services.Notifications
 // Notification daemon (org.freedesktop.Notifications): history, toasts,
 // grouping by app, Focus (do not disturb) with schedule and timer.
 //
-// SETTINGS live in one file, edited by hand or by the Focus menu (applied
-// live): Quickshell.statePath("notifications.json"), i.e.
-// ~/.local/state/quickshell/by-shell/<id>/notifications.json
+// SETTINGS (schedule, persistHistory) live in Services/Settings.qml
+// (~/.local/state/quickshell/settings.json), edited there, in the Settings
+// panel or by the Focus menu (applied live). Only the running Focus timer
+// stays in Quickshell.statePath("notifications.json") (focusUntil):
 //   scheduleEnabled  bool    Focus turns on/off at the times below
 //   scheduleStart    "HH:MM" e.g. "22:00"
 //   scheduleEnd      "HH:MM" e.g. "07:00" (may be earlier than start: overnight)
@@ -37,10 +38,10 @@ Singleton {
     readonly property int maxHistory: 50
     readonly property int maxToastGroups: 3
     readonly property int maxToasts: 12
-    readonly property alias scheduleEnabled: settings.scheduleEnabled
-    readonly property alias scheduleStart: settings.scheduleStart
-    readonly property alias scheduleEnd: settings.scheduleEnd
-    readonly property alias persistHistory: settings.persistHistory
+    readonly property bool scheduleEnabled: Settings.scheduleEnabled
+    readonly property string scheduleStart: Settings.scheduleStart
+    readonly property string scheduleEnd: Settings.scheduleEnd
+    readonly property bool persistHistory: Settings.persistHistory
 
     readonly property var live: server.trackedNotifications.values.slice().reverse()
     readonly property var history: {
@@ -131,7 +132,7 @@ Singleton {
 
     // "now", "5m", "2h", "3 Nov". Reads `tick`, so bindings refresh each minute.
     function timeAgo(n) {
-        tick;
+        void tick;
         const t = timeOf(n);
         if (!t)
             return "";
@@ -204,15 +205,19 @@ Singleton {
     }
 
     function setSchedule(enabled) {
-        settings.scheduleEnabled = enabled;
-        saveSettings();
+        Settings.scheduleEnabled = enabled;
     }
 
     function setPersist(on) {
-        settings.persistHistory = on;
-        saveSettings();
-        saveHistory.restart(); // writes the list, or empties the file when off
+        Settings.persistHistory = on;
     }
+
+    // Writes the list, or empties the file when off; also fires on edits from the Settings panel.
+    onPersistHistoryChanged: saveHistory.restart()
+    // Schedule edits (panel or file) re-arm the edge timer.
+    onScheduleEnabledChanged: applySchedule()
+    onScheduleStartChanged: applySchedule()
+    onScheduleEndChanged: applySchedule()
 
     function saveSettings() {
         settingsFile.writeAdapter();
@@ -262,10 +267,6 @@ Singleton {
         edge.restart();
     }
 
-    onScheduleEnabledChanged: applySchedule()
-    onScheduleStartChanged: applySchedule()
-    onScheduleEndChanged: applySchedule()
-
     Timer {
         id: edge
 
@@ -303,10 +304,6 @@ Singleton {
         JsonAdapter {
             id: settings
 
-            property bool scheduleEnabled: false
-            property string scheduleStart: "22:00"
-            property string scheduleEnd: "07:00"
-            property bool persistHistory: false
             property real focusUntil: 0
         }
     }
@@ -327,7 +324,7 @@ Singleton {
     FileView {
         id: historyFile
 
-        path: settings.persistHistory ? Quickshell.statePath("notification-history.json") : ""
+        path: persistHistory ? Quickshell.statePath("notification-history.json") : ""
         printErrors: false
         onLoaded: {
             try {
@@ -343,7 +340,7 @@ Singleton {
         id: saveHistory
 
         interval: 1000
-        onTriggered: historyFile.setText(JSON.stringify(settings.persistHistory ? root.history.map(n => ({
+        onTriggered: historyFile.setText(JSON.stringify(persistHistory ? root.history.map(n => ({
                         appName: n.appName,
                         appIcon: n.appIcon,
                         desktopEntry: n.desktopEntry,
@@ -354,7 +351,7 @@ Singleton {
                     })) : []))
     }
 
-    onHistoryChanged: if (settings.persistHistory)
+    onHistoryChanged: if (persistHistory)
         saveHistory.restart()
 
     NotificationServer {

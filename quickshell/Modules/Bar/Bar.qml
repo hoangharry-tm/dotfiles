@@ -40,11 +40,11 @@ PanelWindow {
     }
 
     // Drop the weekday only if even fully-collapsed sides don't fit.
-    readonly property int clockLevel: Math.max(left.minTotal, right.minTotal) > sideRoom(clock.widths[0]) ? 1 : 0
+    readonly property int clockLevel: Math.max(leftRow.minTotal, rightRow.minTotal) > sideRoom(clock.widths[0]) ? 1 : 0
 
     // Left: where you are
     ResponsiveRow {
-        id: left
+        id: leftRow
 
         anchors.left: parent.left
         anchors.leftMargin: Theme.barPadX
@@ -56,11 +56,11 @@ PanelWindow {
 
         Workspaces {
             output: bar.modelData.name
-            level: left.level
+            level: leftRow.level
         }
 
         FocusedWindow {
-            level: left.level
+            level: leftRow.level
             Layout.fillWidth: true
             Layout.maximumWidth: 320 // content cap, not spacing
         }
@@ -77,7 +77,7 @@ PanelWindow {
 
     // Right: what's going on
     ResponsiveRow {
-        id: right
+        id: rightRow
 
         anchors.right: parent.right
         anchors.rightMargin: Theme.barPadX
@@ -87,11 +87,11 @@ PanelWindow {
         spacing: Theme.barGap
 
         WeatherChip {
-            level: right.level
+            level: rightRow.level
         }
 
         MediaChip {
-            level: right.level
+            level: rightRow.level
         }
 
         RecordChip {}
@@ -99,20 +99,20 @@ PanelWindow {
         PrivacyDot {}
 
         InputMethodChip {
-            level: right.level
+            level: rightRow.level
         }
 
         SystemChip {
-            level: right.level
+            level: rightRow.level
         }
 
         Tray {
-            level: right.level
+            level: rightRow.level
         }
 
         StatusCluster {
             screenName: bar.modelData.name
-            level: right.level
+            level: rightRow.level
         }
     }
 }

@@ -7,8 +7,8 @@ import qs.Services
 import qs.Widgets
 
 // Spotlight-style launcher: apps (ranked by fuzzy match + frecency), inline
-// calculator, `>` run, `:` wallpapers,
-// `<` clipboard history, `.` emoji. Rendering only; logic is in Services/Launch.
+// calculator (+ units/currency via qalc), `>` run, `:` wallpapers,
+// `<` clipboard history, `.` emoji, `/` files, `?` web search. Rendering only; logic is in Services/Launch.
 PanelWindow {
     id: root
 
@@ -65,14 +65,19 @@ PanelWindow {
             Clipboard.refresh();
         else if (mode === "emoji")
             Emoji.load();
+        else if (mode === "file")
+            FileSearch.refreshRecent();
     }
+    // Kick off async sources (fd, qalc) once per query change, never per frame.
+    onParsedChanged: Launch.update(parsed)
     onResultsChanged: current = 0
 
-    function activate(i) {
+    // alt (Shift+Enter) runs the item's secondary action when it has one.
+    function activate(i, alt = false) {
         const r = results[i];
         if (!r)
             return;
-        r.run();
+        (alt && r.alt ? r.alt : r.run)();
         Panels.close();
     }
 
@@ -129,7 +134,7 @@ PanelWindow {
                 chip: root.mode === "apps" ? "" : Launch.modes[root.mode].label
                 gridNav: root.grid
                 onNavigate: (dx, dy) => root.navigate(dx, dy)
-                onAccepted: root.activate(root.current)
+                onAccepted: alt => root.activate(root.current, alt)
                 onRemoveRequested: root.remove()
                 onDismissed: Panels.close()
             }
@@ -175,7 +180,7 @@ PanelWindow {
                 visible: root.results.length === 0
                 horizontalAlignment: Text.AlignHCenter
                 color: Theme.textMuted
-                text: root.mode === "run" ? "Type a command" : root.mode === "clip" ? "Clipboard history is empty" : root.mode === "calc" ? "Type an expression, e.g. 12 * (3 + 4)" : root.grid ? "No wallpapers in ~/Pictures/Wallpapers" : "No results"
+                text: root.mode === "run" ? "Type a command" : root.mode === "clip" ? "Clipboard history is empty" : root.mode === "calc" ? "Type an expression, e.g. 12 * (3 + 4) or 5 km to mi" : root.mode === "file" ? (FileSearch.query ? "No files found" : "No recent files") : root.grid ? "No wallpapers in ~/Pictures/Wallpapers" : "No results"
             }
 
             // Footer: key hints, plus prefix modes while the field is empty.
@@ -204,35 +209,59 @@ PanelWindow {
                     key: "⇧⌦"
                     text: "delete"
                 }
+                KeyHint {
+                    visible: root.mode === "file"
+                    key: "⇧↵"
+                    text: "reveal"
+                }
 
+                // Prefix hints: full labels when they fit, else bare keycaps
+                // (measured by a hidden twin, so it never overflows or loops).
                 Item {
-                    Layout.fillWidth: true
-                }
+                    id: prefixes
 
-                KeyHint {
+                    readonly property var all: [[">", "run"], ["=", "calc"], [":", "wallpapers"], ["<", "clipboard"], [".", "emoji"], ["/", "files"], ["?", "web"]]
+                    readonly property bool compact: measure.implicitWidth > width
+
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: Theme.control
                     visible: search.text === ""
-                    key: ">"
-                    text: "run"
-                }
-                KeyHint {
-                    visible: search.text === ""
-                    key: "="
-                    text: "calc"
-                }
-                KeyHint {
-                    visible: search.text === ""
-                    key: ":"
-                    text: "wallpapers"
-                }
-                KeyHint {
-                    visible: search.text === ""
-                    key: "<"
-                    text: "clipboard"
-                }
-                KeyHint {
-                    visible: search.text === ""
-                    key: "."
-                    text: "emoji"
+                    clip: true
+
+                    Row {
+                        id: measure
+
+                        visible: false
+                        spacing: Theme.spaceLg
+
+                        Repeater {
+                            model: prefixes.all
+
+                            KeyHint {
+                                required property var modelData
+
+                                key: modelData[0]
+                                text: modelData[1]
+                            }
+                        }
+                    }
+
+                    Row {
+                        anchors.right: parent.right
+                        anchors.verticalCenter: parent.verticalCenter
+                        spacing: prefixes.compact ? Theme.spaceMd : Theme.spaceLg
+
+                        Repeater {
+                            model: prefixes.all
+
+                            KeyHint {
+                                required property var modelData
+
+                                key: modelData[0]
+                                text: prefixes.compact ? "" : modelData[1]
+                            }
+                        }
+                    }
                 }
             }
         }

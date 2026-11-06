@@ -62,7 +62,7 @@ Clickable {
             running: root.busy
             from: 0
             to: 360
-            duration: 1000
+            duration: Theme.animSpin
             loops: Animation.Infinite
         }
     }

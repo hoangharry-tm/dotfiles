@@ -67,3 +67,15 @@ output_path = "~/.local/state/theme/nvim.lua"
 [templates.fcitx5]
 input_path = "~/.config/matugen/templates/fcitx5.conf"
 output_path = "~/.local/share/fcitx5/themes/matugen/theme.conf"
+
+# tmux status line/borders: sourced by tmux.conf (optional include) and
+# live-reloaded by the `wallpaper` script.
+[templates.tmux]
+input_path = "~/.config/matugen/templates/tmux.conf"
+output_path = "~/.local/state/theme/tmux.conf"
+
+# Firefox chrome (tabs, URL bar); imported by userChrome.css, applies on
+# browser restart (see modules/browser.nix).
+[templates.firefox]
+input_path = "~/.config/matugen/templates/firefox.css"
+output_path = "~/.local/state/theme/firefox.css"

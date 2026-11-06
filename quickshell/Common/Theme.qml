@@ -36,6 +36,10 @@ Singleton {
     readonly property color tile: Qt.alpha(text, 0.06)
     readonly property color hover: Qt.alpha(text, 0.08)
     readonly property color pressed: Qt.alpha(text, 0.14)
+    readonly property color selection: Qt.alpha(primary, 0.4)       // text selection highlight
+    readonly property color primaryWash: Qt.alpha(primary, 0.16)    // quiet primary fill (selected row, chart area)
+    readonly property color primaryRing: Qt.alpha(primary, 0.7)     // focus / current ring
+    readonly property color scrim: Qt.alpha(surface, 0.35)          // dim behind full-screen overlays
     readonly property bool dark: surface.hslLightness < 0.5
     function mix(base, over, amount) {
         return Qt.tint(base, Qt.alpha(over, amount));
@@ -145,6 +149,9 @@ Singleton {
     readonly property int anim: 220
     readonly property int animSlow: 340
     readonly property int animAmbient: 9000 // one drift of an "on" gradient (only while a sheet is open)
+    readonly property int animSpin: 1000    // one turn of a busy spinner
+    readonly property int hoverOpen: 350    // hover card appears after this long
+    readonly property int hoverClose: 200   // ...and leaves this long after the pointer
     readonly property int animPulse: 1400   // slow breathing, e.g. privacy dot
     readonly property int easing: Easing.OutCubic
     readonly property int animInstant: 80  // press feedback: must feel immediate
