@@ -14,9 +14,16 @@ Canvas {
     implicitHeight: 28
     antialiasing: true
 
-    onValuesChanged: requestPaint()
-    onColorChanged: requestPaint()
-    onWidthChanged: requestPaint()
+    // Sparklines live in hover tooltips: skip repainting while hidden
+    // (samples keep arriving) and catch up once shown.
+    onVisibleChanged: if (visible)
+        requestPaint()
+    onValuesChanged: if (visible)
+        requestPaint()
+    onColorChanged: if (visible)
+        requestPaint()
+    onWidthChanged: if (visible)
+        requestPaint()
 
     onPaint: {
         const ctx = getContext("2d");

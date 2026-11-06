@@ -38,6 +38,8 @@ PopupWindow {
     Rectangle {
         id: card
 
+        // Propagate window visibility so hidden content (Sparklines) goes idle.
+        visible: root.visible
         width: column.implicitWidth + Theme.padControl * 2
         height: column.implicitHeight + Theme.padControl * 2
         radius: Theme.radiusMd

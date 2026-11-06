@@ -16,7 +16,8 @@ Singleton {
     readonly property bool wiredConnected: wired?.connected ?? false
     readonly property var networks: wifi ? wifi.networks.values.slice().sort((a, b) => (b.connected - a.connected) || (b.known - a.known) || (b.signalStrength - a.signalStrength)) : []
     readonly property var active: networks.find(n => n.connected) ?? null
-    readonly property real strength: active?.signalStrength ?? 0
+    // signalStrength can be undefined while NetworkManager is still scanning.
+    readonly property real strength: (active && active.signalStrength) || 0
 
     readonly property string label: wiredConnected ? "Ethernet" : active ? active.name : wifiEnabled ? "Not connected" : "Off"
     readonly property string icon: wiredConnected ? "󰈀" : !wifiEnabled ? "󰤮" : !active ? "󰤯" : signalIcon(strength)

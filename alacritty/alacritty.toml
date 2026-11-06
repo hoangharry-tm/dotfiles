@@ -15,7 +15,7 @@ decorations = "None"    # niri draws no title bars; keep it borderless
 [font]
 # "monospace" resolves via fontconfig (hh-nix-config modules/fonts.nix):
 # JetBrainsMono Nerd Font Mono, then system fonts as fallback.
-size = 12.0
+size = 10.5
 normal = { family = "monospace", style = "Regular" }
 bold = { family = "monospace", style = "Bold" }
 italic = { family = "monospace", style = "Italic" }
