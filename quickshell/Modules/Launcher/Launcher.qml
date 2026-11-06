@@ -94,6 +94,11 @@ PanelWindow {
             SearchField {
                 id: search
 
+                // Seed before the first frame, so a prefixed open (e.g. ":"
+                // wallpapers) never flashes the app list; opened() then
+                // consumes it.
+                Component.onCompleted: text = Launch.seed
+
                 Layout.fillWidth: true
                 Layout.preferredHeight: Theme.fieldHeight
                 Layout.leftMargin: Theme.spaceMd
