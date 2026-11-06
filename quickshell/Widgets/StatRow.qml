@@ -1,8 +1,10 @@
 import QtQuick
+import QtQuick.Layouts
 import qs.Common
 
-// A metric for hover cards: name and value on one line, history sparkline below.
-Column {
+// A metric for cards: name left, value right, history sparkline below.
+// Fills the width of the column it sits in.
+ColumnLayout {
     id: root
 
     property string name
@@ -11,23 +13,19 @@ Column {
     property real maxValue: 1
     property color color: Theme.primary
 
-    width: Theme.panelWidth / 2 // hover-card content width
+    Layout.fillWidth: true
     spacing: Theme.spaceXs
 
-    Item {
-        width: parent.width
-        height: nameLabel.implicitHeight
+    RowLayout {
+        Layout.fillWidth: true
 
         Label {
-            id: nameLabel
-
+            Layout.fillWidth: true
             text: root.name
             color: Theme.textMuted
-            font.pixelSize: Theme.textSm
         }
 
         Label {
-            anchors.right: parent.right
             text: root.value
             font.family: Theme.mono
             font.pixelSize: Theme.textSm
@@ -35,8 +33,8 @@ Column {
     }
 
     Sparkline {
-        width: parent.width
-        height: Theme.control - Theme.spaceXs * 2
+        Layout.fillWidth: true
+        Layout.preferredHeight: Theme.control
         values: root.history
         maxValue: root.maxValue
         color: root.color

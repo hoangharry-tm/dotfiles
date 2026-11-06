@@ -31,6 +31,17 @@ Singleton {
         onTriggered: root.player?.positionChanged()
     }
 
+    readonly property bool canSeek: player?.canSeek ?? false
+    readonly property string identity: player?.identity ?? ""
+
+    // fraction 0..1 of the track
+    function seek(fraction) {
+        if (canSeek && length > 0) {
+            player.position = fraction * length;
+            player.positionChanged();
+        }
+    }
+
     function formatTime(seconds) {
         const s = Math.max(0, Math.floor(seconds));
         return Math.floor(s / 60) + ":" + String(s % 60).padStart(2, "0");

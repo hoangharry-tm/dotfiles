@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import qs.Common
 import qs.Services
 import qs.Widgets
@@ -21,18 +22,25 @@ BarChip {
         }
     }
 
-    Tooltip {
+    Popover {
         target: root
         shown: root.hovered
+        padding: Theme.padControl
 
-        Label {
+        InfoRow {
             visible: Privacy.micActive
-            text: "󰍬  Microphone · " + Privacy.micApps.join(", ")
+            glyph: "󰍬"
+            label: "Microphone"
+            value: Privacy.micApps.join(", ")
+            valueColor: Theme.tertiary
         }
 
-        Label {
+        InfoRow {
             visible: Privacy.videoActive
-            text: "󰄀  Screen / camera · " + Privacy.videoApps.join(", ")
+            glyph: "󰄀"
+            label: "Screen / camera"
+            value: Privacy.videoApps.join(", ")
+            valueColor: Theme.tertiary
         }
     }
 }

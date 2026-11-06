@@ -11,7 +11,7 @@ Clickable {
     default property alias content: row.data
     property alias spacing: row.spacing
 
-    radius: Theme.radiusMd
+    radius: Theme.radiusSm
     implicitHeight: Theme.control
     implicitWidth: Math.max(Theme.control, row.implicitWidth + Theme.padControl * 2)
 

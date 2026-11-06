@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import qs.Common
 import qs.Services
 import qs.Widgets
@@ -14,12 +15,45 @@ BarChip {
         color: root.busy ? Theme.tertiary : Theme.textMuted
     }
 
-    Tooltip {
+    // `ps` and the extra reads run only while the card is open.
+    Binding {
+        target: System
+        property: "tracking"
+        value: card.open
+    }
+
+    Popover {
+        id: card
+
         target: root
         shown: root.hovered
+        cardWidth: Theme.popoverWidth
+
+        RowLayout {
+            Layout.fillWidth: true
+            spacing: Theme.gapInline
+
+            Icon {
+                glyph: "󰍛"
+                color: Theme.primary
+            }
+
+            Label {
+                Layout.fillWidth: true
+                text: "System"
+                font.weight: Font.DemiBold
+            }
+
+            Label {
+                text: "Up " + System.formatUptime(System.uptime)
+                color: Theme.textMuted
+                font.pixelSize: Theme.textXs
+            }
+        }
 
         StatRow {
-            name: "CPU · " + Math.round(System.temp) + "°C"
+            Layout.topMargin: Theme.spaceXs
+            name: "CPU  ·  " + Math.round(System.temp) + "°C"
             value: Math.round(System.cpu * 100) + "%"
             history: System.cpuHistory
         }
@@ -32,11 +66,25 @@ BarChip {
         }
 
         StatRow {
-            name: "Network"
-            value: "↓ " + System.formatRate(System.netDown) + "   ↑ " + System.formatRate(System.netUp)
+            name: "Network  ·  ↑ " + System.formatRate(System.netUp)
+            value: "↓ " + System.formatRate(System.netDown)
             history: System.netDownHistory
             maxValue: 0
             color: Theme.tertiary
+        }
+
+        InfoRow {
+            Layout.topMargin: Theme.spaceXs
+            label: "Load"
+            value: System.load.toFixed(2)
+            mono: true
+        }
+
+        InfoRow {
+            visible: System.topName !== ""
+            label: "Heaviest"
+            value: System.topName + "  " + System.topMem.toFixed(1) + " GiB"
+            mono: true
         }
     }
 }

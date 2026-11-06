@@ -20,7 +20,9 @@ PanelWindow {
     margins.right: Theme.edge
     implicitWidth: Theme.panelWidth
     implicitHeight: stack.implicitHeight
-    exclusiveZone: 0
+    // Ignore the bar's exclusive zone, else margins.top (already measured
+    // from the screen edge) is added below the bar a second time.
+    exclusionMode: ExclusionMode.Ignore
     color: "transparent"
     WlrLayershell.namespace: "qs-toasts"
     WlrLayershell.layer: WlrLayer.Overlay

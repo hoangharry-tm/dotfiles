@@ -25,6 +25,14 @@ Singleton {
     property var netDownHistory: []
     property var netUpHistory: []
 
+    // Shown only on the system card. Uptime/load are two tiny /proc reads; the
+    // top process spawns `ps`, so it runs only while a card sets `tracking`.
+    property real uptime: 0         // seconds
+    property real load: 0           // 1-minute load average
+    property string topName: ""
+    property real topMem: 0         // GiB
+    property bool tracking: false
+
     property var _last: null
     property var _net: null
 
@@ -43,11 +51,21 @@ Singleton {
         return (i === 0 ? Math.round(bytes) : bytes.toFixed(bytes < 10 ? 1 : 0)) + " " + units[i];
     }
 
+    function formatUptime(seconds) {
+        const m = Math.floor(seconds / 60), h = Math.floor(m / 60), d = Math.floor(h / 24);
+        return d > 0 ? d + "d " + (h % 24) + "h" : h > 0 ? h + "h " + (m % 60) + "m" : m + "m";
+    }
+
     function sample() {
         stat.reload();
         meminfo.reload();
         thermal.reload();
         netdev.reload();
+        uptimeFile.reload();
+        loadavg.reload();
+
+        uptime = parseFloat(uptimeFile.text()) || 0;
+        load = parseFloat(loadavg.text()) || 0;
 
         const fields = stat.text().split("\n")[0].trim().split(/\s+/).slice(1).map(Number);
         const idle = fields[3] + fields[4];
@@ -106,6 +124,20 @@ Singleton {
     }
 
     FileView {
+        id: uptimeFile
+
+        path: "/proc/uptime"
+        blockLoading: true
+    }
+
+    FileView {
+        id: loadavg
+
+        path: "/proc/loadavg"
+        blockLoading: true
+    }
+
+    FileView {
         id: meminfo
 
         path: "/proc/meminfo"
@@ -136,5 +168,35 @@ Singleton {
         repeat: true
         triggeredOnStart: true
         onTriggered: root.sample()
+    }
+
+    // Heaviest process by memory (summed per name: browsers fork many). RSS is
+    // exact, unlike ps's lifetime-average %CPU, so we rank by that.
+    Process {
+        id: top
+
+        command: ["ps", "-eo", "rss=,comm="]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                const sums = {};
+                for (const l of text.split("\n")) {
+                    const m = l.trim().match(/^(\d+)\s+(.+)$/);
+                    if (m)
+                        sums[m[2]] = (sums[m[2]] || 0) + parseInt(m[1]);
+                }
+                const best = Object.entries(sums).sort((x, y) => y[1] - x[1])[0];
+                root.topName = best ? best[0] : "";
+                root.topMem = best ? best[1] / 1048576 : 0;
+            }
+        }
+    }
+
+    Timer {
+        interval: 2000
+        running: root.tracking
+        repeat: true
+        triggeredOnStart: true
+        onTriggered: if (!top.running)
+            top.running = true
     }
 }

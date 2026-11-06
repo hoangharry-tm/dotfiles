@@ -24,7 +24,7 @@ Row {
 
             width: Theme.spaceXl
             height: Theme.control
-            radius: Theme.radiusMd
+            radius: Theme.radiusSm
             onClicked: Niri.focusWorkspace(modelData.id)
 
             Rectangle {

@@ -72,46 +72,60 @@ BarChip {
         border.color: Theme.surface
     }
 
-    Tooltip {
+    Popover {
         target: root
         shown: root.hovered && !root.active
+        cardWidth: Theme.popoverWidth
 
-        Label {
-            text: "Wi-Fi       " + Network.label
+        InfoRow {
+            glyph: Network.icon
+            label: "Network"
+            value: Network.label
         }
 
-        Label {
+        InfoRow {
             visible: BluetoothState.available
-            text: "Bluetooth   " + BluetoothState.label
+            glyph: BluetoothState.icon
+            label: "Bluetooth"
+            value: BluetoothState.label
         }
 
         Repeater {
             model: root.batteryDevices
 
-            Label {
+            InfoRow {
                 required property var modelData
 
-                text: "  " + BluetoothState.nameOf(modelData) + "  " + Math.round(modelData.battery * 100) + "%"
-                color: Theme.textMuted
-                            }
+                Layout.leftMargin: Theme.icon + Theme.gapInline // under the label, not the icon
+                label: BluetoothState.nameOf(modelData)
+                value: Math.round(modelData.battery * 100) + "%"
+                valueColor: Theme.textMuted
+            }
         }
 
-        Label {
-            text: "Volume      " + (Audio.muted ? "Muted" : Math.round(Audio.volume * 100) + "%")
+        InfoRow {
+            glyph: Audio.volumeIcon
+            label: "Volume"
+            value: Audio.muted ? "Muted" : Math.round(Audio.volume * 100) + "%"
         }
 
-        Label {
+        InfoRow {
             visible: Power.hasBattery
-            text: "Battery     " + Math.round(Power.percent * 100) + "%" + (Power.timeLabel ? " · " + Power.timeLabel : "")
+            glyph: Power.icon
+            label: "Battery"
+            value: Math.round(Power.percent * 100) + "%" + (Power.timeLabel ? "  \u00b7  " + Power.timeLabel : "")
+            valueColor: Power.percent < 0.15 && !Power.charging ? Theme.error : Theme.text
+        }
+
+        InfoRow {
+            glyph: Notifications.dnd ? "󰂛" : "󰂚"
+            label: "Notifications"
+            value: Notifications.dnd ? "Do Not Disturb" : Notifications.history.length > 0 ? Notifications.history.length + " unread" : "None"
         }
 
         Label {
-            text: Notifications.dnd ? "Do Not Disturb" : Notifications.history.length + " notifications"
-            color: Theme.textMuted
-        }
-
-        Label {
-            text: "Right-click: Do Not Disturb"
+            Layout.topMargin: Theme.spaceXs
+            text: "Right-click toggles Do Not Disturb"
             color: Theme.textMuted
             font.pixelSize: Theme.textXs
         }

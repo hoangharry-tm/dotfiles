@@ -17,16 +17,29 @@ PanelWindow {
     screen: modelData
     visible: shown
     anchors.top: true
+    exclusionMode: ExclusionMode.Ignore // margin is measured from the screen edge, not below the bar
     margins.top: Theme.popoverTop
-    implicitWidth: 336
-    implicitHeight: sheet.implicitHeight
-    exclusiveZone: 0
+    implicitWidth: Theme.calendarWidth
+    implicitHeight: column.implicitHeight + Theme.padSheet * 2
     color: "transparent"
     WlrLayershell.namespace: "qs-calendar"
     WlrLayershell.layer: WlrLayer.Overlay
 
     onShownChanged: if (shown)
         month = new Date()
+
+    readonly property bool onCurrentMonth: month.getFullYear() === clock.date.getFullYear() && month.getMonth() === clock.date.getMonth()
+
+    // ISO-8601 week number and day of year, for the footer.
+    function weekNumber(d) {
+        const t = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+        t.setUTCDate(t.getUTCDate() + 4 - (t.getUTCDay() || 7));
+        return Math.ceil(((t - Date.UTC(t.getUTCFullYear(), 0, 1)) / 86400000 + 1) / 7);
+    }
+
+    function dayOfYear(d) {
+        return Math.round((new Date(d.getFullYear(), d.getMonth(), d.getDate()) - new Date(d.getFullYear(), 0, 1)) / 86400000) + 1;
+    }
 
     function shift(months) {
         month = new Date(month.getFullYear(), month.getMonth() + months, 1);
@@ -41,8 +54,7 @@ PanelWindow {
     Glass {
         id: sheet
 
-        width: parent.width
-        implicitHeight: column.implicitHeight + Theme.padSheet * 2
+        anchors.fill: parent
         radius: Theme.radiusXl // = qs-calendar layer rule in niri/rules.kdl
 
         MouseArea {
@@ -59,26 +71,51 @@ PanelWindow {
             anchors.margins: Theme.padSheet
             spacing: Theme.spaceSm
 
-            Label {
-                text: Qt.formatDateTime(clock.date, "dddd")
-                color: Theme.primary
-                font.pixelSize: Theme.textSm
-                font.weight: Font.DemiBold
-            }
+            // Header: today's date, large; hierarchy by size and color.
+            ColumnLayout {
+                Layout.fillWidth: true
+                spacing: Theme.spaceXs
 
-            Label {
-                                text: Qt.formatDateTime(clock.date, "d MMMM yyyy")
-                font.pixelSize: Theme.textXl
-                font.weight: Font.DemiBold
+                Label {
+                    text: Qt.formatDateTime(clock.date, "dddd")
+                    color: Theme.primary
+                    font.weight: Font.DemiBold
+                }
+
+                Label {
+                    text: Qt.formatDateTime(clock.date, "d MMMM yyyy")
+                    font.pixelSize: Theme.textXl
+                    font.weight: Font.DemiBold
+                }
             }
 
             RowLayout {
                 Layout.fillWidth: true
+                Layout.topMargin: Theme.spaceSm
+                spacing: Theme.spaceXs
 
                 Label {
                     Layout.fillWidth: true
                     text: Qt.formatDate(root.month, "MMMM yyyy")
-                    color: Theme.textMuted
+                    font.weight: Font.DemiBold
+                }
+
+                Clickable {
+                    visible: !root.onCurrentMonth
+                    Layout.preferredHeight: Theme.controlSm
+                    Layout.preferredWidth: todayLabel.implicitWidth + Theme.padControl * 2
+                    radius: Theme.radiusFull
+                    onClicked: root.month = new Date()
+
+                    Label {
+                        id: todayLabel
+
+                        anchors.centerIn: parent
+                        text: "Today"
+                        color: Theme.primary
+                        font.pixelSize: Theme.textXs
+                        font.weight: Font.DemiBold
+                    }
                 }
 
                 Repeater {
@@ -146,6 +183,13 @@ PanelWindow {
                         font.weight: day.today ? Font.DemiBold : Font.Normal
                     }
                 }
+            }
+
+            Label {
+                Layout.topMargin: Theme.spaceXs
+                text: "Week " + root.weekNumber(clock.date) + "  \u00b7  Day " + root.dayOfYear(clock.date)
+                color: Theme.textMuted
+                font.pixelSize: Theme.textXs
             }
         }
     }

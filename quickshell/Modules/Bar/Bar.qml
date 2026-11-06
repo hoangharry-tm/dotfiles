@@ -33,9 +33,9 @@ PanelWindow {
     // Left: where you are
     RowLayout {
         anchors.left: parent.left
-        anchors.leftMargin: Theme.barInset
+        anchors.leftMargin: Theme.barPadX
         anchors.verticalCenter: parent.verticalCenter
-        spacing: Theme.barInset
+        spacing: Theme.barGap
 
         Workspaces {
             output: bar.modelData.name
@@ -55,9 +55,9 @@ PanelWindow {
     // Right: what's going on
     RowLayout {
         anchors.right: parent.right
-        anchors.rightMargin: Theme.barInset
+        anchors.rightMargin: Theme.barPadX
         anchors.verticalCenter: parent.verticalCenter
-        spacing: Theme.barInset
+        spacing: Theme.barGap
 
         MediaChip {}
 

@@ -102,6 +102,23 @@ layer-rule {
     }
 }
 
+// Bar hover cards (quickshell Widgets/Popover.qml).
+layer-rule {
+    match namespace="^qs-popover$"
+    geometry-corner-radius 16
+    background-effect {
+        blur true
+    }
+    // elevation E2 (quickshell/DESIGN.md)
+    shadow {
+        on
+        softness 40
+        spread 0
+        offset x=0 y=8
+        color "#00000040"
+    }
+}
+
 layer-rule {
     match namespace="^qs-control-center$"
     geometry-corner-radius 28

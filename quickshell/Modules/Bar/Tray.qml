@@ -20,7 +20,7 @@ Row {
         return redundant.some(r => id.includes(r));
     }
 
-    spacing: Theme.barInset
+    spacing: Theme.barGap
 
     Repeater {
         model: SystemTray.items.values.filter(i => !root.isRedundant(i))
@@ -29,6 +29,7 @@ Row {
             id: item
 
             required property SystemTrayItem modelData
+            readonly property string tip: modelData.tooltipTitle || modelData.title
 
             onClicked: modelData.onlyMenu ? openMenu() : modelData.activate()
             onRightClicked: openMenu()
@@ -39,7 +40,8 @@ Row {
                 if (!modelData.hasMenu)
                     return;
                 const p = root.bar.itemPosition(item);
-                modelData.display(root.bar, p.x, p.y + item.height + Theme.spaceSm);
+                // y: chip bottom, then the bar inset, then the shared popover gap
+                modelData.display(root.bar, p.x, p.y + item.height + Theme.barInset + Theme.popoverGap);
             }
 
             IconImage {
@@ -47,12 +49,20 @@ Row {
                 source: item.modelData.icon
             }
 
-            Tooltip {
+            Popover {
                 target: item
-                shown: item.hovered && (item.modelData.tooltipTitle || item.modelData.title) !== ""
+                shown: item.hovered && item.tip !== ""
+                padding: Theme.padControl
 
                 Label {
-                    text: item.modelData.tooltipTitle || item.modelData.title
+                    text: item.tip
+                }
+
+                Label {
+                    visible: item.modelData.tooltipDescription !== ""
+                    text: item.modelData.tooltipDescription
+                    color: Theme.textMuted
+                    font.pixelSize: Theme.textXs
                 }
             }
         }

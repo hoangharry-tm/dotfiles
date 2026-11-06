@@ -19,9 +19,9 @@ Text/icon metrics assume Noto Sans (`Theme.font`) and JetBrainsMono NF
 ## Spacing (`Theme.space*`)
 | Token | px | Semantic alias (use these) |
 |---|---|---|
-| spaceXs | 4 | `barInset` (bar edge to chip), tight stacks (title/subtitle) |
-| spaceSm | 8 | `gapInline` (icon-label, siblings in a row), `gapStack` (rows/cards in a group), `edge` (sheet to screen, bar to screen) |
-| spaceMd | 12 | `padControl` (chip/button horizontal padding), launcher/CC row inset |
+| spaceXs | 4 | tight stacks (title/subtitle) |
+| spaceSm | 8 | `barInset` (bar top/bottom to chip), `barGap` (between bar items), `popoverGap` (bar to popover), `gapInline` (icon-label, siblings in a row), `gapStack` (rows/cards in a group), `edge` (sheet to screen, bar to screen) |
+| spaceMd | 12 | `barPadX` (bar left/right to first chip), `padControl` (chip/button horizontal padding), launcher/CC row inset |
 | spaceLg | 16 | `padCard` (inside cards), `padSheet` (sheet to content), `gapSection` (between groups) |
 | spaceXl | 24 | large section breaks, text inset in launcher (12 + 12) |
 | space2xl | 32 | page-level (power menu, OSD offset) |
@@ -30,10 +30,10 @@ Rule of thumb: gaps *between* groups > gaps *within* a group (Gestalt
 proximity). Inside a group use 8 (4 for tight), between groups 16.
 
 ## Radius (`Theme.radius*`)
-xs 4 keycaps | sm 8 small controls | md 12 cards, tiles, bar chips | lg 16 bar,
+xs 4 keycaps | sm 8 small controls | md 12 cards, tiles | sm 8 also bar chips | lg 16 bar, bar popovers,
 toasts, launcher highlight | xl 28 big sheets (launcher, control center,
 calendar) | full pills/circles.
-Nesting that holds today: bar 16 - inset 4 = chip 12; sheet 28 - inset 16 = card
+Nesting that holds today: bar 16 - inset 8 = chip 8; sheet 28 - inset 16 = card
 12; launcher 28 - inset 12 = highlight 16.
 **niri layer-rule `geometry-corner-radius` must equal the sheet's radius.**
 
@@ -51,7 +51,7 @@ Shadows are wide, low-alpha, zero spread; they blend instead of outlining.
 | E2 | control center, calendar, OSD, tiled windows | 40 (windows 48) | 8 | #00000040 (windows #00000047) |
 | E3 | launcher (modal) | 64 | 16 | #00000047 |
 
-Tooltips and toasts are QML-drawn (xdg popup / unruled), so they are flat:
+Bar popovers use E2 via `qs-popover`. Tooltips and toasts are QML-drawn (xdg popup / unruled), so they are flat:
 `glassSolid` fill + hairline, no shadow.
 Glass: fill `glass` (surface @ 0.66) over niri blur; `glassSolid` (0.92) when no
 blur. Border = `hairline` 1px.
@@ -81,11 +81,25 @@ Heights on the 4-pt grid; minimum hit target `control` 32.
 controlSm 24 (dismiss, chips) | control 32 (bar chip, icon button) | controlLg
 40 | rowHeight 40 (48 with subtitle) | resultHeight 56 | fieldHeight 56 |
 tileHeight 64 | trackHeight 8 | thumb 16.
-Bar: `barHeight` 40 = control 32 + 2 x barInset 4. Every bar item is a `BarChip`
-(32 high, 12 padding, square when icon-only) placed 4 apart on one row; nothing
-is hand-positioned. Groups: workspaces + title left, clock centered, status right.
-Widths: panelWidth 400 (control center, toasts), launcherWidth 640, calendar 336.
-Sheets hang `popoverTop` below the screen top and `edge` from the side.
+Bar: `barHeight` 48 = control 32 + 2 x barInset 8; horizontal inset `barPadX` 12
+(wider than the vertical one: the pill's curve eats space), items `barGap` 8
+apart. Every bar item is a `BarChip` (32 high, 12 padding, square when
+icon-only); nothing is hand-positioned. Groups: workspaces + title left, clock
+centered, status right.
+Widths: panelWidth 400 (control center, toasts), launcherWidth 640,
+calendarWidth 336, popoverWidth 320 (bar hover cards).
+
+## Bar popovers
+One placement rule: a popover's top is `popoverGap` (8) below the bar's bottom
+edge (`popoverTop` from the screen top), centered on its trigger and clamped to
+`barMargin` from the screen sides; it never overlaps the bar. Layer-shell
+windows must set `exclusionMode: ExclusionMode.Ignore`, otherwise niri adds the
+bar's exclusive zone on top of the margin (the old "too far away").
+Hover cards are `Widgets/Popover.qml` (layer namespace `qs-popover`, radius 16,
+E2, blurred like any sheet): open after 350 ms hover, close 200 ms after the
+pointer leaves; `interactive` cards (media) stay open while the pointer is on
+them. Passive cards let clicks through. `Widgets/Tooltip.qml` remains for
+item-relative tooltips inside other sheets.
 
 ## Motion
 animFast 120 (hover wash), anim 220 (state), animSlow 340 (theme color change),
