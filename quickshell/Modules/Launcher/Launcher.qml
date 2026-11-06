@@ -35,10 +35,19 @@ PanelWindow {
 
     // Created on demand by a LazyLoader (shell.qml), so also run on creation.
     Component.onCompleted: if (shown) Qt.callLater(opened)
-    onShownChanged: opened()
+    // Deferred: shown can flip true mid-construction, before the search
+    // field exists, and the seed (e.g. ":" for wallpapers) would be lost.
+    onShownChanged: Qt.callLater(opened)
+
+    // Both paths above can fire for one open (shown flips while the lazy
+    // window initialises); run once, or the 2nd call wipes the consumed seed.
+    property bool primed: false
 
     function opened() {
-        if (shown) {
+        if (!shown) {
+            primed = false;
+        } else if (!primed) {
+            primed = true;
             search.text = Launch.seed;
             Launch.seed = "";
             current = 0;
