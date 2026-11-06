@@ -1,116 +1,93 @@
 import QtQuick
 import qs.Common
 
-// Thin-track slider with a leading icon button (e.g. mute).
+// Large pill slider, macOS style: the accent fill carries the icon (tap it
+// to mute); drag or scroll anywhere else to set the value.
 Item {
     id: root
 
     property real value: 0               // 0..1
     property string glyph: ""
     property bool dimmed: false          // e.g. muted
+    property color trackColor: Theme.tile // pass a stronger fill when sitting on a card
     property string trailing: Math.round(value * 100) + "%"
 
     signal moved(real value)
     signal iconClicked
 
-    implicitHeight: Theme.control
+    // Fill is at least a full circle so the icon always sits on it.
+    readonly property real fillWidth: Math.max(height, width * value)
+    readonly property bool iconCovered: fillWidth >= height
 
-    Clickable {
-        id: iconButton
+    implicitHeight: Theme.sliderHeight
 
-        anchors.left: parent.left
-        anchors.verticalCenter: parent.verticalCenter
-        width: Theme.control
-        height: Theme.control
+    Rectangle {
+        anchors.fill: parent
         radius: Theme.radiusFull
+        color: root.trackColor
+
+        Rectangle {
+            width: root.fillWidth
+            height: parent.height
+            radius: Theme.radiusFull
+            color: root.dimmed ? Theme.pressed : drag.pressed ? Theme.primaryPressed : Theme.primary
+
+            Behavior on width {
+                enabled: !drag.pressed
+                NumberAnimation {
+                    duration: Theme.animFast
+                    easing.type: Theme.easing
+                }
+            }
+
+            Behavior on color {
+                ColorAnimation {
+                    duration: Theme.anim
+                }
+            }
+        }
+    }
+
+    MouseArea {
+        id: drag
+
+        anchors.fill: parent
+        hoverEnabled: true
+        cursorShape: Qt.PointingHandCursor
+        preventStealing: true
+        onPressed: m => update(m.x)
+        onPositionChanged: m => {
+            if (pressed)
+                update(m.x);
+        }
+        onWheel: w => root.moved(Math.max(0, Math.min(1, root.value + (w.angleDelta.y > 0 ? 0.05 : -0.05))))
+
+        function update(x) {
+            root.moved(Math.max(0, Math.min(1, x / root.width)));
+        }
+    }
+
+    // Icon button on top of the drag area (it sits inside the fill's end cap).
+    MouseArea {
+        width: root.height
+        height: root.height
+        cursorShape: Qt.PointingHandCursor
         onClicked: root.iconClicked()
 
         Icon {
             anchors.centerIn: parent
             glyph: root.glyph
-            size: Theme.icon
-            color: root.dimmed ? Theme.textMuted : Theme.text
-        }
-    }
-
-    Item {
-        id: track
-
-        anchors.left: iconButton.right
-        anchors.leftMargin: Theme.spaceMd // thumb overhangs the track by thumb/2
-        anchors.right: valueLabel.left
-        anchors.rightMargin: Theme.spaceMd
-        anchors.verticalCenter: parent.verticalCenter
-        height: Theme.thumb + Theme.spaceXs
-
-        Rectangle {
-            anchors.verticalCenter: parent.verticalCenter
-            width: parent.width
-            height: Theme.trackHeight
-            radius: Theme.trackHeight / 2
-            color: Theme.tile
-
-            Rectangle {
-                width: Math.max(height, parent.width * root.value)
-                height: parent.height
-                radius: Theme.trackHeight / 2
-                color: root.dimmed ? Theme.textMuted : Theme.primary
-
-                Behavior on width {
-                    enabled: !drag.pressed
-                    NumberAnimation {
-                        duration: Theme.animFast
-                    }
-                }
-            }
-        }
-
-        Rectangle {
-            x: parent.width * root.value - width / 2
-            anchors.verticalCenter: parent.verticalCenter
-            width: Theme.thumb
-            height: width
-            radius: width / 2
-            color: Theme.text
-
-            Behavior on width {
-                NumberAnimation {
-                    duration: Theme.animFast
-                }
-            }
-        }
-
-        MouseArea {
-            id: drag
-
-            anchors.fill: parent
-            anchors.margins: -Theme.spaceSm
-            hoverEnabled: true
-            cursorShape: Qt.PointingHandCursor
-            preventStealing: true
-
-            function update(x) {
-                root.moved(Math.max(0, Math.min(1, (x - Theme.spaceSm) / track.width)));
-            }
-
-            onPressed: m => update(m.x)
-            onPositionChanged: m => {
-                if (pressed)
-                    update(m.x);
-            }
-            onWheel: w => root.moved(Math.max(0, Math.min(1, root.value + (w.angleDelta.y > 0 ? 0.05 : -0.05))))
+            size: Theme.iconLg
+            color: root.dimmed ? Theme.textMuted : root.iconCovered ? Theme.primaryText : Theme.text
         }
     }
 
     Label {
-        id: valueLabel
-
         anchors.right: parent.right
+        anchors.rightMargin: Theme.spaceMd
         anchors.verticalCenter: parent.verticalCenter
-        width: Theme.control + Theme.spaceXs
-        horizontalAlignment: Text.AlignRight
         text: root.trailing
-        color: Theme.textMuted
+        color: root.fillWidth > root.width - Theme.rowHeightTall ? Theme.primaryTextMuted : Theme.textMuted
         font.pixelSize: Theme.textXs
         font.family: Theme.mono
     }

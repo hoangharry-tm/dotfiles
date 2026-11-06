@@ -1,19 +1,33 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Io
 import qs.Common
 import qs.Services
 import qs.Widgets
 
-// Battery at a glance + quick actions (wallpaper, screenshot, lock, power).
+// Who and how long (uptime), plus session shortcuts (wallpaper, lock, power).
 RowLayout {
+    id: root
+
+    // True while the sheet is open: uptime is read then, never in the background.
+    property bool active: false
+    property string uptime: ""
+
     spacing: Theme.gapInline
 
-    Icon {
-        visible: Power.hasBattery
-        glyph: Power.icon
-        size: Theme.iconLg
-        color: Power.percent < 0.15 && !Power.charging ? Theme.error : Theme.text
+    onActiveChanged: if (active)
+        uptimeFile.reload()
+
+    FileView {
+        id: uptimeFile
+
+        path: "/proc/uptime"
+        onLoaded: {
+            const s = parseFloat(text());
+            const d = Math.floor(s / 86400), h = Math.floor(s % 86400 / 3600), m = Math.floor(s % 3600 / 60);
+            root.uptime = "Up " + (d ? d + " d " : "") + (h ? h + " h " : "") + m + " min";
+        }
     }
 
     Column {
@@ -21,14 +35,15 @@ RowLayout {
         Layout.leftMargin: Theme.spaceXs
 
         Label {
-            text: Power.hasBattery ? Math.round(Power.percent * 100) + "%" : "Plugged in"
+            width: parent.width
+            text: Quickshell.env("USER")
             font.pixelSize: Theme.textLg
             font.weight: Font.DemiBold
         }
 
         Label {
-            text: Power.timeLabel
-            visible: text !== ""
+            width: parent.width
+            text: root.uptime
             color: Theme.textMuted
             font.pixelSize: Theme.textXs
         }
@@ -37,7 +52,6 @@ RowLayout {
     Repeater {
         model: [
             { glyph: "󰸉", tip: "Wallpaper", run: () => Quickshell.execDetached(["wallpaper", "pick"]) },
-            { glyph: "󰹑", tip: "Screenshot", run: () => Quickshell.execDetached(["sh", "-c", "sleep 0.3; niri msg action screenshot"]) },
             { glyph: "󰌾", tip: "Lock", run: () => Quickshell.execDetached(["lock-screen"]) },
             { glyph: "󰐥", tip: "Power", run: () => Panels.toggle("power") }
         ]
@@ -50,7 +64,7 @@ RowLayout {
             Layout.preferredWidth: Theme.control
             Layout.preferredHeight: Theme.control
             radius: Theme.radiusFull
-            color: hovered ? Theme.pressed : Theme.tile
+            color: pressed ? Theme.pressed : hovered ? Theme.hover : Theme.tile
             onClicked: {
                 Panels.close();
                 modelData.run();

@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
-import Quickshell.Services.UPower
 import qs.Common
 import qs.Services
 import qs.Widgets
@@ -14,7 +13,7 @@ PanelWindow {
     required property ShellScreen modelData
     readonly property bool shown: Panels.isOpen("control", modelData.name)
 
-    // Which detail list is expanded: "", "wifi", "bluetooth", "output", "input"
+    // Which detail list is expanded: "", "wifi", "bluetooth", "sound"
     property string detail: ""
 
     screen: modelData
@@ -30,6 +29,10 @@ PanelWindow {
     WlrLayershell.namespace: "qs-control-center"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: shown ? WlrKeyboardFocus.OnDemand : WlrKeyboardFocus.None
+
+    function toggleDetail(name) {
+        detail = detail === name ? "" : name;
+    }
 
     onShownChanged: {
         if (!shown)
@@ -63,24 +66,31 @@ PanelWindow {
 
                 Header {
                     Layout.fillWidth: true
+                    active: root.shown
                 }
 
-                GridLayout {
+                // Connectivity: each tile opens its list right below it.
+                ColumnLayout {
                     Layout.fillWidth: true
-                    columns: 2
-                    columnSpacing: Theme.gapStack
-                    rowSpacing: Theme.gapStack
+                    spacing: Theme.gapStack
 
                     Tile {
                         Layout.fillWidth: true
-                        glyph: Network.wiredConnected ? "󰈀" : Network.wifiEnabled ? "󰤨" : "󰤮"
+                        glyph: Network.icon
                         title: Network.wiredConnected ? "Ethernet" : "Wi-Fi"
                         subtitle: Network.label
                         checked: Network.wifiEnabled || Network.wiredConnected
                         expandable: Network.wifi !== null
                         expanded: root.detail === "wifi"
                         onToggled: Network.setWifi(!Network.wifiEnabled)
-                        onExpand: root.detail = root.detail === "wifi" ? "" : "wifi"
+                        onExpand: root.toggleDetail("wifi")
+                    }
+
+                    Loader {
+                        Layout.fillWidth: true
+                        active: root.detail === "wifi"
+                        visible: active
+                        sourceComponent: WifiList {}
                     }
 
                     Tile {
@@ -93,62 +103,70 @@ PanelWindow {
                         expandable: true
                         expanded: root.detail === "bluetooth"
                         onToggled: BluetoothState.setEnabled(!BluetoothState.enabled)
-                        onExpand: root.detail = root.detail === "bluetooth" ? "" : "bluetooth"
+                        onExpand: root.toggleDetail("bluetooth")
                     }
+
+                    Loader {
+                        Layout.fillWidth: true
+                        active: root.detail === "bluetooth"
+                        visible: active
+                        sourceComponent: BluetoothList {}
+                    }
+                }
+
+                // Quick toggles
+                RowLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.gapStack
 
                     Tile {
                         Layout.fillWidth: true
+                        Layout.preferredWidth: 1 // equal widths
+                        compact: true
                         glyph: Notifications.dnd ? "󰂛" : "󰂚"
                         title: "Focus"
-                        subtitle: Notifications.dnd ? "Do not disturb" : "Off"
                         checked: Notifications.dnd
                         onToggled: Notifications.dnd = !Notifications.dnd
                     }
 
                     Tile {
                         Layout.fillWidth: true
-                        readonly property var modes: [PowerProfile.PowerSaver, PowerProfile.Balanced].concat(Power.hasPerformance ? [PowerProfile.Performance] : [])
-                        glyph: Power.profile === PowerProfile.PowerSaver ? "󰌪" : Power.profile === PowerProfile.Performance ? "󰓅" : "󰾅"
-                        title: "Power mode"
-                        subtitle: PowerProfile.toString(Power.profile).replace(/([a-z])([A-Z])/g, "$1 $2")
-                        checked: Power.profile !== PowerProfile.Balanced
-                        onToggled: Power.setProfile(modes[(modes.indexOf(Power.profile) + 1) % modes.length])
-                    }
-                }
-
-                // Expanded details for a tile or a slider's device picker
-                Loader {
-                    Layout.fillWidth: true
-                    active: root.detail !== ""
-                    visible: active
-                    sourceComponent: root.detail === "wifi" ? wifiList : root.detail === "bluetooth" ? bluetoothList : audioList
-                }
-
-                Section {
-                    Layout.fillWidth: true
-
-                    SliderRow {
-                        Layout.fillWidth: true
-                        value: Audio.volume
-                        glyph: Audio.volumeIcon
-                        dimmed: Audio.muted
-                        expanded: root.detail === "output"
-                        onMoved: v => Audio.setVolume(v)
-                        onIconClicked: Audio.toggleMute()
-                        onExpand: root.detail = root.detail === "output" ? "" : "output"
+                        Layout.preferredWidth: 1
+                        compact: true
+                        glyph: KeepAwake.enabled ? "󰅶" : "󰾪"
+                        title: "Awake"
+                        checked: KeepAwake.enabled
+                        onToggled: KeepAwake.enabled = !KeepAwake.enabled
                     }
 
-                    SliderRow {
+                    Tile {
                         Layout.fillWidth: true
+                        Layout.preferredWidth: 1
                         visible: Audio.source !== null
-                        value: Audio.micVolume
+                        compact: true
                         glyph: Audio.micIcon
-                        dimmed: Audio.micMuted
-                        expanded: root.detail === "input"
-                        onMoved: v => Audio.setMicVolume(v)
-                        onIconClicked: Audio.toggleMicMute()
-                        onExpand: root.detail = root.detail === "input" ? "" : "input"
+                        title: Audio.micMuted ? "Mic off" : "Mic"
+                        checked: Audio.micMuted
+                        onToggled: Audio.toggleMicMute()
                     }
+
+                    Tile {
+                        Layout.fillWidth: true
+                        Layout.preferredWidth: 1
+                        compact: true
+                        glyph: "󰹑"
+                        title: "Capture"
+                        onToggled: {
+                            Panels.close();
+                            Quickshell.execDetached(["sh", "-c", "sleep 0.3; niri msg action screenshot"]);
+                        }
+                    }
+                }
+
+                // Display and sound
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: Theme.gapStack
 
                     SliderRow {
                         Layout.fillWidth: true
@@ -158,37 +176,41 @@ PanelWindow {
                         expandable: false
                         onMoved: v => Brightness.set(v)
                     }
+
+                    SliderRow {
+                        Layout.fillWidth: true
+                        value: Audio.volume
+                        glyph: Audio.volumeIcon
+                        dimmed: Audio.muted
+                        expanded: root.detail === "sound"
+                        onMoved: v => Audio.setVolume(v)
+                        onIconClicked: Audio.toggleMute()
+                        onExpand: root.toggleDetail("sound")
+                    }
+
+                    Loader {
+                        Layout.fillWidth: true
+                        active: root.detail === "sound"
+                        visible: active
+                        sourceComponent: SoundList {}
+                    }
+                }
+
+                BatteryCard {
+                    Layout.fillWidth: true
+                    visible: Power.hasBattery || Power.hasPerformance
                 }
 
                 MediaCard {
                     Layout.fillWidth: true
                     visible: Media.active
+                    live: root.shown && Media.active
                 }
 
                 NotificationList {
                     Layout.fillWidth: true
                 }
             }
-        }
-    }
-
-    Component {
-        id: wifiList
-
-        WifiList {}
-    }
-
-    Component {
-        id: bluetoothList
-
-        BluetoothList {}
-    }
-
-    Component {
-        id: audioList
-
-        AudioList {
-            output: root.detail === "output"
         }
     }
 }

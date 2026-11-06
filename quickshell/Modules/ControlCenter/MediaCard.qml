@@ -5,15 +5,26 @@ import qs.Common
 import qs.Services
 import qs.Widgets
 
-// Now playing: artwork, title/artist, previous · play/pause · next.
+// Now playing: artwork, title/artist, transport controls and progress.
 Section {
+    id: root
+
+    // Position polling runs only while this card is on screen.
+    property bool live: false
+
+    Binding {
+        target: Media
+        property: "tracking"
+        value: root.live
+    }
+
     RowLayout {
         Layout.fillWidth: true
         spacing: Theme.spaceMd
 
         ClippingRectangle {
-            Layout.preferredWidth: Theme.controlLg + Theme.spaceMd
-            Layout.preferredHeight: Theme.controlLg + Theme.spaceMd
+            Layout.preferredWidth: Theme.tileHeight
+            Layout.preferredHeight: Theme.tileHeight
             radius: Theme.radiusSm
             color: Theme.tile
 
@@ -28,7 +39,7 @@ Section {
             Icon {
                 anchors.centerIn: parent
                 glyph: "󰎆"
-                size: Theme.iconLg
+                size: Theme.iconXl
                 visible: Media.art === ""
             }
         }
@@ -46,29 +57,78 @@ Section {
                 width: parent.width
                 text: Media.artist || Media.player?.identity || ""
                 color: Theme.textMuted
-                font.pixelSize: Theme.textSm
+                font.pixelSize: Theme.textXs
+            }
+        }
+    }
+
+    // Progress
+    RowLayout {
+        Layout.fillWidth: true
+        visible: Media.length > 0
+        spacing: Theme.gapInline
+
+        Label {
+            text: Media.formatTime(Media.position)
+            color: Theme.textMuted
+            font.pixelSize: Theme.textXs
+            font.family: Theme.mono
+        }
+
+        Rectangle {
+            Layout.fillWidth: true
+            implicitHeight: Theme.trackHeight / 2
+            radius: Theme.radiusFull
+            color: Theme.tile
+
+            Rectangle {
+                width: parent.width * Media.progress
+                height: parent.height
+                radius: Theme.radiusFull
+                color: Theme.primary
+
+                Behavior on width {
+                    NumberAnimation {
+                        duration: Theme.animSlow
+                    }
+                }
             }
         }
 
+        Label {
+            text: Media.formatTime(Media.length)
+            color: Theme.textMuted
+            font.pixelSize: Theme.textXs
+            font.family: Theme.mono
+        }
+    }
+
+    // Transport
+    RowLayout {
+        Layout.alignment: Qt.AlignHCenter
+        spacing: Theme.spaceXl
+
         Repeater {
             model: [
-                { glyph: "󰒮", run: () => Media.previous() },
-                { glyph: Media.playing ? "󰏤" : "󰐊", run: () => Media.toggle() },
-                { glyph: "󰒭", run: () => Media.next() }
+                { glyph: "󰒮", main: false, run: () => Media.previous() },
+                { glyph: Media.playing ? "󰏤" : "󰐊", main: true, run: () => Media.toggle() },
+                { glyph: "󰒭", main: false, run: () => Media.next() }
             ]
 
             Clickable {
                 required property var modelData
 
-                Layout.preferredWidth: Theme.control
-                Layout.preferredHeight: Theme.control
+                Layout.preferredWidth: Theme.controlLg
+                Layout.preferredHeight: Theme.controlLg
                 radius: Theme.radiusFull
+                color: modelData.main ? (pressed ? Theme.primaryPressed : hovered ? Theme.primaryHover : Theme.primary) : pressed ? Theme.pressed : hovered ? Theme.hover : "transparent"
                 onClicked: modelData.run()
 
                 Icon {
                     anchors.centerIn: parent
                     glyph: parent.modelData.glyph
-                    size: Theme.icon
+                    size: Theme.iconLg
+                    color: parent.modelData.main ? Theme.primaryText : Theme.text
                 }
             }
         }

@@ -1,8 +1,9 @@
 import QtQuick
 import qs.Common
 
-// Control Center tile: icon + title + status, accent-filled when on.
-// The right part (chevron) opens details when `expandable`.
+// Control Center tile. Wide: icon badge + title + status, chevron opens
+// details when `expandable`. Compact: icon badge over a short label.
+// Accent-filled when on; colors animate between hover/press/on states.
 Rectangle {
     id: root
 
@@ -10,17 +11,18 @@ Rectangle {
     property string title: ""
     property string subtitle: ""
     property bool checked: false
+    property bool compact: false
     property bool expandable: false
     property bool expanded: false
 
     signal toggled
     signal expand
 
-    implicitHeight: Theme.tileHeight
-    radius: Theme.radiusMd
-    color: checked ? Theme.primary : main.containsMouse ? Theme.hover : Theme.tile
-
     readonly property color fg: checked ? Theme.primaryText : Theme.text
+
+    implicitHeight: compact ? stack.implicitHeight + Theme.padControl * 2 : Theme.tileHeight
+    radius: Theme.radiusMd
+    color: checked ? (main.pressed ? Theme.primaryPressed : main.containsMouse ? Theme.primaryHover : Theme.primary) : main.pressed ? Theme.pressed : main.containsMouse ? Theme.hover : Theme.tile
 
     Behavior on color {
         ColorAnimation {
@@ -28,7 +30,9 @@ Rectangle {
         }
     }
 
+    // Wide layout
     Row {
+        visible: !root.compact
         anchors.left: parent.left
         anchors.leftMargin: Theme.padCard // = (height - badge) / 2: equal on all sides
         anchors.right: chevron.visible ? chevron.left : parent.right
@@ -36,31 +40,20 @@ Rectangle {
         anchors.verticalCenter: parent.verticalCenter
         spacing: Theme.spaceMd
 
-        Rectangle {
-            width: Theme.control
-            height: Theme.control
-            radius: Theme.radiusFull
-            color: root.checked ? Qt.alpha(Theme.primaryText, 0.14) : Theme.tile
+        IconBadge {
             anchors.verticalCenter: parent.verticalCenter
-
-            Icon {
-                anchors.centerIn: parent
-                glyph: root.glyph
-                size: Theme.icon
-                color: root.fg
-            }
+            glyph: root.glyph
+            on: root.checked
         }
 
         Column {
             width: parent.width - Theme.control - Theme.spaceMd
             anchors.verticalCenter: parent.verticalCenter
-            spacing: 0
 
             Label {
                 width: parent.width
                 text: root.title
                 color: root.fg
-                font.pixelSize: Theme.textMd
                 font.weight: Font.DemiBold
             }
 
@@ -68,9 +61,34 @@ Rectangle {
                 width: parent.width
                 text: root.subtitle
                 visible: text !== ""
-                color: root.checked ? Qt.alpha(Theme.primaryText, 0.75) : Theme.textMuted
+                color: root.checked ? Theme.primaryTextMuted : Theme.textMuted
                 font.pixelSize: Theme.textXs
             }
+        }
+    }
+
+    // Compact layout
+    Column {
+        id: stack
+
+        visible: root.compact
+        anchors.centerIn: parent
+        width: parent.width - Theme.padControl * 2
+        spacing: Theme.spaceXs
+
+        IconBadge {
+            anchors.horizontalCenter: parent.horizontalCenter
+            glyph: root.glyph
+            on: root.checked
+        }
+
+        Label {
+            width: parent.width
+            horizontalAlignment: Text.AlignHCenter
+            text: root.title
+            color: root.fg
+            font.pixelSize: Theme.textXs
+            font.weight: Font.DemiBold
         }
     }
 
@@ -78,7 +96,7 @@ Rectangle {
         id: main
 
         anchors.fill: parent
-        anchors.rightMargin: chevron.visible ? chevron.width : 0
+        anchors.rightMargin: chevron.visible ? chevron.width + Theme.spaceSm * 2 : 0
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         onClicked: root.toggled()
@@ -87,7 +105,7 @@ Rectangle {
     Clickable {
         id: chevron
 
-        visible: root.expandable
+        visible: root.expandable && !root.compact
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: parent.bottom

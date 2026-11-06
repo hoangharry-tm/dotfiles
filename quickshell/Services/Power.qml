@@ -15,6 +15,14 @@ Singleton {
     readonly property bool plugged: !UPower.onBattery
     readonly property real secondsLeft: charging ? (battery?.timeToFull ?? 0) : (battery?.timeToEmpty ?? 0)
 
+    // Battery health (full vs design capacity), averaged over the physical
+    // batteries (the T480 has two); -1 when UPower can't tell.
+    readonly property real health: {
+        const bats = UPower.devices.values.filter(d => d.type === UPowerDeviceType.Battery && d.healthSupported);
+        return bats.length ? bats.reduce((a, d) => a + d.healthPercentage, 0) / bats.length : -1;
+    }
+    readonly property real watts: Math.abs(battery?.changeRate ?? 0)
+
     readonly property string icon: {
         if (charging)
             return "󰂄";

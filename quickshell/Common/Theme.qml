@@ -33,6 +33,11 @@ Singleton {
     readonly property color tile: Qt.alpha(text, 0.06)
     readonly property color hover: Qt.alpha(text, 0.08)
     readonly property color pressed: Qt.alpha(text, 0.14)
+    // Accent states (a filled tile / selected segment) and content on it.
+    readonly property color primaryHover: Qt.lighter(primary, 1.08)
+    readonly property color primaryPressed: Qt.darker(primary, 1.12)
+    readonly property color primaryWash: Qt.alpha(primaryText, 0.14)    // badge on a primary fill
+    readonly property color primaryTextMuted: Qt.alpha(primaryText, 0.75) // secondary text on a primary fill
     readonly property int hairlineWidth: 1
 
     // Type: generic families; fontconfig (hh-nix-config fonts.nix) resolves
@@ -94,13 +99,19 @@ Singleton {
     readonly property int fieldHeight: 56       // launcher search field
     readonly property int trackHeight: 8        // slider / progress track
     readonly property int thumb: 16
+    readonly property int sliderHeight: 48      // large pill slider (brightness, volume)
     readonly property int trackThin: 2          // progress hairline (media chip)
-    readonly property int barHeight: 40         // = control + 2 * barInset
-    readonly property int barInset: spaceXs     // bar edge <-> chip, equal on all sides
+    readonly property int barHeight: control + 2 * barInset   // 48
+    readonly property int barInset: spaceSm     // bar edge <-> chip, top and bottom (radiusLg - inset = chip radius)
+    readonly property int barPadX: spaceMd      // bar edge <-> first/last chip, left and right (wider: the pill's curve eats space)
+    readonly property int barGap: spaceSm       // between bar items
     readonly property int barMargin: edge       // bar <-> screen top (and sides)
     readonly property int panelWidth: 400
     readonly property int launcherWidth: 640
-    readonly property int popoverTop: barMargin + barHeight + spaceSm   // sheets hang below the bar
+    readonly property int popoverWidth: 320     // bar hover cards
+    readonly property int calendarWidth: 336
+    readonly property int popoverGap: spaceSm   // bar bottom edge <-> any popover
+    readonly property int popoverTop: barMargin + barHeight + popoverGap   // screen top <-> popover top
 
     // Motion
     readonly property int animFast: 120

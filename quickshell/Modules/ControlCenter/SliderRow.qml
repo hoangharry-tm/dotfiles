@@ -2,13 +2,14 @@ import QtQuick
 import qs.Common
 import qs.Widgets
 
-// A slider with an optional chevron that opens a device picker.
+// A large slider with an optional chevron that opens a picker.
 Item {
     id: root
 
     property alias value: slider.value
     property alias glyph: slider.glyph
     property alias dimmed: slider.dimmed
+    property alias trackColor: slider.trackColor
     property bool expandable: true
     property bool expanded: false
 
@@ -34,9 +35,10 @@ Item {
         visible: root.expandable
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        width: Theme.controlSm
-        height: Theme.controlSm
+        width: root.height
+        height: root.height
         radius: Theme.radiusFull
+        color: root.expanded ? Theme.pressed : hovered ? Theme.hover : Theme.tile
         onClicked: root.expand()
 
         Icon {
