@@ -29,6 +29,19 @@ export ZSH="$HOME/.oh-my-zsh"
 ZSH_THEME="powerlevel10k/powerlevel10k"
 zstyle ':omz:update' mode auto
 
+# Cache dir for compdump and generated init scripts
+_zc="${XDG_CACHE_HOME:-$HOME/.cache}/zsh"; [[ -d $_zc ]] || mkdir -p "$_zc"
+
+# Why: omz runs compinit (+ compaudit) on every start. Skip the security audit
+# (nix store is read-only) and reuse the dump (-C) when it is under 24h old.
+ZSH_DISABLE_COMPFIX=true
+ZSH_COMPDUMP="$_zc/zcompdump-${ZSH_VERSION}"
+compinit() {
+  unfunction compinit; autoload -Uz compinit
+  local -a fresh=( $ZSH_COMPDUMP(Nmh-24) )
+  if (( $#fresh )); then compinit -C -d "$ZSH_COMPDUMP"; else compinit -u -d "$ZSH_COMPDUMP"; fi
+}
+
 # Docker completions (add before OMZ compinit runs)
 fpath=("$HOME/.docker/completions" $fpath)
 
@@ -38,8 +51,6 @@ ZVM_VI_INSERT_ESCAPE_BINDKEY=jk
 plugins=(
   zsh-vi-mode
   git
-  zsh-autosuggestions
-  zsh-syntax-highlighting
   web-search
   virtualenv
   extract
@@ -52,10 +63,31 @@ plugins=(
 
 source $ZSH/oh-my-zsh.sh
 
+# Why: highlighting/suggestions are not needed for the first prompt; load them
+# after it via zsh-defer (Nix-provided; plain sync load where it is absent).
+# Highlighting must load last so it wraps every widget.
+if [[ -r ${_zd:=$ZSH_CUSTOM/plugins/zsh-defer/zsh-defer.plugin.zsh} ]]; then
+  source $_zd
+  _late() { [[ -r $ZSH_CUSTOM/plugins/$1/$1.plugin.zsh ]] && zsh-defer source $ZSH_CUSTOM/plugins/$1/$1.plugin.zsh }
+else
+  _late() { [[ -r $ZSH_CUSTOM/plugins/$1/$1.plugin.zsh ]] && source $ZSH_CUSTOM/plugins/$1/$1.plugin.zsh }
+fi
+_late zsh-autosuggestions
+_late zsh-syntax-highlighting
+
 # ============================================================
 #  TOOL INIT
 # ============================================================
-eval "$(zoxide init zsh)"
+# Why: `tool init` forks are slow; cache the output, keyed by the binary's
+# store dir (and mtime off Nix) so upgrades regenerate it.
+_cache_init() { # _cache_init <tool> <args...>
+  local bin=${commands[$1]:-$(whence -p $1)}  # fallback: hash may be cold under zvm
+  local out="$_zc/${1}-${(j:-:)@[2,-1]}-${${bin:A}:h:h:t}.zsh"
+  [[ -n $bin ]] || return
+  [[ -s $out && $out -nt $bin ]] || "$@" >| "$out" 2>/dev/null
+  source "$out"
+}
+_cache_init zoxide init zsh
 # fzf/atuin keybindings are set in zvm_after_init (see KEY BINDINGS),
 # otherwise zsh-vi-mode overrides them
 
@@ -79,8 +111,8 @@ setopt HASH_LIST_ALL
 # ============================================================
 # zsh-vi-mode resets keybindings on init, so custom bindings go here
 zvm_after_init() {
-  source <(fzf --zsh)
-  eval "$(atuin init zsh)"
+  _cache_init fzf --zsh
+  _cache_init atuin init zsh
   bindkey '^[[A' up-line-or-search
   bindkey '^[[B' down-line-or-search
   bindkey '^[[H' beginning-of-line
@@ -97,7 +129,9 @@ export VISUAL='nvim'
 export PAGER='less'
 export LESS='-F -g -i -M -R -S -w -X -z-4'
 export BAT_THEME='Catppuccin Mocha'
-export LS_COLORS="$(vivid generate catppuccin-mocha 2>/dev/null)"
+_ls="$_zc/ls_colors-${${commands[vivid]:A}:h:h:t}"
+[[ -s $_ls ]] || vivid generate catppuccin-mocha >| "$_ls" 2>/dev/null
+export LS_COLORS="$(<$_ls)"
 export MANPAGER="sh -c 'col -bx | bat -l man -p'"
 export PYTHON="/opt/homebrew/bin/python3:$PATH"
 
@@ -272,7 +306,7 @@ export PATH="/opt/homebrew/share/man:$PATH"
 # ============================================================
 #  RBENV
 # ============================================================
-(( $+commands[rbenv] )) && eval "$(rbenv init - zsh)"
+(( $+commands[rbenv] )) && _cache_init rbenv init - zsh
 
 # ============================================================
 #  LOCAL OVERRIDES (git-ignored, machine-specific)
