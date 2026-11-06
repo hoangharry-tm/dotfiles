@@ -20,3 +20,5 @@ tmux/plugins/
 !jupyterlab/**
 !zsh/
 !zsh/**
+!niri/
+!niri/**
