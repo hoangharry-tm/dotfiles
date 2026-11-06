@@ -21,10 +21,10 @@ PanelWindow {
     visible: shown
     anchors.top: true
     anchors.right: true
-    margins.top: Theme.barMargin + Theme.barHeight + 8
-    margins.right: 10
+    margins.top: Theme.popoverTop
+    margins.right: Theme.edge
     implicitWidth: Theme.panelWidth
-    implicitHeight: Math.min(content.implicitHeight + Theme.pad * 2, modelData.height - margins.top - 20)
+    implicitHeight: Math.min(content.implicitHeight + Theme.padSheet * 2, modelData.height - margins.top - Theme.edge)
     exclusiveZone: 0
     color: "transparent"
     WlrLayershell.namespace: "qs-control-center"
@@ -44,30 +44,13 @@ PanelWindow {
         id: sheet
 
         anchors.fill: parent
+        radius: Theme.radiusXl // = qs-control-center layer rule in niri/rules.kdl
         focus: true
         Keys.onEscapePressed: Panels.close()
 
-        opacity: root.shown ? 1 : 0
-        transform: Translate {
-            y: root.shown ? 0 : -8
-
-            Behavior on y {
-                NumberAnimation {
-                    duration: Theme.anim
-                    easing.type: Theme.easing
-                }
-            }
-        }
-
-        Behavior on opacity {
-            NumberAnimation {
-                duration: Theme.anim
-            }
-        }
-
         Flickable {
             anchors.fill: parent
-            anchors.margins: Theme.pad
+            anchors.margins: Theme.padSheet
             contentHeight: content.implicitHeight
             clip: true
             boundsBehavior: Flickable.StopAtBounds
@@ -76,7 +59,7 @@ PanelWindow {
                 id: content
 
                 width: parent.width
-                spacing: 12
+                spacing: Theme.gapSection
 
                 Header {
                     Layout.fillWidth: true
@@ -85,8 +68,8 @@ PanelWindow {
                 GridLayout {
                     Layout.fillWidth: true
                     columns: 2
-                    columnSpacing: 8
-                    rowSpacing: 8
+                    columnSpacing: Theme.gapStack
+                    rowSpacing: Theme.gapStack
 
                     Tile {
                         Layout.fillWidth: true

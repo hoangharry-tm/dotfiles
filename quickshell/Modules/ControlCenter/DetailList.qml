@@ -18,7 +18,7 @@ Section {
 
     RowLayout {
         Layout.fillWidth: true
-        Layout.leftMargin: 4
+        Layout.leftMargin: Theme.spaceMd
 
         Label {
             Layout.fillWidth: true
@@ -28,9 +28,9 @@ Section {
 
         Clickable {
             visible: root.actionGlyph !== ""
-            Layout.preferredWidth: 26
-            Layout.preferredHeight: 26
-            radius: 13
+            Layout.preferredWidth: Theme.control
+            Layout.preferredHeight: Theme.control
+            radius: Theme.radiusFull
             onClicked: root.action()
 
             Icon {
@@ -53,7 +53,7 @@ Section {
 
     Label {
         Layout.fillWidth: true
-        Layout.leftMargin: 4
+        Layout.leftMargin: Theme.spaceMd
         visible: root.count === 0 && root.emptyText !== ""
         text: root.emptyText
         color: Theme.textMuted

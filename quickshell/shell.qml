@@ -17,6 +17,7 @@ import qs.Services
 import qs.Modules
 import qs.Modules.Bar
 import qs.Modules.Calendar
+import qs.Modules.Cheatsheet
 import qs.Modules.ControlCenter
 import qs.Modules.Launcher
 import qs.Modules.Notifications
@@ -60,12 +61,16 @@ ShellRoot {
             PowerMenu {
                 modelData: perScreen.modelData
             }
+
+            Cheatsheet {
+                modelData: perScreen.modelData
+            }
         }
     }
 
     Osd {}
 
-    // qs ipc call shell launcher|wallpapers|control|calendar|power|close
+    // qs ipc call shell launcher|wallpapers|control|calendar|power|keybinds|close
     IpcHandler {
         target: "shell"
 
@@ -89,6 +94,10 @@ ShellRoot {
 
         function power(): void {
             Panels.toggle("power");
+        }
+
+        function keybinds(): void {
+            Panels.toggle("keybinds");
         }
 
         function close(): void {

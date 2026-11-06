@@ -16,9 +16,9 @@ PanelWindow {
     visible: Notifications.toasts.length > 0 && Panels.focusedScreen() === modelData.name && !Panels.isOpen("control", modelData.name)
     anchors.top: true
     anchors.right: true
-    margins.top: Theme.barMargin + Theme.barHeight + 8
-    margins.right: 10
-    implicitWidth: 360
+    margins.top: Theme.popoverTop
+    margins.right: Theme.edge
+    implicitWidth: Theme.panelWidth
     implicitHeight: stack.implicitHeight
     exclusiveZone: 0
     color: "transparent"
@@ -29,7 +29,7 @@ PanelWindow {
         id: stack
 
         width: parent.width
-        spacing: 8
+        spacing: Theme.gapStack
 
         Repeater {
             model: Notifications.toasts
@@ -53,7 +53,7 @@ PanelWindow {
                 // Slide in from the right
                 x: 0
                 NumberAnimation on x {
-                    from: 40
+                    from: Theme.space2xl
                     to: 0
                     duration: Theme.anim
                     easing.type: Theme.easing

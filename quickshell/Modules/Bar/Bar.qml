@@ -16,32 +16,33 @@ PanelWindow {
     anchors.left: true
     anchors.right: true
     margins.top: Theme.barMargin
-    margins.left: 10
-    margins.right: 10
+    margins.left: Theme.barMargin
+    margins.right: Theme.barMargin
     implicitHeight: Theme.barHeight
     exclusiveZone: Theme.barHeight
     color: "transparent"
     WlrLayershell.namespace: "qs-bar"
     WlrLayershell.layer: WlrLayer.Top
 
+    // Radius must equal the qs-bar layer rule in niri/rules.kdl.
     Glass {
         anchors.fill: parent
-        radius: 14
+        radius: Theme.radiusLg
     }
 
     // Left: where you are
     RowLayout {
         anchors.left: parent.left
-        anchors.leftMargin: 6
+        anchors.leftMargin: Theme.barInset
         anchors.verticalCenter: parent.verticalCenter
-        spacing: 4
+        spacing: Theme.barInset
 
         Workspaces {
             output: bar.modelData.name
         }
 
         FocusedWindow {
-            Layout.maximumWidth: 320
+            Layout.maximumWidth: 320 // content cap, not spacing
         }
     }
 
@@ -54,9 +55,9 @@ PanelWindow {
     // Right: what's going on
     RowLayout {
         anchors.right: parent.right
-        anchors.rightMargin: 6
+        anchors.rightMargin: Theme.barInset
         anchors.verticalCenter: parent.verticalCenter
-        spacing: 2
+        spacing: Theme.barInset
 
         MediaChip {}
 

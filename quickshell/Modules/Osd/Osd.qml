@@ -72,9 +72,9 @@ Scope {
             screen: modelData
             visible: hide.running && Panels.focusedScreen() === modelData.name
             anchors.bottom: true
-            margins.bottom: 72
-            implicitWidth: root.showValue ? 280 : 64
-            implicitHeight: 52
+            margins.bottom: Theme.space2xl * 2
+            implicitWidth: root.showValue ? 280 : Theme.fieldHeight
+            implicitHeight: Theme.fieldHeight
             exclusiveZone: 0
             color: "transparent"
             WlrLayershell.namespace: "qs-osd"
@@ -82,13 +82,13 @@ Scope {
 
             Glass {
                 anchors.fill: parent
-                radius: 26
+                radius: Theme.fieldHeight / 2 // pill; = qs-osd layer rule
 
                 Icon {
                     id: icon
 
                     anchors.left: parent.left
-                    anchors.leftMargin: root.showValue ? 18 : 0
+                    anchors.leftMargin: root.showValue ? Theme.spaceXl : 0
                     anchors.horizontalCenter: root.showValue ? undefined : parent.horizontalCenter
                     anchors.verticalCenter: parent.verticalCenter
                     glyph: root.glyph
@@ -98,18 +98,18 @@ Scope {
                 Rectangle {
                     visible: root.showValue
                     anchors.left: icon.right
-                    anchors.leftMargin: 14
+                    anchors.leftMargin: Theme.spaceMd
                     anchors.right: percent.left
-                    anchors.rightMargin: 12
+                    anchors.rightMargin: Theme.spaceMd
                     anchors.verticalCenter: parent.verticalCenter
-                    height: 6
-                    radius: 3
+                    height: Theme.trackHeight
+                    radius: Theme.trackHeight / 2
                     color: Theme.tile
 
                     Rectangle {
                         width: parent.width * Math.min(1, root.value)
                         height: parent.height
-                        radius: 3
+                        radius: Theme.trackHeight / 2
                         color: Theme.primary
 
                         Behavior on width {
@@ -125,13 +125,13 @@ Scope {
 
                     visible: root.showValue
                     anchors.right: parent.right
-                    anchors.rightMargin: 18
+                    anchors.rightMargin: Theme.spaceXl
                     anchors.verticalCenter: parent.verticalCenter
-                    width: 34
+                    width: Theme.spaceXl + Theme.spaceSm
                     horizontalAlignment: Text.AlignRight
                     text: Math.round(root.value * 100)
                     font.family: Theme.mono
-                    font.pixelSize: Theme.textSm
+                    font.pixelSize: Theme.textXs
                     color: Theme.textMuted
                 }
             }

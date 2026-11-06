@@ -16,11 +16,9 @@ Rectangle {
     signal toggled
     signal expand
 
-    implicitHeight: 58
+    implicitHeight: Theme.tileHeight
     radius: Theme.radiusMd
     color: checked ? Theme.primary : main.containsMouse ? Theme.hover : Theme.tile
-    border.width: checked ? 0 : 1
-    border.color: Theme.hairline
 
     readonly property color fg: checked ? Theme.primaryText : Theme.text
 
@@ -32,31 +30,31 @@ Rectangle {
 
     Row {
         anchors.left: parent.left
-        anchors.leftMargin: 12
+        anchors.leftMargin: Theme.padCard // = (height - badge) / 2: equal on all sides
         anchors.right: chevron.visible ? chevron.left : parent.right
-        anchors.rightMargin: 6
+        anchors.rightMargin: Theme.spaceSm
         anchors.verticalCenter: parent.verticalCenter
-        spacing: 10
+        spacing: Theme.spaceMd
 
         Rectangle {
-            width: 32
-            height: 32
-            radius: 16
+            width: Theme.control
+            height: Theme.control
+            radius: Theme.radiusFull
             color: root.checked ? Qt.alpha(Theme.primaryText, 0.14) : Theme.tile
             anchors.verticalCenter: parent.verticalCenter
 
             Icon {
                 anchors.centerIn: parent
                 glyph: root.glyph
-                size: 17
+                size: Theme.icon
                 color: root.fg
             }
         }
 
         Column {
-            width: parent.width - 42
+            width: parent.width - Theme.control - Theme.spaceMd
             anchors.verticalCenter: parent.verticalCenter
-            spacing: 1
+            spacing: 0
 
             Label {
                 width: parent.width
@@ -93,8 +91,8 @@ Rectangle {
         anchors.right: parent.right
         anchors.top: parent.top
         anchors.bottom: parent.bottom
-        anchors.margins: 6
-        width: 30
+        anchors.margins: Theme.spaceSm
+        width: Theme.control
         radius: Theme.radiusSm
         onClicked: root.expand()
 

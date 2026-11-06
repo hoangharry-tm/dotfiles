@@ -6,11 +6,11 @@ import qs.Widgets
 
 // Notification history with Clear.
 ColumnLayout {
-    spacing: 8
+    spacing: Theme.gapStack
 
     RowLayout {
         Layout.fillWidth: true
-        Layout.leftMargin: 4
+        Layout.leftMargin: Theme.spaceMd
 
         Label {
             Layout.fillWidth: true
@@ -22,8 +22,9 @@ ColumnLayout {
 
         Clickable {
             visible: Notifications.history.length > 0
-            implicitWidth: clear.implicitWidth + 18
-            implicitHeight: 24
+            implicitWidth: clear.implicitWidth + Theme.padControl * 2
+            implicitHeight: Theme.controlSm
+            radius: Theme.radiusFull
             onClicked: Notifications.clearAll()
 
             Label {
@@ -39,8 +40,8 @@ ColumnLayout {
 
     Label {
         Layout.fillWidth: true
-        Layout.topMargin: 8
-        Layout.bottomMargin: 8
+        Layout.topMargin: Theme.spaceSm
+        Layout.bottomMargin: Theme.spaceSm
         visible: Notifications.history.length === 0
         horizontalAlignment: Text.AlignHCenter
         text: "No notifications"

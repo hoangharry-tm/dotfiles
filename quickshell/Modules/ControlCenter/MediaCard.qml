@@ -9,11 +9,11 @@ import qs.Widgets
 Section {
     RowLayout {
         Layout.fillWidth: true
-        spacing: 12
+        spacing: Theme.spaceMd
 
         ClippingRectangle {
-            Layout.preferredWidth: 52
-            Layout.preferredHeight: 52
+            Layout.preferredWidth: Theme.controlLg + Theme.spaceMd
+            Layout.preferredHeight: Theme.controlLg + Theme.spaceMd
             radius: Theme.radiusSm
             color: Theme.tile
 
@@ -60,15 +60,15 @@ Section {
             Clickable {
                 required property var modelData
 
-                Layout.preferredWidth: 32
-                Layout.preferredHeight: 32
-                radius: 16
+                Layout.preferredWidth: Theme.control
+                Layout.preferredHeight: Theme.control
+                radius: Theme.radiusFull
                 onClicked: modelData.run()
 
                 Icon {
                     anchors.centerIn: parent
                     glyph: parent.modelData.glyph
-                    size: Theme.iconLg - 2
+                    size: Theme.icon
                 }
             }
         }

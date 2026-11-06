@@ -17,7 +17,7 @@ Rectangle {
     signal scrolled(int delta)
 
     radius: Theme.radiusSm
-    color: mouse.pressed ? Theme.pressed : (mouse.containsMouse || active) ? (active ? activeColor : Theme.hover) : "transparent"
+    color: mouse.pressed ? Theme.pressed : active ? activeColor : mouse.containsMouse ? Theme.hover : "transparent"
 
     Behavior on color {
         ColorAnimation {

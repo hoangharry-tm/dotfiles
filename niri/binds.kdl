@@ -9,33 +9,35 @@ binds {
     Mod+Return hotkey-overlay-title=null { spawn "alacritty"; }
     Mod+Space hotkey-overlay-title="Search Apps" { spawn "qs" "ipc" "call" "shell" "launcher"; }
     Mod+D hotkey-overlay-title=null { spawn "qs" "ipc" "call" "shell" "launcher"; }
+    Mod+Slash hotkey-overlay-title="Keybindings" { spawn "qs" "ipc" "call" "shell" "keybinds"; }
     Mod+N hotkey-overlay-title="Control Center" { spawn "qs" "ipc" "call" "shell" "control"; }
     Mod+Shift+W hotkey-overlay-title="Pick a Wallpaper" { spawn "qs" "ipc" "call" "shell" "wallpapers"; }
     Super+Alt+L hotkey-overlay-title="Lock the Screen" { spawn "lock-screen"; }
     Super+Alt+S allow-when-locked=true hotkey-overlay-title=null { spawn-sh "pkill orca || exec orca"; }
 
-    // Volume (PipeWire/WirePlumber); -l 1.0 caps at 100%
+    // Volume — PipeWire/WirePlumber; -l 1.0 caps at 100%
     XF86AudioRaiseVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1+ -l 1.0"; }
     XF86AudioLowerVolume allow-when-locked=true { spawn-sh "wpctl set-volume @DEFAULT_AUDIO_SINK@ 0.1-"; }
     XF86AudioMute        allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"; }
     XF86AudioMicMute     allow-when-locked=true { spawn-sh "wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"; }
 
-    // Media (any MPRIS player)
+    // Media — any MPRIS player
     XF86AudioPlay allow-when-locked=true { spawn-sh "playerctl play-pause"; }
     XF86AudioStop allow-when-locked=true { spawn-sh "playerctl stop"; }
     XF86AudioPrev allow-when-locked=true { spawn-sh "playerctl previous"; }
     XF86AudioNext allow-when-locked=true { spawn-sh "playerctl next"; }
 
-    // Brightness via the shell so the OSD shows (it runs brightnessctl).
+    // Brightness — via the shell so the OSD shows (it runs brightnessctl)
     XF86MonBrightnessUp   allow-when-locked=true { spawn "qs" "ipc" "call" "brightness" "up"; }
     XF86MonBrightnessDown allow-when-locked=true { spawn "qs" "ipc" "call" "brightness" "down"; }
 
-    // Overview (also: top-left hot corner, four-finger swipe up)
+    // Overview — also: top-left hot corner, four-finger swipe up
     Mod+O repeat=false { toggle-overview; }
 
+    // Windows
     Mod+Q hotkey-overlay-title="Close Window" repeat=false { close-window; }
 
-    // Jump back to the previous window / workspace (like Alt-Tab / Cmd-`)
+    // Recent — jump back to the previous window / workspace (like Alt-Tab / Cmd-`)
     Mod+Tab   { focus-window-previous; }
     Mod+Grave { focus-workspace-previous; }
 
@@ -98,7 +100,7 @@ binds {
     Mod+Shift+U         { move-workspace-down; }
     Mod+Shift+I         { move-workspace-up; }
 
-    // Mouse wheel
+    // Mouse Wheel
     Mod+WheelScrollDown      cooldown-ms=150 { focus-workspace-down; }
     Mod+WheelScrollUp        cooldown-ms=150 { focus-workspace-up; }
     Mod+Ctrl+WheelScrollDown cooldown-ms=150 { move-column-to-workspace-down; }
@@ -114,7 +116,7 @@ binds {
     Mod+Ctrl+Shift+WheelScrollDown { move-column-right; }
     Mod+Ctrl+Shift+WheelScrollUp   { move-column-left; }
 
-    // Workspaces by index (best effort: niri workspaces are dynamic)
+    // Workspace Index — best effort: niri workspaces are dynamic
     Mod+1 { focus-workspace 1; }
     Mod+2 { focus-workspace 2; }
     Mod+3 { focus-workspace 3; }
@@ -156,7 +158,7 @@ binds {
     Mod+Shift+Minus  { set-window-height "-10%"; }
     Mod+Shift+Equal  { set-window-height "+10%"; }
 
-    // Floating / tabbed
+    // Floating / Tabbed
     Mod+V hotkey-overlay-title="Toggle Floating" { toggle-window-floating; }
     Mod+Shift+V { switch-focus-between-floating-and-tiling; }
     Mod+W       { toggle-column-tabbed-display; }
@@ -169,7 +171,7 @@ binds {
     Ctrl+Print { screenshot-screen; }
     Alt+Print  { screenshot-window; }
 
-    // Escape hatch if an app inhibits shortcuts
+    // Shortcut Inhibit — escape hatch if an app inhibits shortcuts
     Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }
 
     // Session
@@ -177,8 +179,8 @@ binds {
     Ctrl+Alt+Delete { spawn "qs" "ipc" "call" "shell" "power"; }
     Mod+Shift+P     { power-off-monitors; }
 
-    // Single windows to another monitor (the column binds above move whole
-    // columns).
+    // Window to Monitor — single windows; the column binds above move whole
+    // columns
     Mod+Alt+Left  { move-window-to-monitor-left; }
     Mod+Alt+Right { move-window-to-monitor-right; }
 }

@@ -11,8 +11,8 @@ Column {
     property real maxValue: 1
     property color color: Theme.primary
 
-    width: 200
-    spacing: 4
+    width: Theme.panelWidth / 2 // hover-card content width
+    spacing: Theme.spaceXs
 
     Item {
         width: parent.width
@@ -36,7 +36,7 @@ Column {
 
     Sparkline {
         width: parent.width
-        height: 26
+        height: Theme.control - Theme.spaceXs * 2
         values: root.history
         maxValue: root.maxValue
         color: root.color

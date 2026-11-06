@@ -13,12 +13,13 @@ RowLayout {
     readonly property var window: Niri.focusedWindow
     readonly property var entry: window ? DesktopEntries.heuristicLookup(window.app_id) : null
 
-    spacing: 8
+    spacing: Theme.gapInline
     visible: window !== null
 
     IconImage {
-        Layout.preferredWidth: 16
-        Layout.preferredHeight: 16
+        Layout.leftMargin: Theme.padControl
+        Layout.preferredWidth: Theme.icon
+        Layout.preferredHeight: Theme.icon
         source: Quickshell.iconPath(root.entry?.icon ?? root.window?.app_id ?? "", "application-x-executable")
     }
 

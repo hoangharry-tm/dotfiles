@@ -7,11 +7,9 @@ Rectangle {
     default property alias content: column.data
     property alias spacing: column.spacing
 
-    implicitHeight: column.implicitHeight + 20
+    implicitHeight: column.implicitHeight + Theme.padCard * 2
     radius: Theme.radiusMd
     color: Theme.tile
-    border.width: 1
-    border.color: Theme.hairline
 
     ColumnLayout {
         id: column
@@ -19,7 +17,7 @@ Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        anchors.margins: 10
-        spacing: 4
+        anchors.margins: Theme.padCard
+        spacing: Theme.gapStack
     }
 }

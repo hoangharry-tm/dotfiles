@@ -4,16 +4,12 @@ import qs.Services
 import qs.Widgets
 
 // A single quiet glyph; tints when the machine is busy. Hover for live graphs.
-Clickable {
+BarChip {
     id: root
 
     readonly property bool busy: System.cpu > 0.8 || System.mem > 0.9 || System.temp > 85
 
-    implicitWidth: 30
-    implicitHeight: 26
-
     Icon {
-        anchors.centerIn: parent
         glyph: "󰍛"
         color: root.busy ? Theme.tertiary : Theme.textMuted
     }

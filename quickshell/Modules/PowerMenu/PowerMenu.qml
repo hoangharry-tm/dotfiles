@@ -63,7 +63,7 @@ PanelWindow {
 
     ColumnLayout {
         anchors.centerIn: parent
-        spacing: 28
+        spacing: Theme.space2xl
 
         Label {
             Layout.alignment: Qt.AlignHCenter
@@ -74,7 +74,7 @@ PanelWindow {
 
         Row {
             Layout.alignment: Qt.AlignHCenter
-            spacing: 22
+            spacing: Theme.spaceXl
 
             Repeater {
                 model: root.actions
@@ -86,14 +86,14 @@ PanelWindow {
                     required property int index
                     readonly property bool current: root.selected === index
 
-                    spacing: 10
+                    spacing: Theme.spaceMd
 
                     Rectangle {
-                        width: 84
-                        height: 84
-                        radius: 42
+                        width: Theme.space2xl * 3
+                        height: width
+                        radius: width / 2
                         color: action.current ? Theme.primary : mouse.containsMouse ? Theme.glassSolid : Theme.glass
-                        border.width: 1
+                        border.width: Theme.hairlineWidth
                         border.color: Theme.hairline
                         scale: mouse.pressed ? 0.94 : 1
 
@@ -112,7 +112,7 @@ PanelWindow {
                         Icon {
                             anchors.centerIn: parent
                             glyph: action.modelData.glyph
-                            size: 28
+                            size: Theme.iconHero
                             color: action.current ? Theme.primaryText : Theme.text
                         }
 

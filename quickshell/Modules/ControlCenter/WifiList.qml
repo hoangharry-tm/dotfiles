@@ -27,7 +27,7 @@ DetailList {
             required property var modelData
 
             Layout.fillWidth: true
-            spacing: 4
+            spacing: Theme.spaceXs
 
             ListRow {
                 Layout.fillWidth: true
@@ -53,21 +53,21 @@ DetailList {
             // Inline password prompt
             Rectangle {
                 Layout.fillWidth: true
-                Layout.leftMargin: 8
-                Layout.rightMargin: 8
+                Layout.leftMargin: Theme.spaceSm
+                Layout.rightMargin: Theme.spaceSm
                 visible: root.asking === entry.modelData
-                implicitHeight: 36
+                implicitHeight: Theme.control + Theme.spaceXs
                 radius: Theme.radiusSm
                 color: Theme.tile
-                border.width: 1
-                border.color: password.activeFocus ? Theme.primary : Theme.hairline
+                border.width: password.activeFocus ? Theme.hairlineWidth : 0
+                border.color: Theme.primary
 
                 TextInput {
                     id: password
 
                     anchors.fill: parent
-                    anchors.leftMargin: 12
-                    anchors.rightMargin: 12
+                    anchors.leftMargin: Theme.spaceMd
+                    anchors.rightMargin: Theme.spaceMd
                     verticalAlignment: TextInput.AlignVCenter
                     echoMode: TextInput.Password
                     color: Theme.text

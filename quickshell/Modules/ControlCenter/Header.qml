@@ -7,7 +7,7 @@ import qs.Widgets
 
 // Battery at a glance + quick actions (wallpaper, screenshot, lock, power).
 RowLayout {
-    spacing: 4
+    spacing: Theme.gapInline
 
     Icon {
         visible: Power.hasBattery
@@ -18,7 +18,7 @@ RowLayout {
 
     Column {
         Layout.fillWidth: true
-        Layout.leftMargin: 6
+        Layout.leftMargin: Theme.spaceXs
 
         Label {
             text: Power.hasBattery ? Math.round(Power.percent * 100) + "%" : "Plugged in"
@@ -47,9 +47,9 @@ RowLayout {
 
             required property var modelData
 
-            Layout.preferredWidth: 34
-            Layout.preferredHeight: 34
-            radius: 17
+            Layout.preferredWidth: Theme.control
+            Layout.preferredHeight: Theme.control
+            radius: Theme.radiusFull
             color: hovered ? Theme.pressed : Theme.tile
             onClicked: {
                 Panels.close();

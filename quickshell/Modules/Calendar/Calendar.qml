@@ -17,8 +17,8 @@ PanelWindow {
     screen: modelData
     visible: shown
     anchors.top: true
-    margins.top: Theme.barMargin + Theme.barHeight + 8
-    implicitWidth: 320
+    margins.top: Theme.popoverTop
+    implicitWidth: 336
     implicitHeight: sheet.implicitHeight
     exclusiveZone: 0
     color: "transparent"
@@ -42,7 +42,8 @@ PanelWindow {
         id: sheet
 
         width: parent.width
-        implicitHeight: column.implicitHeight + Theme.pad * 2
+        implicitHeight: column.implicitHeight + Theme.padSheet * 2
+        radius: Theme.radiusXl // = qs-calendar layer rule in niri/rules.kdl
 
         MouseArea {
             anchors.fill: parent
@@ -55,8 +56,8 @@ PanelWindow {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            anchors.margins: Theme.pad
-            spacing: 10
+            anchors.margins: Theme.padSheet
+            spacing: Theme.spaceSm
 
             Label {
                 text: Qt.formatDateTime(clock.date, "dddd")
@@ -66,8 +67,7 @@ PanelWindow {
             }
 
             Label {
-                Layout.topMargin: -8
-                text: Qt.formatDateTime(clock.date, "d MMMM yyyy")
+                                text: Qt.formatDateTime(clock.date, "d MMMM yyyy")
                 font.pixelSize: Theme.textXl
                 font.weight: Font.DemiBold
             }
@@ -87,9 +87,9 @@ PanelWindow {
                     Clickable {
                         required property var modelData
 
-                        Layout.preferredWidth: 26
-                        Layout.preferredHeight: 26
-                        radius: 13
+                        Layout.preferredWidth: Theme.control
+                        Layout.preferredHeight: Theme.control
+                        radius: Theme.radiusFull
                         onClicked: root.shift(modelData.d)
 
                         Icon {
@@ -128,14 +128,14 @@ PanelWindow {
                     required property var model
                     readonly property bool today: model.today
 
-                    implicitWidth: 36
-                    implicitHeight: 32
+                    implicitWidth: Theme.control + Theme.spaceXs
+                    implicitHeight: Theme.control + Theme.spaceXs
 
                     Rectangle {
                         anchors.centerIn: parent
-                        width: 30
-                        height: 30
-                        radius: 15
+                        width: Theme.control
+                        height: Theme.control
+                        radius: Theme.radiusFull
                         color: day.today ? Theme.primary : "transparent"
                     }
 
@@ -143,7 +143,6 @@ PanelWindow {
                         anchors.centerIn: parent
                         text: day.model.day
                         color: day.today ? Theme.primaryText : day.model.month === grid.month ? Theme.text : Qt.alpha(Theme.textMuted, 0.5)
-                        font.pixelSize: Theme.textSm
                         font.weight: day.today ? Font.DemiBold : Font.Normal
                     }
                 }

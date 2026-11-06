@@ -12,25 +12,24 @@ Clickable {
     property bool selected: false
     property bool busy: false
 
-    implicitHeight: subtitle ? 46 : 38
+    implicitHeight: subtitle ? Theme.rowHeightTall : Theme.rowHeight
     radius: Theme.radiusSm
 
     Icon {
         id: leading
 
         anchors.left: parent.left
-        anchors.leftMargin: 10
+        anchors.leftMargin: Theme.spaceMd
         anchors.verticalCenter: parent.verticalCenter
-        width: 22
         glyph: root.glyph
         color: root.selected ? Theme.primary : Theme.text
     }
 
     Column {
         anchors.left: leading.right
-        anchors.leftMargin: 10
+        anchors.leftMargin: Theme.spaceMd
         anchors.right: trailing.left
-        anchors.rightMargin: 8
+        anchors.rightMargin: Theme.spaceSm
         anchors.verticalCenter: parent.verticalCenter
 
         Label {
@@ -52,7 +51,7 @@ Clickable {
         id: trailing
 
         anchors.right: parent.right
-        anchors.rightMargin: 10
+        anchors.rightMargin: Theme.spaceMd
         anchors.verticalCenter: parent.verticalCenter
         glyph: root.busy ? "󰔟" : root.trailingGlyph
         color: root.selected ? Theme.primary : Theme.textMuted

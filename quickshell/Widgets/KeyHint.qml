@@ -6,15 +6,13 @@ Row {
     property string key: ""
     property string text: ""
 
-    spacing: 6
+    spacing: Theme.spaceSm
 
     Rectangle {
-        width: Math.max(18, cap.implicitWidth + 10)
-        height: 18
-        radius: 5
+        width: Math.max(Theme.spaceLg + Theme.spaceXs, cap.implicitWidth + Theme.spaceSm * 2)
+        height: Theme.spaceLg + Theme.spaceXs
+        radius: Theme.radiusXs
         color: Theme.tile
-        border.width: 1
-        border.color: Theme.hairline
 
         Label {
             id: cap

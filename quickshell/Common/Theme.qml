@@ -10,7 +10,7 @@ import Quickshell.Io
 Singleton {
     id: root
 
-    // Palette (Material You roles)
+    // Palette (Material You roles). Usage rules: DESIGN.md "Color".
     readonly property color primary: palette.primary
     readonly property color primaryText: palette.primaryText
     readonly property color primaryContainer: palette.primaryContainer
@@ -24,37 +24,83 @@ Singleton {
     readonly property color outline: palette.outline
     readonly property color outlineVariant: palette.outlineVariant
 
-    // Surfaces: glass (niri blurs behind layer surfaces), hairlines, states
-    readonly property color glass: Qt.alpha(surface, 0.62)
-    readonly property color glassSolid: Qt.alpha(surface, 0.9)
-    readonly property color hairline: Qt.alpha(outlineVariant, 0.55)
-    readonly property color tile: Qt.alpha(text, 0.07)
+    // Surfaces: glass (niri blurs behind layer surfaces), hairlines, states.
+    // Fills are the only separators inside a sheet; hairlines are reserved
+    // for a sheet's own edge (see DESIGN.md "Surfaces").
+    readonly property color glass: Qt.alpha(surface, 0.66)
+    readonly property color glassSolid: Qt.alpha(surface, 0.92)
+    readonly property color hairline: Qt.alpha(outlineVariant, 0.5)
+    readonly property color tile: Qt.alpha(text, 0.06)
     readonly property color hover: Qt.alpha(text, 0.08)
     readonly property color pressed: Qt.alpha(text, 0.14)
+    readonly property int hairlineWidth: 1
 
     // Type: generic families; fontconfig (hh-nix-config fonts.nix) resolves
     // them to JetBrainsMono Nerd Font, which also provides every icon glyph.
+    // Five steps, 4/2/2/5/12 apart; weight does the rest (Normal, DemiBold).
     readonly property string font: "sans-serif"
     readonly property string mono: "monospace"
-    readonly property int textXs: 11
-    readonly property int textSm: 12
-    readonly property int textMd: 13
-    readonly property int textLg: 15
-    readonly property int textXl: 20
-    readonly property int textHero: 34
-    readonly property int icon: 15
-    readonly property int iconLg: 20
+    readonly property int textXs: 11        // meta: timestamps, keycaps, chips
+    readonly property int textMd: 13        // body and controls (default)
+    readonly property int textSm: textMd    // alias: secondary text differs by color, not size
+    readonly property int textLg: 15        // titles, result names
+    readonly property int textXl: 20        // headings, search input
+    readonly property int textHero: 32      // display (power menu)
+    readonly property real lineHeight: 1.25 // wrapped body text only (single lines: leave 1, it shifts glyphs down)
 
-    // Shape & rhythm
-    readonly property int radiusSm: 8
-    readonly property int radiusMd: 12
-    readonly property int radiusLg: 18
-    readonly property int radiusXl: 24
-    readonly property int gap: 8
-    readonly property int pad: 14
-    readonly property int barHeight: 34
-    readonly property int barMargin: 8
-    readonly property int panelWidth: 380
+    // Icons (glyph em-size): sit on the same optical size as body text + 3.
+    readonly property int iconSm: 12        // dismiss marks, chevrons in dense rows
+    readonly property int icon: 16          // default: bar, rows, buttons
+    readonly property int iconLg: 20        // headers, sliders, tile badges
+    readonly property int iconXl: 24        // launcher glyph results
+    readonly property int iconHero: 32      // power menu
+    readonly property int iconApp: 32       // app icon images in lists
+
+    // Spacing: 4-pt scale. One name per step; semantic aliases below say what
+    // each is *for* so call sites never pick a number.
+    readonly property int spaceXs: 4
+    readonly property int spaceSm: 8
+    readonly property int spaceMd: 12
+    readonly property int spaceLg: 16
+    readonly property int spaceXl: 24
+    readonly property int space2xl: 32
+
+    readonly property int gapInline: spaceSm    // icon <-> label, siblings in a row
+    readonly property int gapStack: spaceSm     // rows/cards stacked in a group
+    readonly property int gapSection: spaceLg   // between groups inside a sheet
+    readonly property int padControl: spaceMd   // horizontal padding of a chip/button
+    readonly property int padCard: spaceLg      // inside a card / section
+    readonly property int padSheet: spaceLg     // inside a sheet, to its content
+    readonly property int pad: padSheet         // alias (legacy name)
+    readonly property int gap: gapStack         // alias (legacy name)
+    readonly property int edge: spaceSm         // sheet <-> screen edge / bar <-> sheet
+
+    // Radius: nested = outer - padding (a card inset 4 in a 16 bar is 12).
+    readonly property int radiusXs: 4           // keycaps
+    readonly property int radiusSm: 8           // small controls, rows
+    readonly property int radiusMd: 12          // cards, tiles, bar chips
+    readonly property int radiusLg: 16          // bar, toasts, small sheets
+    readonly property int radiusXl: 28          // large sheets (launcher, control center, calendar)
+    readonly property int radiusFull: 999       // pills and circles (clamped by size)
+
+    // Sizing: every interactive thing is on a 4-pt height; hit target >= 32.
+    readonly property int controlSm: 24         // dismiss, small buttons
+    readonly property int control: 32           // bar chips, icon buttons
+    readonly property int controlLg: 40         // list rows, inputs in popovers
+    readonly property int rowHeight: 40         // detail-list row (48 with subtitle)
+    readonly property int rowHeightTall: 48
+    readonly property int resultHeight: 56      // launcher result row
+    readonly property int tileHeight: 64        // control-center tile
+    readonly property int fieldHeight: 56       // launcher search field
+    readonly property int trackHeight: 8        // slider / progress track
+    readonly property int thumb: 16
+    readonly property int trackThin: 2          // progress hairline (media chip)
+    readonly property int barHeight: 40         // = control + 2 * barInset
+    readonly property int barInset: spaceXs     // bar edge <-> chip, equal on all sides
+    readonly property int barMargin: edge       // bar <-> screen top (and sides)
+    readonly property int panelWidth: 400
+    readonly property int launcherWidth: 640
+    readonly property int popoverTop: barMargin + barHeight + spaceSm   // sheets hang below the bar
 
     // Motion
     readonly property int animFast: 120

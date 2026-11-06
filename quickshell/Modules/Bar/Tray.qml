@@ -20,18 +20,16 @@ Row {
         return redundant.some(r => id.includes(r));
     }
 
-    spacing: 2
+    spacing: Theme.barInset
 
     Repeater {
         model: SystemTray.items.values.filter(i => !root.isRedundant(i))
 
-        Clickable {
+        BarChip {
             id: item
 
             required property SystemTrayItem modelData
 
-            width: 26
-            height: 26
             onClicked: modelData.onlyMenu ? openMenu() : modelData.activate()
             onRightClicked: openMenu()
             onMiddleClicked: modelData.secondaryActivate()
@@ -41,12 +39,11 @@ Row {
                 if (!modelData.hasMenu)
                     return;
                 const p = root.bar.itemPosition(item);
-                modelData.display(root.bar, p.x, p.y + item.height + 10);
+                modelData.display(root.bar, p.x, p.y + item.height + Theme.spaceSm);
             }
 
             IconImage {
-                anchors.centerIn: parent
-                implicitSize: 15
+                implicitSize: Theme.icon
                 source: item.modelData.icon
             }
 

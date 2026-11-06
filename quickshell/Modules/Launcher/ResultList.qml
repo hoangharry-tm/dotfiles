@@ -12,14 +12,15 @@ ListView {
     signal chosen(int index)
     signal hovered(int index)
 
-    implicitHeight: Math.min(contentHeight, 7 * 52)
+    implicitHeight: Math.min(contentHeight, 7 * (Theme.resultHeight + spacing))
     clip: true
+    spacing: Theme.spaceXs
     currentIndex: current
     highlightMoveDuration: Theme.animFast
     boundsBehavior: Flickable.StopAtBounds
 
     highlight: Rectangle {
-        radius: Theme.radiusMd
+        radius: Theme.radiusLg // sheet radius (28) - sheet inset (12)
         color: Theme.hover
     }
 

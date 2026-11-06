@@ -18,7 +18,7 @@ Item {
     signal clicked
     signal entered
 
-    implicitHeight: 52
+    implicitHeight: Theme.resultHeight
 
     MouseArea {
         anchors.fill: parent
@@ -30,13 +30,13 @@ Item {
 
     RowLayout {
         anchors.fill: parent
-        anchors.leftMargin: Theme.pad
-        anchors.rightMargin: Theme.pad
-        spacing: Theme.pad
+        anchors.leftMargin: Theme.spaceMd
+        anchors.rightMargin: Theme.spaceMd
+        spacing: Theme.spaceMd
 
         Item {
-            Layout.preferredWidth: 30
-            Layout.preferredHeight: 30
+            Layout.preferredWidth: Theme.iconApp
+            Layout.preferredHeight: Theme.iconApp
 
             IconImage {
                 anchors.fill: parent
@@ -48,7 +48,7 @@ Item {
                 anchors.centerIn: parent
                 visible: root.iconName === ""
                 glyph: root.glyph
-                size: Theme.iconLg + 4
+                size: Theme.iconXl
                 color: Theme.primary
             }
         }

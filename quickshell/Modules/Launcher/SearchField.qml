@@ -21,7 +21,7 @@ RowLayout {
         input.forceActiveFocus();
     }
 
-    spacing: 12
+    spacing: Theme.spaceMd
 
     Icon {
         glyph: root.glyph
@@ -72,9 +72,9 @@ RowLayout {
 
     Rectangle {
         visible: root.chip !== ""
-        implicitWidth: chipLabel.implicitWidth + 16
-        implicitHeight: 22
-        radius: 11
+        implicitWidth: chipLabel.implicitWidth + Theme.spaceLg
+        implicitHeight: Theme.controlSm
+        radius: Theme.radiusFull
         color: Qt.alpha(Theme.primary, 0.16)
 
         Label {

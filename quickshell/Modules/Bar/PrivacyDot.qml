@@ -4,18 +4,14 @@ import qs.Services
 import qs.Widgets
 
 // Appears only while an app is capturing the mic or screen/camera.
-Item {
+BarChip {
     id: root
 
     visible: Privacy.active
-    implicitWidth: visible ? 26 : 0
-    implicitHeight: 26
 
     Icon {
-        anchors.centerIn: parent
         glyph: Privacy.videoActive ? "󰄀" : "󰍬"
         color: Theme.tertiary
-        size: 14
 
         SequentialAnimation on opacity {
             running: root.visible
@@ -25,16 +21,9 @@ Item {
         }
     }
 
-    MouseArea {
-        id: mouse
-
-        anchors.fill: parent
-        hoverEnabled: true
-    }
-
     Tooltip {
         target: root
-        shown: mouse.containsMouse
+        shown: root.hovered
 
         Label {
             visible: Privacy.micActive

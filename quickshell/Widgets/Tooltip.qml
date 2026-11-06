@@ -2,7 +2,9 @@ import QtQuick
 import Quickshell
 import qs.Common
 
-// Hover details for a bar item: a small glass card below it.
+// Hover details for a bar item: a small glass card below it. The card is
+// QML-drawn (xdg popups get no niri layer rule), so it is a near-opaque
+// fill with a hairline instead of blur + shadow.
 // Usage: Tooltip { target: someItem; shown: someItem.hovered; content: ... }
 PopupWindow {
     id: root
@@ -14,7 +16,7 @@ PopupWindow {
     anchor.item: target
     anchor.edges: Edges.Bottom
     anchor.gravity: Edges.Bottom
-    anchor.margins.top: 10
+    anchor.margins.top: Theme.spaceSm
     visible: shown && delay.done
     color: "transparent"
     implicitWidth: card.width
@@ -36,18 +38,18 @@ PopupWindow {
     Rectangle {
         id: card
 
-        width: column.implicitWidth + Theme.pad * 2
-        height: column.implicitHeight + 20
+        width: column.implicitWidth + Theme.padControl * 2
+        height: column.implicitHeight + Theme.padControl * 2
         radius: Theme.radiusMd
         color: Theme.glassSolid
-        border.width: 1
+        border.width: Theme.hairlineWidth
         border.color: Theme.hairline
 
         Column {
             id: column
 
             anchors.centerIn: parent
-            spacing: 4
+            spacing: Theme.spaceXs
         }
     }
 }

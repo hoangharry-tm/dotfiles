@@ -17,10 +17,10 @@ Rectangle {
 
     signal closed
 
-    implicitHeight: layout.implicitHeight + 24
-    radius: Theme.radiusMd
+    implicitHeight: layout.implicitHeight + Theme.spaceMd * 2
+    radius: toast ? Theme.radiusLg : Theme.radiusMd
     color: toast ? Theme.glassSolid : Theme.tile
-    border.width: 1
+    border.width: toast || notification.urgency === NotificationUrgency.Critical ? Theme.hairlineWidth : 0
     border.color: notification.urgency === NotificationUrgency.Critical ? Theme.error : Theme.hairline
 
     readonly property string iconSource: {
@@ -58,19 +58,19 @@ Rectangle {
         anchors.left: parent.left
         anchors.right: parent.right
         anchors.top: parent.top
-        anchors.margins: 12
-        spacing: 12
+        anchors.margins: Theme.spaceMd
+        spacing: Theme.spaceMd
 
         ClippingRectangle {
             Layout.alignment: Qt.AlignTop
-            Layout.preferredWidth: 36
-            Layout.preferredHeight: 36
+            Layout.preferredWidth: Theme.controlLg
+            Layout.preferredHeight: Theme.controlLg
             radius: Theme.radiusSm
             color: Theme.tile
 
             IconImage {
                 anchors.fill: parent
-                anchors.margins: root.notification.image ? 0 : 4
+                anchors.margins: root.notification.image ? 0 : Theme.spaceSm
                 source: root.iconSource
                 visible: root.iconSource !== ""
             }
@@ -84,7 +84,7 @@ Rectangle {
 
         ColumnLayout {
             Layout.fillWidth: true
-            spacing: 2
+            spacing: Theme.spaceXs
 
             RowLayout {
                 Layout.fillWidth: true
@@ -103,16 +103,16 @@ Rectangle {
                 }
 
                 Clickable {
-                    Layout.preferredWidth: 20
-                    Layout.preferredHeight: 20
-                    radius: 10
+                    Layout.preferredWidth: Theme.controlSm
+                    Layout.preferredHeight: Theme.controlSm
+                    radius: Theme.radiusFull
                     opacity: hover.containsMouse || hovered ? 1 : 0
                     onClicked: root.closed()
 
                     Icon {
                         anchors.centerIn: parent
                         glyph: "󰅖"
-                        size: 12
+                        size: Theme.iconSm
                     }
                 }
             }
@@ -131,7 +131,7 @@ Rectangle {
                 text: root.notification.body
                 textFormat: Text.StyledText
                 color: Theme.textMuted
-                font.pixelSize: Theme.textSm
+                lineHeight: Theme.lineHeight
                 wrapMode: Text.Wrap
                 maximumLineCount: root.toast ? 3 : 5
                 onLinkActivated: link => Qt.openUrlExternally(link)
@@ -139,8 +139,8 @@ Rectangle {
 
             Flow {
                 Layout.fillWidth: true
-                Layout.topMargin: 6
-                spacing: 6
+                Layout.topMargin: Theme.spaceSm
+                spacing: Theme.spaceSm
                 visible: actions.count > 0
 
                 Repeater {
@@ -151,8 +151,9 @@ Rectangle {
                     Clickable {
                         required property NotificationAction modelData
 
-                        width: actionLabel.implicitWidth + 20
-                        height: 26
+                        width: actionLabel.implicitWidth + Theme.padControl * 2
+                        height: Theme.controlSm + Theme.spaceXs
+                        radius: Theme.radiusFull
                         color: hovered ? Theme.pressed : Theme.tile
                         onClicked: {
                             modelData.invoke();

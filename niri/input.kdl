@@ -22,15 +22,16 @@ input {
     trackpoint {}
 }
 
-// Outputs. The laptop panel keeps its auto-detected scale (1.25); the HDMI
-// monitor sits to its right, at 1x, top-aligned. Absent outputs are ignored,
-// so the laptop-only case is unaffected.
-output "eDP-1" {
+// Outputs, in logical pixels (physical / scale). The HDMI monitor sits to
+// the LEFT of the laptop: it spans x 0–1920 (scale 1), the laptop panel
+// starts at x=1920 (1920 / 1.25 = 1536 logical wide). Top edges aligned.
+// When the monitor is unplugged niri ignores its block and the laptop
+// panel still works on its own.
+output "HDMI-A-2" {
+    scale 1
     position x=0 y=0
 }
 
-output "HDMI-A-2" {
-    scale 1
-    // eDP-1 is 1920 / 1.25 = 1536 logical pixels wide.
-    position x=1536 y=0
+output "eDP-1" {
+    position x=1920 y=0
 }

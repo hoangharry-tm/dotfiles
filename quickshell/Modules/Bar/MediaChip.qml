@@ -1,4 +1,5 @@
 import QtQuick
+import QtQuick.Layouts
 import Quickshell.Widgets
 import qs.Common
 import qs.Services
@@ -6,12 +7,10 @@ import qs.Widgets
 
 // Now playing: note + title with a hairline progress along the bottom.
 // Click play/pause; scroll to skip; hover for artwork, artist and time.
-Clickable {
+BarChip {
     id: root
 
     visible: Media.active
-    implicitWidth: row.implicitWidth + 16
-    implicitHeight: 26
     onClicked: Media.toggle()
     onScrolled: d => d > 0 ? Media.previous() : Media.next()
 
@@ -22,32 +21,26 @@ Clickable {
         value: root.visible
     }
 
-    Row {
-        id: row
+    Icon {
+        glyph: Media.playing ? "󰎈" : "󰏤"
+        color: Media.playing ? Theme.primary : Theme.textMuted
+    }
 
-        anchors.centerIn: parent
-        spacing: 6
-
-        Icon {
-            glyph: Media.playing ? "󰎈" : "󰏤"
-            color: Media.playing ? Theme.primary : Theme.textMuted
-        }
-
-        Label {
-            width: Math.min(implicitWidth, 180)
-            text: Media.title
-            color: Theme.textMuted
-        }
+    Label {
+        Layout.maximumWidth: 180
+        text: Media.title
+        color: Theme.textMuted
     }
 
     Rectangle {
+        parent: root // outside the chip's row layout
         visible: Media.length > 0
         anchors.bottom: parent.bottom
-        anchors.bottomMargin: 1
-        x: 8
-        height: 2
-        radius: 1
-        width: (parent.width - 16) * Media.progress
+        anchors.bottomMargin: Theme.spaceXs / 2
+        x: Theme.padControl
+        height: Theme.trackThin
+        radius: Theme.trackThin / 2
+        width: (parent.width - Theme.padControl * 2) * Media.progress
         color: Qt.alpha(Theme.primary, Media.playing ? 0.8 : 0.35)
     }
 
@@ -56,17 +49,17 @@ Clickable {
         shown: root.hovered
 
         Row {
-            spacing: 12
+            spacing: Theme.spaceMd
 
             IconImage {
                 visible: Media.art !== ""
-                implicitSize: 56
+                implicitSize: Theme.iconApp * 2
                 source: Media.art
             }
 
             Column {
                 anchors.verticalCenter: parent.verticalCenter
-                spacing: 3
+                spacing: Theme.spaceXs
 
                 Label {
                     width: Math.min(implicitWidth, 240)

@@ -34,16 +34,16 @@ GridView {
 
         ClippingRectangle {
             anchors.fill: parent
-            anchors.margins: 4
+            anchors.margins: Theme.spaceXs
             radius: Theme.radiusMd
             color: Theme.tile
-            border.width: cell.index === root.current ? 2 : 0
+            border.width: cell.index === root.current ? Theme.spaceXs / 2 : 0
             border.color: Theme.primary
 
             Image {
                 anchors.fill: parent
                 source: cell.modelData.image ? "file://" + cell.modelData.image : ""
-                sourceSize.width: 320
+                sourceSize.width: 320 // decode size, not layout
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true
                 cache: false
@@ -53,14 +53,14 @@ GridView {
                 anchors.left: parent.left
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
-                height: 22
+                height: Theme.controlSm
                 color: Qt.alpha(Theme.surface, 0.7)
                 visible: cell.index === root.current
 
                 Label {
                     anchors.fill: parent
-                    anchors.leftMargin: 8
-                    anchors.rightMargin: 8
+                    anchors.leftMargin: Theme.spaceSm
+                    anchors.rightMargin: Theme.spaceSm
                     text: cell.modelData.title
                     font.pixelSize: Theme.textXs
                 }

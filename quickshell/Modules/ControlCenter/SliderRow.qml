@@ -23,7 +23,7 @@ Item {
 
         anchors.left: parent.left
         anchors.right: chevron.visible ? chevron.left : parent.right
-        anchors.rightMargin: chevron.visible ? 2 : 0
+        anchors.rightMargin: chevron.visible ? Theme.gapInline : 0
         onMoved: v => root.moved(v)
         onIconClicked: root.iconClicked()
     }
@@ -34,9 +34,9 @@ Item {
         visible: root.expandable
         anchors.right: parent.right
         anchors.verticalCenter: parent.verticalCenter
-        width: 26
-        height: 26
-        radius: 13
+        width: Theme.controlSm
+        height: Theme.controlSm
+        radius: Theme.radiusFull
         onClicked: root.expand()
 
         Icon {

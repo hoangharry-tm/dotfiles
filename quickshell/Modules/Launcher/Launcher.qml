@@ -20,10 +20,12 @@ PanelWindow {
     property int current: 0
 
     screen: modelData
-    visible: shown || sheet.opacity > 0.01 // keep mapped while fading out
+    // Mapped only while shown: niri draws blur and shadow for the whole
+    // surface, so fading or scaling the sheet inside it would leave a ghost halo.
+    visible: shown
     anchors.top: true
     margins.top: Math.round(modelData.height * 0.2)
-    implicitWidth: 640
+    implicitWidth: Theme.launcherWidth
     implicitHeight: sheet.implicitHeight
     exclusiveZone: 0
     color: "transparent"
@@ -64,24 +66,8 @@ PanelWindow {
         id: sheet
 
         width: parent.width
-        implicitHeight: column.implicitHeight + 16
-        radius: Theme.radiusXl
-        opacity: root.shown ? 1 : 0
-        scale: root.shown ? 1 : 0.97
-        transformOrigin: Item.Top
-
-        Behavior on opacity {
-            NumberAnimation {
-                duration: Theme.animFast
-                easing.type: Theme.easing
-            }
-        }
-        Behavior on scale {
-            NumberAnimation {
-                duration: Theme.anim
-                easing.type: Theme.easing
-            }
-        }
+        implicitHeight: column.implicitHeight + Theme.spaceMd * 2
+        radius: Theme.radiusXl // = qs-launcher layer rule in niri/rules.kdl
 
         ColumnLayout {
             id: column
@@ -89,16 +75,16 @@ PanelWindow {
             anchors.left: parent.left
             anchors.right: parent.right
             anchors.top: parent.top
-            anchors.margins: 8
-            spacing: 6
+            anchors.margins: Theme.spaceMd
+            spacing: Theme.spaceXs
 
             SearchField {
                 id: search
 
                 Layout.fillWidth: true
-                Layout.preferredHeight: 48
-                Layout.leftMargin: Theme.pad
-                Layout.rightMargin: Theme.pad
+                Layout.preferredHeight: Theme.fieldHeight
+                Layout.leftMargin: Theme.spaceMd
+                Layout.rightMargin: Theme.spaceMd
                 placeholder: Launch.modes[root.mode].placeholder
                 glyph: Launch.modes[root.mode].glyph
                 chip: root.mode === "apps" ? "" : Launch.modes[root.mode].label
@@ -110,7 +96,9 @@ PanelWindow {
 
             Rectangle {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 1
+                Layout.leftMargin: Theme.spaceMd
+                Layout.rightMargin: Theme.spaceMd
+                Layout.preferredHeight: Theme.hairlineWidth
                 color: Theme.hairline
             }
 
@@ -139,7 +127,7 @@ PanelWindow {
             // Empty state
             Label {
                 Layout.fillWidth: true
-                Layout.preferredHeight: 64
+                Layout.preferredHeight: Theme.tileHeight
                 visible: root.results.length === 0
                 horizontalAlignment: Text.AlignHCenter
                 color: Theme.textMuted
@@ -149,10 +137,10 @@ PanelWindow {
             // Footer: key hints, plus prefix modes while the field is empty.
             RowLayout {
                 Layout.fillWidth: true
-                Layout.leftMargin: Theme.pad
-                Layout.rightMargin: Theme.pad
-                Layout.bottomMargin: 4
-                spacing: 14
+                Layout.leftMargin: Theme.spaceMd
+                Layout.rightMargin: Theme.spaceMd
+                Layout.preferredHeight: Theme.control
+                spacing: Theme.spaceLg
 
                 KeyHint {
                     key: "↵"
