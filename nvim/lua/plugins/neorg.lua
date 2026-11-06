@@ -9,14 +9,23 @@ return {
     init = function()
       -- The parser rocks ship `parser/<lang>.so` under lib/lua/5.1, which
       -- isn't on the runtimepath by default; add it so treesitter finds them.
-      for _, rock in ipairs({ "tree-sitter-norg", "tree-sitter-norg-meta" }) do
-        vim.opt.rtp:append(vim.fn.stdpath("data") .. "/lazy-rocks/" .. rock .. "/lib/lua/5.1")
+      -- Skip when the parsers are provided in site/parser (Nix): the rock's
+      -- prebuilt .so needs the system libstdc++, which Nix's Neovim can't load.
+      local data = vim.fn.stdpath("data")
+      if not vim.uv.fs_stat(data .. "/site/parser/norg.so") then
+        for _, rock in ipairs({ "tree-sitter-norg", "tree-sitter-norg-meta" }) do
+          vim.opt.rtp:append(data .. "/lazy-rocks/" .. rock .. "/lib/lua/5.1")
+        end
       end
     end,
     config = function()
       require("neorg").setup({
         load = {
           ["core.defaults"] = {},
+          -- Why: by default neorg dlopens the first parser.<lang> on
+          -- package.cpath, which is sometimes the rock's non-Nix .so
+          -- (libstdc++ error). Let Neovim resolve parsers via the runtimepath.
+          ["core.integrations.treesitter"] = { config = { configure_parsers = false } },
           ["core.concealer"] = {
             config = { icon_preset = "diamond" },
           },
