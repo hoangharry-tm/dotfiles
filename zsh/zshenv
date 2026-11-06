@@ -1,1 +1,15 @@
+# Keep PATH entries unique (later additions of an existing dir are dropped)
+typeset -U path PATH
+
+# Nix: put Nix-installed tools on PATH. bash gets this via /etc/profile, but
+# zsh (Nix's build in particular) doesn't read it. The script guards itself
+# against being sourced twice.
+for f in /etc/profile.d/nix-daemon.sh /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh; do
+  [ -e "$f" ] && { . "$f"; break; }
+done
+unset f
+
+# Home Manager session variables
+[ -e "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh" ] && . "$HOME/.nix-profile/etc/profile.d/hm-session-vars.sh"
+
 [ -f "$HOME/.cargo/env" ] && . "$HOME/.cargo/env"
