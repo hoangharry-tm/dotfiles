@@ -196,6 +196,16 @@ ShellRoot {
         }
     }
 
+    // qs ipc call ime toggle (EN/VI). niri binds go through here, not
+    // fcitx5-remote directly, so the bar chip updates on the keypress.
+    IpcHandler {
+        target: "ime"
+
+        function toggle(): void {
+            Ime.toggle();
+        }
+    }
+
     // qs ipc call notifications dnd|clear
     IpcHandler {
         target: "notifications"

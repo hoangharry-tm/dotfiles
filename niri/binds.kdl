@@ -14,7 +14,7 @@ binds {
     Mod+N hotkey-overlay-title="Control Center" { spawn "qs" "ipc" "call" "shell" "control"; }
     Mod+Shift+W hotkey-overlay-title="Pick a Wallpaper" { spawn "qs" "ipc" "call" "shell" "wallpapers"; }
     Mod+V hotkey-overlay-title="Clipboard History" { spawn "qs" "ipc" "call" "shell" "clipboard"; }
-    Mod+Shift+Space hotkey-overlay-title="Toggle EN/VI Input" { spawn "fcitx5-remote" "-t"; }
+    Mod+Shift+Space hotkey-overlay-title="Toggle EN/VI Input" { spawn "qs" "ipc" "call" "ime" "toggle"; }
     Mod+Period hotkey-overlay-title="Emoji Picker" { spawn "qs" "ipc" "call" "shell" "emoji"; }
     Mod+E hotkey-overlay-title="Files (yazi)" { spawn "alacritty" "--class" "yazi" "-e" "yazi"; }
     Mod+Shift+T hotkey-overlay-title="Copy Text from Screen" { spawn "screen-ocr"; }

@@ -22,7 +22,11 @@ Singleton {
             probe.running = true;
     }
 
+    // Flip the label optimistically so the chip changes on the keypress, then
+    // let fcitx5 confirm (refresh) once the toggle has gone through.
     function toggle() {
+        if (running)
+            engine = vietnamese ? "keyboard-us" : "bamboo";
         toggler.running = true;
     }
 
