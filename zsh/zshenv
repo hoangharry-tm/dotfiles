@@ -2,8 +2,10 @@
 typeset -U path PATH
 
 # Nix: put Nix-installed tools on PATH. bash gets this via /etc/profile, but
-# zsh (Nix's build in particular) doesn't read it. The script guards itself
-# against being sourced twice.
+# zsh (Nix's build in particular) doesn't read it. Clear the script's
+# "already sourced" guard: it can be inherited without the PATH it set, and
+# re-sourcing is harmless since PATH is unique (above).
+unset __ETC_PROFILE_NIX_SOURCED
 for f in /etc/profile.d/nix-daemon.sh /nix/var/nix/profiles/default/etc/profile.d/nix-daemon.sh; do
   [ -e "$f" ] && { . "$f"; break; }
 done
