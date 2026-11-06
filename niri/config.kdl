@@ -308,6 +308,13 @@ animations {
 // Find more information on the wiki:
 // https://niri-wm.github.io/niri/Configuration:-Window-Rules
 
+// Draw the focus ring and border only around windows, not as a solid
+// rectangle behind them; otherwise it shows through translucent windows
+// (e.g. Alacritty at 0.9 opacity) and tints the focused one.
+window-rule {
+    draw-border-with-background false
+}
+
 // Work around WezTerm's initial configure bug
 // by setting an empty default-column-width.
 window-rule {
