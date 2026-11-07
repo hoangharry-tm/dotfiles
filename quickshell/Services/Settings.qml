@@ -71,6 +71,7 @@ Singleton {
     property alias lowPower: data.lowPower
     property alias motionTier: data.motionTier
     property alias controlCenterStyle: data.controlCenterStyle
+    property alias scrollStyle: data.scrollStyle
     property alias calendarRemindMin: data.calendarRemindMin
     property alias calendarChipMin: data.calendarChipMin
     property alias notesInbox: data.notesInbox
@@ -119,6 +120,7 @@ Singleton {
             property string lowPower: "auto"
             property string motionTier: "auto"
             property string controlCenterStyle: "classic" // classic | tiles | pages
+            property string scrollStyle: "native" // native (Qt Flickable) | smooth (Widgets/SmoothWheel)
             property int calendarRemindMin: 10
             property int calendarChipMin: 30
             property string notesInbox: "~/mh_notes/inbox.norg"

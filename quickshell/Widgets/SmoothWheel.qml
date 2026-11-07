@@ -1,5 +1,6 @@
 import QtQuick
 import qs.Common
+import qs.Services
 
 // Smooth wheel scrolling for a Flickable: declare it inside the Flickable
 // and set `flick`. It re-parents itself onto the Flickable's viewport (not
@@ -38,6 +39,13 @@ MouseArea {
     // True from the first wheel event until the content has settled.
     readonly property bool busy: mode !== 0 || lift.running
 
+    // "native": stay out of the way (disabled MouseArea = wheel events reach
+    // the Flickable's own handler). Default: the custom path measured ~8% of
+    // frames over 25 ms on the T480, mostly from baking the content into a
+    // texture (a ~40 ms preprocess each time a scroll started).
+    enabled: Settings.scrollStyle === "smooth"
+    onEnabledChanged: if (!enabled) halt()
+
     parent: flick
     anchors.fill: parent
     z: 1
@@ -49,7 +57,7 @@ MouseArea {
 
     function halt() {
         if (mode !== 0)
-            flick.contentY = Math.round(flick.contentY); // crisp text once layer-less again
+            flick.contentY = Math.round(flick.contentY); // whole pixels: crisp text at rest
         mode = 0;
         vel = 0;
         frames.stop();
@@ -108,18 +116,6 @@ MouseArea {
                 frames.start();
             }
         }
-    }
-
-    // While moving, bake the content into one texture: the renderer then
-    // just shifts a quad instead of re-transforming and re-uploading every
-    // card's gradient/curve geometry per frame (that was ~25% of a core on
-    // the render thread for the Control Center). At rest the live items
-    // draw, so text stays sharp and hover/animations are unaffected.
-    Binding {
-        target: root.flick.contentItem
-        property: "layer.enabled"
-        value: true
-        when: root.busy
     }
 
     // Some compositors never send the end-of-scroll phase: infer it from silence.

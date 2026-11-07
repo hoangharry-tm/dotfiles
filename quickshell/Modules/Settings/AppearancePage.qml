@@ -187,6 +187,21 @@ ColumnLayout {
                 onPicked: v => Settings.controlCenterStyle = v
             }
         }
+
+        SettingRow {
+            title: "Scrolling"
+            subtitle: Settings.scrollStyle === "smooth" ? "Eased wheel steps and touchpad coasting (custom)" : "Qt's built-in scrolling: direct and lightest"
+
+            Segmented {
+                width: Theme.launcherWidth / 2
+                model: [
+                    { glyph: "󰁔", label: "Native", value: "native" },
+                    { glyph: "󰦒", label: "Smooth", value: "smooth" }
+                ]
+                current: Settings.scrollStyle
+                onPicked: v => Settings.scrollStyle = v
+            }
+        }
     }
 
     Group {

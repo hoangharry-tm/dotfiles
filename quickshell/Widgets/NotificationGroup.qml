@@ -26,6 +26,14 @@ Item {
     // the whole column fits the screen (Infinity = uncapped, e.g. the Control Center).
     property real maxFanH: Infinity
     property bool hot: false           // pointer over the stack (held a grace period after leaving)
+    // Scroll freeze: while the enclosing list scrolls, hover neither fans nor
+    // collapses a group (cards sweeping under a still pointer used to fan
+    // one group after another, relayouting the list mid-scroll). An open
+    // group stays open, so the list can be scrolled through its cards. When
+    // scrolling settles, hover is re-read: a group under the pointer fans
+    // after hoverOpen, one the pointer left collapses after hoverClose.
+    property Item scroller: null       // nearest ancestor Flickable (none for toasts)
+    property bool scrolling: false
     readonly property bool fanned: canFan && (open || hot)
     property int busy: 0               // cards being hovered, dragged or typed in
     readonly property bool interacting: busy > 0 || hot
@@ -80,7 +88,55 @@ Item {
         hot = false;
     }
 
+    function settle() {
+        if (!canFan)
+            return;
+        if (hover.hovered && !hot)
+            opener.restart();
+        else if (!hover.hovered && hot)
+            grace.restart();
+    }
+
+    Connections {
+        target: root.scroller
+        enabled: root.scroller !== null && !root.toast
+
+        function onContentYChanged() {
+            root.scrolling = true;
+            opener.stop();
+            grace.stop();
+            quiet.restart();
+        }
+    }
+
+    // contentY quiet this long = scrolling stopped (covers wheel, touchpad, flick).
+    Timer {
+        id: quiet
+
+        interval: Theme.hoverClose
+        onTriggered: {
+            root.scrolling = false;
+            root.settle();
+        }
+    }
+
+    // Fan only once the pointer has rested on a group after a scroll.
+    Timer {
+        id: opener
+
+        interval: Theme.hoverOpen
+        onTriggered: if (hover.hovered && !root.scrolling)
+            root.hot = true
+    }
+
     Component.onCompleted: {
+        if (!toast) {
+            for (let p = parent; p; p = p.parent)
+                if (p.contentY !== undefined && p.flickableDirection !== undefined) {
+                    scroller = p;
+                    break;
+                }
+        }
         keepAll = fanned;
         Qt.callLater(() => ready = true);
     }
@@ -234,8 +290,12 @@ Item {
             }
 
             HoverHandler {
+                id: hover
+
                 enabled: root.canFan
                 onHoveredChanged: {
+                    if (root.scrolling)
+                        return; // frozen; settle() re-reads hover when scrolling stops
                     if (hovered) {
                         grace.stop();
                         root.hot = true;
