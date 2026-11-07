@@ -20,7 +20,7 @@ Singleton {
         })
 
     function open(url) {
-        Quickshell.execDetached(["xdg-open", url]);
+        Apps.run(["xdg-open", url]);
     }
 
     // "gh foo bar" -> { key: "gh", terms: "foo bar" }; unknown first word = default engine.

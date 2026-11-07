@@ -85,3 +85,13 @@ output_path = "~/.local/state/theme/firefox.css"
 [templates.neomutt]
 input_path = "~/.config/matugen/templates/neomutt.muttrc"
 output_path = "~/.local/state/theme/neomutt-colors.muttrc"
+
+# kitty: included by kitty.conf; the `wallpaper` script reloads running
+# kittys (SIGUSR1). fastfetch colours: sourced by the `ff` wrapper.
+[templates.kitty]
+input_path = "~/.config/matugen/templates/kitty.conf"
+output_path = "~/.local/state/theme/kitty.conf"
+
+[templates.fastfetch]
+input_path = "~/.config/matugen/templates/fastfetch.conf"
+output_path = "~/.local/state/theme/fastfetch.conf"

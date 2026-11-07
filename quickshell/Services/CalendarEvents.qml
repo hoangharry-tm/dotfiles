@@ -98,7 +98,7 @@ Singleton {
 
     function open(link) {
         if (/^https?:\/\//.test(link))
-            Quickshell.execDetached(["xdg-open", link]);
+            Apps.run(["xdg-open", link]);
     }
 
     // Starts calendar-sync now; the cache watcher picks the result up.

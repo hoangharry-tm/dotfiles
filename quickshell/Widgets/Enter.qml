@@ -20,7 +20,15 @@ Item {
         id: shift
     }
 
-    Component.onCompleted: target.transform = [shift]
+    // High tier only: content also grows from enterScale around its center.
+    Scale {
+        id: grow
+
+        origin.x: root.target.width / 2
+        origin.y: root.target.height / 2
+    }
+
+    Component.onCompleted: target.transform = [shift, grow]
 
     onActiveChanged: {
         if (!active) {
@@ -29,6 +37,7 @@ Item {
         }
         target.opacity = 0;
         shift.y = Theme.enterRise;
+        grow.xScale = grow.yScale = Theme.motionRich ? Theme.enterScale : 1;
         anim.restart();
     }
 
@@ -43,6 +52,15 @@ Item {
             NumberAnimation {
                 target: root.target
                 property: "opacity"
+                to: 1
+                duration: Theme.anim
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Theme.curveDecelerate
+            }
+
+            NumberAnimation {
+                target: grow
+                properties: "xScale,yScale"
                 to: 1
                 duration: Theme.anim
                 easing.type: Easing.BezierSpline

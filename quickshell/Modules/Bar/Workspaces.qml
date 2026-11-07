@@ -60,7 +60,8 @@ Row {
             Behavior on width {
                 NumberAnimation {
                     duration: Theme.anim
-                    easing.type: Theme.easing
+                    easing.type: Theme.motionRich ? Easing.BezierSpline : Theme.easing
+                    easing.bezierCurve: Theme.curveDecelerate
                 }
             }
 
@@ -76,6 +77,17 @@ Row {
                 border.width: ws.apps.length && ws.active ? Theme.hairlineWidth : 0
                 border.color: Theme.primaryRing
                 opacity: ws.active || ws.apps.length ? 1 : 0.6
+
+                // The pill grows with its slot instead of snapping (balanced and up).
+                Behavior on width {
+                    enabled: Theme.motionAmbient
+
+                    NumberAnimation {
+                        duration: Theme.anim
+                        easing.type: Easing.BezierSpline
+                        easing.bezierCurve: Theme.curveDecelerate
+                    }
+                }
 
                 Behavior on color {
                     ColorAnimation {

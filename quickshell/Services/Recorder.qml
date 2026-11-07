@@ -87,7 +87,7 @@ Singleton {
         command: ["notify-send", "-a", "Screen recorder", "-i", "media-record", "-A", "open=Open folder", "Recording saved", root.file]
         stdout: StdioCollector {
             onStreamFinished: if (text.trim() === "open")
-                Quickshell.execDetached(["xdg-open", root.dir])
+                Apps.run(["xdg-open", root.dir])
         }
     }
 }

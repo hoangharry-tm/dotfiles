@@ -109,7 +109,8 @@ right. Levels, least important first:
   title (glyph + countdown),
   3 visualiser goes, 4 media is a glyph only, 5 weather chip goes (the Control
   Center has it), 6 input-method chip and next-event chip go, 7 tray folds into a "..." chip,
-  8 system chip goes, 9 battery % goes. Wi-Fi/Bluetooth/volume/battery icons,
+  6 also drops the removable-drive chip (`DriveChip`, shown only while a USB drive
+  is mounted; hover = list + Eject), 8 system chip goes, 9 battery % goes. Wi-Fi/Bluetooth/volume/battery icons,
   recording, screen-share (`ScreencastChip`, error-coloured, pulses only
   while a niri cast is active; hover lists casts with Stop / Stop all) and
   privacy (mic/camera) indicators never collapse. The Focus-timer chip (only
@@ -190,6 +191,32 @@ opacity, offset and scale of *content*; never a glass sheet (see Elevation).
 - Windows: niri `window-open` scales 94% -> 100% + fades (220 ms decelerate);
   `window-close` 100% -> 96% + fades (150 ms accelerate), via custom shaders.
 - Wallpaper: awww `grow` from the screen center, 1.2 s, 60 fps.
+
+### Motion tiers
+Same language everywhere; tiers change richness and cost. `motion-tier`
+(modules/motion.nix) scores the machine: score = gpu + cpu + ram - pixel
+penalty. gpu 0 none, 2 older Intel iGPU or unknown, 4 Intel Xe / AMD APU,
+6 Arc / NVIDIA / discrete AMD; cpu 0 (<8 threads), 1 (>=8), 2 (>=16); ram 1
+(>=16 GiB); penalty from Mpx/s of enabled outputs: <=150 0, <=300 1, <=600 2,
+else 3 (1080p60 = 124, 4K60 = 498). `low` <= 1, `balanced` 2-5, `high` >= 6.
+The T480 (UHD 620, 8 threads, 24 GiB) scores 4, or 3 with an external 1080p:
+balanced. Override in Settings > Appearance > Motion (auto | low | balanced |
+high); `tier.json` and the niri include (`~/.local/state/motion/`) are
+rewritten on change and on output hotplug (`motion-tier-watch`).
+- low: niri blur 1 pass, plain fade open/close (100-140 ms), stiffer springs;
+  shell durations x0.7, no stagger, no rise, no ambient drift, no cava.
+- balanced: look.kdl as is; stagger 18 (max 6), rise `spaceSm`.
+- high: niri blur 4 passes, open = 92% scale + 10 px rise + soft light, close
+  95% + drop, softer springs; shell stagger 22 (max 8), rise `spaceMd`,
+  `Enter` also scales from `enterScale`, workspace pill morph on the decelerate
+  curve, animated lock background at full strength.
+- Runtime: on battery or the power-saver profile the shell drops one tier;
+  `lowPower` still collapses everything (`motionScale` 0). Tokens:
+  `motionTier`, `motionLevel`, `motionAmbient` (balanced+), `motionRich`
+  (high). Gate new heavy effects on those flags, not on the tier name.
+- Balanced+ extras: workspace pill grows with its slot, toasts slide in.
+- Lock background: `shaders/lock-drift.frag` (qsb built in Nix), balanced+,
+  AC only, 30 fps, stops after `driftIdle` without pointer movement.
 
 ## Color
 Roles come from the wallpaper (matugen). text = primary content; textMuted =
@@ -295,3 +322,27 @@ and grain) over a `glassSolid` base, so toasts (no niri blur) and CC cards read 
      the fanned one is capped to what remains, scrolling inside; nothing else moves. The window height is clamped
      to `avail` and still only changes when a transition starts or ends.
 - Timers: none without toasts; relative time ticks once a minute only while a card is visible.
+
+## System monitor
+The bar System chip's hover card is the monitor (a Control Center page would
+duplicate it, and a glance should not need a click). It is an *interactive*
+`Popover` (stays open under the pointer, for the Quit pills): CPU and memory
+`StatRow`s with sparklines (memory name carries swap), network, then
+`InfoRow`s for sensors, fan and load, then "Busiest processes" (top 5 by CPU,
+`textXs` mono % of one core, a `controlSm` error-tinted "Quit" pill that sends
+SIGTERM, no confirm). Session-critical processes (quickshell, niri, systemd,
+dbus, pipewire, ...) get no pill (`System.protectedProcs`).
+`Services/System` samples cheaply every 2 s for the chip tint; the detail probe
+(one `sh`: one grep over hwmon, one awk over my /proc/<pid>/stat) runs only
+while the card is open (`tracking`). Sensors are chosen by hwmon driver name and
+label (coretemp/k10temp package, thinkpad, nvme, amdgpu), never by number; rows
+and the fan row (`fan*_input`) simply do not appear when absent. The process
+list fills on the second tick (CPU needs a delta).
+
+## Quick notes
+Launcher prefix `+` (free: `>` is run) appends `- YYYY-MM-DD HH:MM text` to a
+neorg inbox (`Services/Notes`; created with a `@document.meta` header) and
+toasts "Saved to inbox" via notify-send. Target: `Settings.notesInbox`
+(Settings > General > Notes), default `~/mh_notes/inbox.norg` (the nvim neorg
+"notes" workspace). Mod+Shift+N opens the launcher straight in this mode
+(`qs ipc call shell note`).

@@ -26,11 +26,13 @@ import Quickshell.Io
 //   recDesktopAudio  bool   = false    record what the speakers play      (Recorder)
 //   focusDefaultMin  real   = 25      Focus timer length; also the last one used (FocusTimer)
 //   lowPower         string = "auto"   "auto" (on battery) | "always" | "never" (PowerMode)
+//   motionTier       string = "auto"   "auto" | "low" | "balanced" | "high" (PowerMode, motion-tier)
 //   dockEnabled      bool   = true     bottom dock                        (Dock)
 //   dockAutoHide     bool   = true     reveal at the bottom edge only     (Dock)
 //   dockIconSize     int    = 48       app icon px                        (Dock)
 //   calendarRemindMin int   = 10      reminder toast lead, 0 = off       (CalendarEvents)
 //   calendarChipMin  int    = 30      bar chip shows this long before start (NextEventChip)
+//   notesInbox       string = "~/mh_notes/inbox.norg"  launcher `+` quick-capture target (Notes)
 //   dockPinned       list   = [...]    desktop-entry ids ("@settings" = built-in) (Dock)
 //
 // NOT here (owned by Nix, read-only in the panel): swayidle timings
@@ -65,8 +67,10 @@ Singleton {
     property alias dockPinned: data.dockPinned
     property alias focusDefaultMin: data.focusDefaultMin
     property alias lowPower: data.lowPower
+    property alias motionTier: data.motionTier
     property alias calendarRemindMin: data.calendarRemindMin
     property alias calendarChipMin: data.calendarChipMin
+    property alias notesInbox: data.notesInbox
 
     FileView {
         id: file
@@ -109,8 +113,10 @@ Singleton {
             property var dockPinned: ["Alacritty", "firefox", "spotify", "yazi", "@settings"]
             property real focusDefaultMin: 25
             property string lowPower: "auto"
+            property string motionTier: "auto"
             property int calendarRemindMin: 10
             property int calendarChipMin: 30
+            property string notesInbox: "~/mh_notes/inbox.norg"
         }
     }
 

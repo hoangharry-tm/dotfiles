@@ -80,6 +80,30 @@ PanelWindow {
         width: parent.width
         spacing: Theme.gapStack
 
+        // A new stack slides in from the right and fades (balanced and up).
+        add: Transition {
+            enabled: Theme.motionAmbient
+
+            ParallelAnimation {
+                NumberAnimation {
+                    property: "opacity"
+                    from: 0
+                    to: 1
+                    duration: Theme.anim
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Theme.curveDecelerate
+                }
+
+                NumberAnimation {
+                    property: "x"
+                    from: Theme.spaceLg
+                    duration: Theme.anim
+                    easing.type: Easing.BezierSpline
+                    easing.bezierCurve: Theme.curveDecelerate
+                }
+            }
+        }
+
         // Cards below glide up when one leaves.
         move: Transition {
             NumberAnimation {

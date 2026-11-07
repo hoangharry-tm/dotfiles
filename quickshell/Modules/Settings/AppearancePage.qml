@@ -165,6 +165,27 @@ ColumnLayout {
         }
     }
 
+    Group {
+        title: "Motion"
+
+        SettingRow {
+            title: "Animation level"
+            subtitle: "Detected: " + PowerMode.detectedTier + (PowerMode.saving ? " (one lower while saving power)" : "")
+
+            Segmented {
+                width: Theme.launcherWidth / 2
+                model: [
+                    { glyph: "󰁪", label: "Auto", value: "auto" },
+                    { glyph: "󰁹", label: "Low", value: "low" },
+                    { glyph: "󰁿", label: "Balanced", value: "balanced" },
+                    { glyph: "󰂂", label: "High", value: "high" }
+                ]
+                current: Settings.motionTier
+                onPicked: v => Settings.motionTier = v
+            }
+        }
+    }
+
     UnitText {
         id: schedule
 

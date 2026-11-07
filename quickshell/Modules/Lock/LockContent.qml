@@ -37,6 +37,51 @@ Item {
         color: Theme.scrim
     }
 
+    // Slow light drift + grain over the blurred wallpaper (shaders/lock-drift.frag,
+    // built by modules/motion.nix). Balanced/high tier, on AC only, <= 30 fps,
+    // and it stops after driftIdle without pointer activity (an unattended or
+    // dimmed screen costs nothing); moving the pointer resumes it.
+    Loader {
+        id: drift
+
+        property bool awake: true
+
+        anchors.fill: parent
+        active: awake && Theme.motionAmbient && !PowerMode.lowPower && (Power.plugged || !Power.hasBattery)
+
+        sourceComponent: ShaderEffect {
+            property real time: 0
+            property real aspect: width / Math.max(1, height)
+            property real strength: Theme.motionRich ? 1 : 0.7
+
+            fragmentShader: "file://" + Quickshell.env("HOME") + "/.local/share/motion/lock-drift.frag.qsb"
+            blending: true
+
+            Timer {
+                interval: 1000 / 30
+                repeat: true
+                running: true
+                onTriggered: parent.time += interval / 1000
+            }
+        }
+
+        Timer {
+            id: sleepy
+
+            interval: Theme.driftIdle
+            running: drift.awake
+            onTriggered: drift.awake = false
+        }
+
+        HoverHandler {
+            onPointChanged: {
+                if (!drift.awake)
+                    drift.awake = true;
+                sleepy.restart();
+            }
+        }
+    }
+
     SystemClock {
         id: clock
 

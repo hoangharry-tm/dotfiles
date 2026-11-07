@@ -17,6 +17,7 @@ window-rule {
 // GPU for nothing.
 window-rule {
     match app-id="^Alacritty$"
+    match app-id="^kitty$"
     match app-id="^dropdown$"
     match app-id="^yazi$"
     background-effect {
@@ -67,6 +68,14 @@ window-rule {
     match app-id=r#"^org\.gnome\.(Settings|Characters)$"#
     match app-id=r#"^com\.saivert\.pwvucontrol$"#
     open-floating true
+}
+
+// LocalSend (AirDrop-like): a small floating utility, not a tiled column.
+window-rule {
+    match app-id=r#"^(localsend_app|org\.localsend\.localsend_app)$"#
+    open-floating true
+    default-column-width { fixed 760; }
+    default-window-height { fixed 520; }
 }
 
 // Dialogs and pickers: file choosers (xdg-desktop-portal-gtk), browser

@@ -27,7 +27,7 @@ Item {
     Timer {
         interval: 100
         repeat: true
-        running: root.users > 0 && !PowerMode.lowPower // static gradient saves repaints
+        running: root.users > 0 && !PowerMode.lowPower && Theme.motionAmbient // static gradient saves repaints
         onTriggered: root.t = (root.t + interval) % (2 * Theme.animAmbient)
     }
 }

@@ -196,6 +196,12 @@ ShellRoot {
             Panels.toggle("launcher");
         }
 
+        // Launcher in quick-note (`+`) mode.
+        function note(): void {
+            Launch.seed = "+";
+            Panels.toggle("launcher");
+        }
+
         function emoji(): void {
             Launch.seed = ".";
             Panels.toggle("launcher");

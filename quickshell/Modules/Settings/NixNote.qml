@@ -2,6 +2,7 @@ import QtQuick
 import QtQuick.Layouts
 import Quickshell
 import qs.Common
+import qs.Services
 
 // Read-only view of a Nix-owned setting. Changing it at runtime would break
 // reproducibility, so the only action is opening the module that defines it.
@@ -28,7 +29,7 @@ Group {
             text: "Open"
             onClicked: {
                 Panels.close();
-                Quickshell.execDetached(["alacritty", "-e", "nvim", root.path]);
+                Apps.run([Apps.terminal, "-e", "nvim", root.path]);
             }
         }
     }

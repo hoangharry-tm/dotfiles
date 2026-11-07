@@ -21,6 +21,9 @@ Singleton {
         const bats = UPower.devices.values.filter(d => d.type === UPowerDeviceType.Battery && d.healthSupported);
         return bats.length ? bats.reduce((a, d) => a + d.healthPercentage, 0) / bats.length : -1;
     }
+    // Always-on helpers (low-battery notices, ThinkPad LEDs): referencing the
+    // singletons here instantiates them, since Power is loaded at startup.
+    readonly property var background: [Battery, Leds]
     readonly property real watts: Math.abs(battery?.changeRate ?? 0)
 
     readonly property string icon: {

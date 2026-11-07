@@ -99,7 +99,7 @@ Singleton {
     function newWindow(item) {
         const act = item.entry?.actions.find(a => /new.?window/i.test(a.id + a.name));
         if (act)
-            act.execute();
+            Apps.start(act);
         else
             launch(item);
     }

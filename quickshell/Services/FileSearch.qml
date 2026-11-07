@@ -48,8 +48,8 @@ Singleton {
             title: path.slice(cut + 1) || path,
             subtitle: dir.startsWith(home) ? "~" + dir.slice(home.length) : dir,
             icon: mime === "inode/directory" || path.endsWith("/") ? "folder" : iconFor(path, mime),
-            run: () => Quickshell.execDetached(["xdg-open", path]),
-            alt: () => Quickshell.execDetached(["alacritty", "--class", "yazi", "-e", "yazi", path])
+            run: () => Apps.run(["xdg-open", path]),
+            alt: () => Apps.run([Apps.terminal, "--class", "yazi", "-e", "yazi", path])
         };
     }
 

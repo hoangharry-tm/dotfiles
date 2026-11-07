@@ -113,6 +113,10 @@ PanelWindow {
             level: rightRow.level
         }
 
+        DriveChip {
+            level: rightRow.level
+        }
+
         SystemChip {
             level: rightRow.level
         }

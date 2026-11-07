@@ -3,6 +3,7 @@ pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
+import qs.Common
 
 // Audio spectrum from cava (raw ascii, ~30 fps). Runs only while media plays
 // AND a visible visualiser holds it (hold/release, like Ambient), so idle cost
@@ -24,7 +25,7 @@ Singleton {
 
     Process {
         command: ["media-cava"]
-        running: root.users > 0 && Media.playing && !PowerMode.lowPower // no spectrum on battery
+        running: root.users > 0 && Media.playing && !PowerMode.lowPower && Theme.motionAmbient // no spectrum on battery
 
         stdout: SplitParser {
             // One frame per line: "12;40;..;" (trailing delimiter).

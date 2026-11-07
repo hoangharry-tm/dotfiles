@@ -34,3 +34,5 @@ tmux/plugins/
 !plymouth/**
 !.github/
 !.github/**
+!fastfetch/
+!fastfetch/**

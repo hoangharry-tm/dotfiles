@@ -29,9 +29,18 @@ Singleton {
     // top process spawns `ps`, so it runs only while a card sets `tracking`.
     property real uptime: 0         // seconds
     property real load: 0           // 1-minute load average
-    property string topName: ""
-    property real topMem: 0         // GiB
     property bool tracking: false
+
+    // Detail view (card open only): swap, labelled sensors, fan, busiest processes.
+    property real swapUsed: 0       // GiB
+    property real swapTotal: 0      // GiB
+    property var sensors: []        // [{ name, temp }] CPU / Drive / GPU, whichever exist
+    property int fanRpm: -1         // -1 = no fan sensor (card hides the row)
+    property var procs: []          // [{ pid, name, cpu }] top by CPU; cpu in cores (1 = one full core)
+    readonly property int procCount: 5
+    // Never offered a kill action: killing these takes the session down.
+    readonly property var protectedProcs: ["quickshell", "niri", "systemd", "dbus-daemon", "dbus-broker", "Xwayland", "pipewire", "wireplumber"]
+    property var _ticks: null
 
     property var _last: null
     property var _net: null
@@ -79,6 +88,8 @@ Singleton {
         const kb = key => parseInt((meminfo.text().match(new RegExp("^" + key + ":\\s+(\\d+)", "m")) || [0, 0])[1]);
         memTotal = kb("MemTotal") / 1048576;
         memUsed = (kb("MemTotal") - kb("MemAvailable")) / 1048576;
+        swapTotal = kb("SwapTotal") / 1048576;
+        swapUsed = (kb("SwapTotal") - kb("SwapFree")) / 1048576;
 
         const t = parseInt(thermal.text());
         if (t > 0)
@@ -170,33 +181,108 @@ Singleton {
         onTriggered: root.sample()
     }
 
-    // Heaviest process by memory (summed per name: browsers fork many). RSS is
-    // exact, unlike ps's lifetime-average %CPU, so we rank by that.
-    Process {
-        id: top
+    // Substring match: Nix wraps binaries (".quickshell-wra").
+    function canKill(proc) {
+        return !protectedProcs.some(n => proc.name.includes(n));
+    }
 
-        command: ["ps", "-eo", "rss=,comm="]
-        stdout: StdioCollector {
-            onStreamFinished: {
-                const sums = {};
-                for (const l of text.split("\n")) {
-                    const m = l.trim().match(/^(\d+)\s+(.+)$/);
-                    if (m)
-                        sums[m[2]] = (sums[m[2]] || 0) + parseInt(m[1]);
-                }
-                const best = Object.entries(sums).sort((x, y) => y[1] - x[1])[0];
-                root.topName = best ? best[0] : "";
-                root.topMem = best ? best[1] / 1048576 : 0;
+    function kill(proc) {
+        if (canKill(proc))
+            Quickshell.execDetached(["kill", "-TERM", String(proc.pid)]);
+    }
+
+    // hwmon numbering differs per machine: pick sensors by driver name and
+    // label, never by number. First match per display name wins.
+    readonly property var _wanted: [
+        { name: "CPU", hw: /^(coretemp|k10temp|zenpower|cpu_thermal)$/, label: /^(Package|Tctl|Tdie)/ },
+        { name: "CPU", hw: /^thinkpad$/, label: /^(CPU|)$/ },
+        { name: "Drive", hw: /^nvme$/, label: /^(Composite|)$/ },
+        { name: "GPU", hw: /^(amdgpu|radeon|nouveau)$/, label: /^(edge|)$/ }
+    ]
+
+    // One `sh` per tick: all hwmon values via one grep, then utime+stime of
+    // my own processes from /proc/<pid>/stat via one awk (comm may hold spaces
+    // or parens, so split after the last ")").
+    readonly property string _awk: '{ s = $0; sub(/^[0-9]+ \\(/, "", s); n = match(s, /\\)[^)]*$/); split(substr(s, n + 2), f, " "); print $1, f[12] + f[13], substr(s, 1, n - 1) }'
+    readonly property string _script: "echo '#hw'; grep -H . /sys/class/hwmon/hwmon*/name /sys/class/hwmon/hwmon*/temp*_input /sys/class/hwmon/hwmon*/temp*_label /sys/class/hwmon/hwmon*/fan*_input 2>/dev/null; " + "echo '#ps'; find /proc -maxdepth 1 -name '[0-9]*' -user \"$(id -u)\" -printf '%p/stat\\n' 2>/dev/null | xargs awk '" + _awk + "' 2>/dev/null"
+
+    function _parse(out) {
+        const hw = {}, ticks = {};
+        let fan = -1, kind = "";
+        for (const line of out.split("\n")) {
+            if (line === "#hw" || line === "#ps") {
+                kind = line;
+                continue;
             }
+            if (kind === "#hw") {
+                const m = line.match(/hwmon(\d+)\/(\w+?)(?:_(input|label))?:(.*)$/);
+                if (!m)
+                    continue;
+                const [, n, key, sub, v] = m;
+                hw[n] = hw[n] || { temps: {} };
+                if (key === "name")
+                    hw[n].name = v;
+                else if (/^fan/.test(key) && fan < 0)
+                    fan = parseInt(v);
+                else if (/^temp/.test(key))
+                    (hw[n].temps[key] = hw[n].temps[key] || {})[sub] = v;
+            } else {
+                const m = line.match(/^(\d+) (\d+) (.*)$/);
+                if (m)
+                    ticks[m[1]] = { pid: +m[1], t: +m[2], name: m[3] };
+            }
+        }
+        const found = [];
+        for (const w of _wanted) {
+            if (found.some(f => f.name === w.name))
+                continue;
+            for (const h of Object.values(hw)) {
+                if (!h.name || !w.hw.test(h.name))
+                    continue;
+                const t = Object.values(h.temps).find(x => w.label.test(x.label || "") && parseInt(x.input) > 0);
+                if (t) {
+                    found.push({ name: w.name, temp: parseInt(t.input) / 1000 });
+                    break;
+                }
+            }
+        }
+        sensors = found;
+        fanRpm = fan;
+
+        // CLK_TCK is 100 on Linux: Δticks / (100 · Δs) = cores in use.
+        const now = Date.now();
+        if (_ticks) {
+            const dt = (now - _ticks.now) / 1000;
+            procs = Object.values(ticks).filter(p => _ticks.map[p.pid] !== undefined).map(p => ({ pid: p.pid, name: p.name, cpu: Math.max(0, (p.t - _ticks.map[p.pid]) / (100 * dt)) })).sort((a, b) => b.cpu - a.cpu).slice(0, procCount);
+        }
+        const map = {};
+        for (const p of Object.values(ticks))
+            map[p.pid] = p.t;
+        _ticks = { now, map };
+    }
+
+    Process {
+        id: probe
+
+        command: ["sh", "-c", root._script]
+        stdout: StdioCollector {
+            onStreamFinished: root._parse(text)
         }
     }
 
+    // Runs only while a card is open; the first tick has no delta yet, so the
+    // process list fills on the second.
     Timer {
         interval: 2000
         running: root.tracking
         repeat: true
         triggeredOnStart: true
-        onTriggered: if (!top.running)
-            top.running = true
+        onTriggered: if (!probe.running)
+            probe.running = true
+    }
+
+    onTrackingChanged: if (!tracking) {
+        _ticks = null;
+        procs = [];
     }
 }

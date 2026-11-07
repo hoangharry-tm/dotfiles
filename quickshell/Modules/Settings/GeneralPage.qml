@@ -22,6 +22,20 @@ ColumnLayout {
     }
 
     Group {
+        title: "Notes"
+
+        SettingRow {
+            title: "Quick-note inbox"
+            subtitle: "Launcher + appends here (a neorg file)"
+
+            FieldControl {
+                text: Settings.notesInbox
+                onCommitted: v => Settings.notesInbox = v
+            }
+        }
+    }
+
+    Group {
         title: "Recording"
 
         SettingRow {
@@ -52,7 +66,7 @@ ColumnLayout {
                 text: "Open"
                 onClicked: {
                     Panels.close();
-                    Quickshell.execDetached(["alacritty", "-e", "nvim", Settings.dir + "/settings.json"]);
+                    Apps.run([Apps.terminal, "-e", "nvim", Settings.dir + "/settings.json"]);
                 }
             }
         }

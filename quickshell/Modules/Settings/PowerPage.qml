@@ -7,6 +7,8 @@ import qs.Widgets
 ColumnLayout {
     spacing: Theme.gapSection
 
+    Component.onCompleted: Battery.refresh()
+
     // Timings come from the swayidle unit Nix installed, so this is never a stale copy.
     UnitText {
         id: unit
@@ -19,9 +21,11 @@ ColumnLayout {
         return (m % 1 ? m.toFixed(1) : m) + " min";
     }
 
-    function after(action) {
-        const m = unit.text.match(new RegExp("timeout (\\d+) '?" + action));
-        return m ? minutes(Number(m[1])) : "not set";
+    // The unit carries IDLE_AC / IDLE_BAT="dim=S lock=S off=S [suspend=S]".
+    function after(env, key) {
+        const line = unit.text.match(new RegExp("IDLE_" + env + "=([^\"\\n]*)"));
+        const m = line && line[1].match(new RegExp(key + "=(\\d+)"));
+        return m ? minutes(Number(m[1])) : "never";
     }
 
     NixNote {
@@ -30,17 +34,51 @@ ColumnLayout {
 
         ReadOnlyRow {
             title: "Dim screen"
-            value: after("idle-dim")
+            value: "AC " + after("AC", "dim") + "  ·  battery " + after("BAT", "dim")
         }
 
         ReadOnlyRow {
             title: "Lock"
-            value: after("lock-screen")
+            value: "AC " + after("AC", "lock") + "  ·  battery " + after("BAT", "lock")
         }
 
         ReadOnlyRow {
             title: "Turn displays off"
-            value: after("niri msg action power-off-monitors")
+            value: "AC " + after("AC", "off") + "  ·  battery " + after("BAT", "off")
+        }
+
+        ReadOnlyRow {
+            title: "Suspend"
+            value: "AC " + after("AC", "suspend") + "  ·  battery " + after("BAT", "suspend")
+        }
+    }
+
+    Group {
+        visible: Battery.limitSupported
+        title: "Charge limit"
+
+        SettingRow {
+            title: "Stop charging at"
+            subtitle: Battery.limitWritable ? "Keeps both batteries healthier. Resumes 5% below" : "No permission: run scripts/system-setup.sh, then log in again"
+
+            Segmented {
+                width: Theme.launcherWidth / 2
+                enabled: Battery.limitWritable
+                model: [60, 70, 80, 90, 100].map(n => ({ label: n + "%", value: n }))
+                current: Battery.limit
+                onPicked: v => Battery.setLimit(v)
+            }
+        }
+
+        SettingRow {
+            title: "Charge to full once"
+            subtitle: "Until unplugged or full, then the limit returns"
+
+            SwitchControl {
+                enabled: Battery.limitWritable
+                checked: Battery.fullOnce
+                onToggled: Battery.setFullOnce(!Battery.fullOnce)
+            }
         }
     }
 

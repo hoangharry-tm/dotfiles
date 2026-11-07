@@ -297,7 +297,7 @@ PanelWindow {
                 Item {
                     id: prefixes
 
-                    readonly property var all: [[">", "run"], ["=", "calc"], [":", "wallpapers"], ["<", "clipboard"], [".", "emoji"], ["/", "files"], ["?", "web"]]
+                    readonly property var all: [[">", "run"], ["=", "calc"], [":", "wallpapers"], ["<", "clipboard"], [".", "emoji"], ["/", "files"], ["?", "web"], ["+", "note"]]
                     readonly property bool compact: measure.implicitWidth > width
 
                     Layout.fillWidth: true

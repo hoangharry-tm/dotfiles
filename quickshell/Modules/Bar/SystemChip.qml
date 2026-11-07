@@ -30,6 +30,7 @@ BarChip {
 
         target: root
         shown: root.hovered
+        interactive: true       // has Kill buttons: stays open under the pointer
         cardWidth: Theme.popoverWidth
 
         RowLayout {
@@ -62,7 +63,7 @@ BarChip {
         }
 
         StatRow {
-            name: "Memory"
+            name: "Memory" + (System.swapTotal > 0 ? "  ·  Swap " + System.swapUsed.toFixed(1) + " GiB" : "")
             value: System.memUsed.toFixed(1) + " / " + System.memTotal.toFixed(1) + " GiB"
             history: System.memHistory
             color: Theme.secondary
@@ -76,18 +77,83 @@ BarChip {
             color: Theme.tertiary
         }
 
+        // Sensors found by name at runtime; rows hide when the machine lacks them.
+        Repeater {
+            model: System.sensors
+
+            InfoRow {
+                required property var modelData
+                required property int index
+
+                Layout.topMargin: index === 0 ? Theme.spaceXs : 0
+                label: modelData.name + " temperature"
+                value: Math.round(modelData.temp) + "°C"
+                mono: true
+            }
+        }
+
         InfoRow {
-            Layout.topMargin: Theme.spaceXs
+            visible: System.fanRpm >= 0
+            label: "Fan"
+            value: System.fanRpm + " rpm"
+            mono: true
+        }
+
+        InfoRow {
             label: "Load"
             value: System.load.toFixed(2)
             mono: true
         }
 
-        InfoRow {
-            visible: System.topName !== ""
-            label: "Heaviest"
-            value: System.topName + "  " + System.topMem.toFixed(1) + " GiB"
-            mono: true
+        Label {
+            Layout.topMargin: Theme.spaceXs
+            visible: System.procs.length > 0
+            text: "Busiest processes"
+            color: Theme.textMuted
+            font.pixelSize: Theme.textXs
+        }
+
+        Repeater {
+            model: System.procs
+
+            RowLayout {
+                required property var modelData
+
+                Layout.fillWidth: true
+                spacing: Theme.gapInline
+
+                Label {
+                    Layout.fillWidth: true
+                    elide: Text.ElideRight
+                    text: modelData.name
+                }
+
+                Label {
+                    text: Math.round(modelData.cpu * 100) + "%"
+                    font.family: Theme.mono
+                    font.pixelSize: Theme.textSm
+                    color: Theme.textMuted
+                }
+
+                // Sends SIGTERM (a polite quit); no pill for session-critical processes.
+                Clickable {
+                    visible: System.canKill(modelData)
+                    implicitWidth: killLabel.implicitWidth + Theme.padControl * 2
+                    implicitHeight: Theme.controlSm
+                    radius: Theme.radiusFull
+                    color: pressed ? Theme.pressed : hovered ? Qt.alpha(Theme.error, 0.24) : Qt.alpha(Theme.error, 0.14)
+                    onClicked: System.kill(modelData)
+
+                    Label {
+                        id: killLabel
+
+                        anchors.centerIn: parent
+                        text: "Quit"
+                        color: Theme.error
+                        font.pixelSize: Theme.textXs
+                    }
+                }
+            }
         }
     }
 }

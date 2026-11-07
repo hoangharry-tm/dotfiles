@@ -293,6 +293,25 @@ PanelWindow {
                     Layout.fillWidth: true
                 }
 
+                UpdatesRow {
+                    Layout.fillWidth: true
+                }
+
+                Tile {
+                    Layout.fillWidth: true
+                    visible: KbdMods.available
+                    glyph: "󰌌"
+                    title: "Home-row mods"
+                    subtitle: KbdMods.on ? "On  \u00b7  Shift+Shift toggles" : "Off"
+                    checked: KbdMods.on
+                    onToggled: KbdMods.toggle()
+                }
+
+                DevicesCard {
+                    Layout.fillWidth: true
+                    live: root.shown
+                }
+
                 MediaCard {
                     Layout.fillWidth: true
                     visible: Media.active

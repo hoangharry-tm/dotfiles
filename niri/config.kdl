@@ -11,6 +11,9 @@ include "rules.kdl"
 include "startup.kdl"
 include "binds.kdl"
 
+// Hardware-scaled motion tier (modules/motion.nix: `motion-tier`); overrides look.kdl animations/blur.
+include optional=true "~/.local/state/motion/niri.kdl"
+
 include optional=true "~/.local/state/theme/niri.kdl"
 
 // Low-power override (blur off, short animations); written by quickshell's PowerMode, empty otherwise. Keep last.

@@ -9,6 +9,9 @@ import qs.Widgets
 Section {
     readonly property bool low: Power.percent < 0.15 && !Power.charging
 
+    // Limit info is read from sysfs once per open, not polled.
+    Component.onCompleted: Battery.refresh()
+
     RowLayout {
         visible: Power.hasBattery
         Layout.fillWidth: true
@@ -69,6 +72,72 @@ Section {
         text: [Power.charging ? "Charging" : Power.plugged ? "On AC" : "On battery", Power.watts > 0 ? Power.watts.toFixed(1) + " W" : "", Power.health >= 0 ? "Health " + Math.round(Power.health) + "%" : ""].filter(t => t).join("  ·  ")
         color: Theme.textMuted
         font.pixelSize: Theme.textXs
+    }
+
+    // One row per battery when there are several (T480: internal + external).
+    Repeater {
+        model: Battery.multi ? Battery.batteries : []
+
+        RowLayout {
+            required property var modelData
+
+            Layout.fillWidth: true
+            spacing: Theme.gapInline
+
+            Label {
+                text: modelData.name
+                color: Theme.textMuted
+                font.pixelSize: Theme.textXs
+            }
+
+            Label {
+                Layout.fillWidth: true
+                text: modelData.charging ? "Charging" : modelData.discharging ? "Discharging" : modelData.full ? "Full" : "Idle"
+                font.pixelSize: Theme.textXs
+                color: modelData.discharging ? Theme.text : Theme.textMuted
+            }
+
+            Label {
+                text: modelData.health >= 0 ? "Health " + Math.round(modelData.health) + "%" : ""
+                color: Theme.textMuted
+                font.pixelSize: Theme.textXs
+            }
+
+            Label {
+                text: Math.round(modelData.percent * 100) + "%"
+                font.family: Theme.mono
+                font.pixelSize: Theme.textXs
+            }
+        }
+    }
+
+    RowLayout {
+        visible: Battery.limitSupported
+        Layout.fillWidth: true
+        Layout.bottomMargin: Theme.spaceXs
+        spacing: Theme.gapInline
+
+        Label {
+            Layout.fillWidth: true
+            text: Battery.fullOnce ? "Charging to 100% once" : "Charge limit " + Battery.activeStop + "%"
+            color: Theme.textMuted
+            font.pixelSize: Theme.textXs
+        }
+
+        Clickable {
+            visible: Battery.limitWritable && (Battery.fullOnce || Battery.limited)
+            implicitWidth: onceLabel.implicitWidth + Theme.padControl * 2
+            implicitHeight: Theme.controlSm
+            onClicked: Battery.setFullOnce(!Battery.fullOnce)
+
+            Label {
+                id: onceLabel
+
+                anchors.centerIn: parent
+                text: Battery.fullOnce ? "Restore limit" : "Charge to full once"
+                font.pixelSize: Theme.textXs
+            }
+        }
     }
 
     Segmented {

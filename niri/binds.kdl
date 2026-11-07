@@ -5,8 +5,8 @@ binds {
     Mod+Shift+Slash { show-hotkey-overlay; }
 
     // Apps
-    Mod+T hotkey-overlay-title="Open a Terminal" { spawn "alacritty"; }
-    Mod+Return hotkey-overlay-title=null { spawn "alacritty"; }
+    Mod+T hotkey-overlay-title="Open a Terminal" { spawn "kitty"; }
+    Mod+Return hotkey-overlay-title=null { spawn "kitty"; }
     Mod+Backslash hotkey-overlay-title="Dropdown Terminal" { spawn "dropdown-term"; }
     Mod+Space hotkey-overlay-title="Search Apps" { spawn "qs" "ipc" "call" "shell" "launcher"; }
     Mod+D hotkey-overlay-title=null { spawn "qs" "ipc" "call" "shell" "launcher"; }
@@ -16,8 +16,9 @@ binds {
     Mod+Shift+W hotkey-overlay-title="Pick a Wallpaper" { spawn "qs" "ipc" "call" "shell" "wallpapers"; }
     Mod+V hotkey-overlay-title="Clipboard History" { spawn "qs" "ipc" "call" "shell" "clipboard"; }
     Mod+Shift+Space hotkey-overlay-title="Toggle EN/VI Input" { spawn "qs" "ipc" "call" "ime" "toggle"; }
+    Mod+Shift+N hotkey-overlay-title="Quick Note to Inbox" { spawn "qs" "ipc" "call" "shell" "note"; }
     Mod+Period hotkey-overlay-title="Emoji Picker" { spawn "qs" "ipc" "call" "shell" "emoji"; }
-    Mod+E hotkey-overlay-title="Files (yazi)" { spawn "alacritty" "--class" "yazi" "-e" "yazi"; }
+    Mod+E hotkey-overlay-title="Files (yazi)" { spawn "kitty" "--class" "yazi" "-e" "yazi"; }
     Mod+Shift+T hotkey-overlay-title="Copy Text from Screen" { spawn "screen-ocr"; }
     Mod+Shift+Q hotkey-overlay-title="Scan QR Code" { spawn "screen-qr"; }
     Mod+Shift+C hotkey-overlay-title="Pick a Colour" { spawn "qs" "ipc" "call" "shell" "pickColor"; }
@@ -187,6 +188,16 @@ binds {
     Mod+Alt+R hotkey-overlay-title="Record the Screen" { spawn "qs" "ipc" "call" "shell" "record"; }
     Mod+P hotkey-overlay-title="Focus Timer: Open / Play-Pause" { spawn "qs" "ipc" "call" "focus" "toggle"; }
     Alt+Print  { screenshot-window; }
+    // macOS muscle memory (Cmd = Mod): Shift+3 whole screen, Shift+4 region
+    // (niri's picker, Space switches to a window like macOS), Shift+5 record /
+    // markup. Adding Ctrl copies to the clipboard without saving a file, as
+    // on macOS. (Mod+Ctrl+3/4/5 alone move columns to workspaces.)
+    Mod+Shift+3 hotkey-overlay-title="Screenshot: Screen to File" { screenshot-screen write-to-disk=true; }
+    Mod+Ctrl+Shift+3 hotkey-overlay-title="Screenshot: Screen to Clipboard" { screenshot-screen write-to-disk=false; }
+    Mod+Shift+4 hotkey-overlay-title="Screenshot: Region to File" { screenshot; }
+    Mod+Ctrl+Shift+4 hotkey-overlay-title="Screenshot: Region to Clipboard" { spawn "screenshot-region-copy"; }
+    Mod+Shift+5 hotkey-overlay-title="Record the Screen" { spawn "qs" "ipc" "call" "shell" "record"; }
+    Mod+Ctrl+Shift+5 hotkey-overlay-title="Screenshot: Region + Markup" { spawn "screenshot-annotate"; }
 
     // Shortcut Inhibit — escape hatch if an app inhibits shortcuts
     Mod+Escape allow-inhibiting=false { toggle-keyboard-shortcuts-inhibit; }

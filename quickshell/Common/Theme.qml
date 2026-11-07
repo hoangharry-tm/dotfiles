@@ -177,11 +177,19 @@ Singleton {
 
     // Motion
     // 0 in low power (Services/PowerMode): every duration below collapses, in one place.
-    readonly property real motionScale: PowerMode.lowPower ? 0 : 1
+    // Hardware tier (PowerMode.tier: low | balanced | high, DESIGN.md "Motion"):
+    // same language, different richness. Derived tokens below; gate new
+    // continuous or heavy effects on these, never on the tier name.
+    readonly property string motionTier: PowerMode.tier
+    readonly property int motionLevel: PowerMode.tierLevel                  // 0 low, 1 balanced, 2 high
+    readonly property bool motionAmbient: motionLevel >= 1                  // gradient drift, cava spectrum
+    readonly property bool motionRich: motionLevel >= 2                     // extra polish (springy morphs, lock shader)
+    readonly property real motionScale: PowerMode.lowPower ? 0 : (motionLevel === 0 ? 0.7 : 1)
     readonly property int animFast: Math.round(120 * motionScale)
     readonly property int anim: Math.round(220 * motionScale)
     readonly property int animSlow: Math.round(340 * motionScale)
     readonly property int animAmbient: 9000 // one drift of an "on" gradient (only while a sheet is open)
+    readonly property int driftIdle: 240000 // lock-screen shader stops after this long without pointer movement
     readonly property int animSpin: 1000    // one turn of a busy spinner
     readonly property int pressDelay: 120 // ms: Flickable press hold-off (scroll vs click)
     readonly property int holdDelay: 400    // press-and-hold: first repeat
@@ -198,9 +206,9 @@ Singleton {
     readonly property var curveAccelerate: [0.3, 0, 0.8, 0.15, 1, 1]
     readonly property real pressScale: 0.96   // pressed controls dip, then spring back
     readonly property real enterScale: 0.97   // content grows into its sheet from this
-    readonly property int enterRise: spaceSm  // content slides this far while entering
-    readonly property int stagger: 18         // delay per list item on entrance
-    readonly property int staggerMax: 6       // items past this appear together (cheap)
+    readonly property int enterRise: [0, spaceSm, spaceMd][motionLevel] // content slides this far while entering
+    readonly property int stagger: [0, 18, 22][motionLevel] // delay per list item on entrance
+    readonly property int staggerMax: [0, 6, 8][motionLevel] // items past this appear together (cheap)
     // Notification stack: layers tucked under the front card, fanned into a list on hover.
     readonly property int stackLayers: 3      // cards that peek beneath the front one
     readonly property int stackPeek: spaceSm  // visible edge of each tucked card

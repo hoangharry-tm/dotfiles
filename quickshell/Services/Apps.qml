@@ -6,6 +6,24 @@ import Quickshell
 // Installed applications (.desktop entries) and launcher search.
 // search() returns launcher result items: { id, title, subtitle, icon, run }.
 Singleton {
+    // The terminal for the shell's own launches (kitty; flags shared with alacritty).
+    readonly property string terminal: "kitty"
+
+    // Every app the shell starts gets its own transient systemd scope, so
+    // restarting quickshell.service (switch, live edits) never kills the
+    // apps it launched (it used to take terminals down with it).
+    function run(argv) {
+        Quickshell.execDetached(["systemd-run", "--user", "--scope", "--collect", "--quiet", "--", ...argv]);
+    }
+    // Desktop entry or action: its argv minus field codes (%u, %F, …), which
+    // only make sense when a file/URL is passed (aerc got a literal "%u").
+    function argv(entry) {
+        return entry.command.filter(a => !/^%[fFuUdDnNickvm]$/.test(a));
+    }
+    function start(entry) {
+        run(argv(entry));
+    }
+
     id: root
 
     // Lowercased search fields are computed once per app-list change, not per
@@ -51,7 +69,7 @@ Singleton {
     function item(e) {
         const app = e.app;
         if (e.kind === "action")
-            return { id: e.id, title: e.act.name, subtitle: app.name, icon: app.icon, run: () => { Usage.record(e.id); e.act.execute(); } };
+            return { id: e.id, title: e.act.name, subtitle: app.name, icon: app.icon, run: () => { Usage.record(e.id); start(e.act); } };
         return { id: e.id, title: app.name, subtitle: app.comment || app.genericName, icon: app.icon, run: () => launch(app) };
     }
 
@@ -89,10 +107,8 @@ Singleton {
     function launch(app) {
         Usage.record(app.id);
         if (app.runInTerminal)
-            // Desktop-entry field codes (%u, %F, …) must be dropped when we
-            // build the argv ourselves: aerc got a literal "%u" and quit.
-            Quickshell.execDetached(["alacritty", "-e", ...app.command.filter(a => !/^%[fFuUdDnNickvm]$/.test(a))]);
+            run([terminal, "-e", ...argv(app)]);
         else
-            app.execute();
+            start(app);
     }
 }

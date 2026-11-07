@@ -8,6 +8,7 @@ import qs.Common
 // items { id, title, subtitle, icon | glyph, run }. UI files only render these.
 //   (none) apps + inline calculator   > run in terminal   = calculator   : wallpapers
 //   < clipboard history   . emoji   / files   ? web search (?g ?gh ?yt ?nix ?w)
+//   + quick note appended to the neorg inbox (Services/Notes)
 Singleton {
     id: root
 
@@ -22,11 +23,12 @@ Singleton {
             clip: { label: "Clipboard", placeholder: "Search clipboard history", glyph: "󰅍" },
             emoji: { label: "Emoji", placeholder: "Search emoji by name", glyph: "󰞅" },
             file: { label: "Files", placeholder: "Search files in ~ (empty: recent)", glyph: "󰈔" },
+            note: { label: "Note", placeholder: "Capture a note to the inbox", glyph: "󰎞" },
             web: { label: "Web", placeholder: "Search the web (?g ?gh ?yt ?nix ?w)", glyph: "󰖟" }
         })
 
     function parse(text) {
-        const m = { ">": "run", "=": "calc", ":": "wall", "<": "clip", ".": "emoji", "/": "file", "?": "web" }[text[0]];
+        const m = { ">": "run", "=": "calc", ":": "wall", "<": "clip", ".": "emoji", "/": "file", "?": "web", "+": "note" }[text[0]];
         return m ? { mode: m, query: text.slice(1).trim() } : { mode: "apps", query: text.trim() };
     }
 
@@ -55,14 +57,16 @@ Singleton {
         { id: "focus-timer", title: "Focus timer", subtitle: "Count down with Focus on", glyph: "󱎫", keywords: "focus timer countdown pomodoro stopwatch alarm", run: () => Qt.callLater(() => FocusTimer.openCard()) },
         // Deferred: the launcher closes the open panel right after run().
         { id: "settings", title: "Settings", subtitle: "Shell preferences", glyph: "󰒓", keywords: "settings preferences options config", run: () => Qt.callLater(() => Panels.toggle("settings")) },
-        { id: "files", title: "Files", subtitle: "Browse files with yazi", glyph: "󰉋", keywords: "files file manager yazi browse folder", run: () => Quickshell.execDetached(["alacritty", "--class", "yazi", "-e", "yazi"]) },
+        { id: "files", title: "Files", subtitle: "Browse files with yazi", glyph: "󰉋", keywords: "files file manager yazi browse folder", run: () => Apps.run([Apps.terminal, "--class", "yazi", "-e", "yazi"]) },
+        { id: "send-device", title: "Send to device…", subtitle: "Pick files, send via LocalSend or KDE Connect", glyph: "󰒖", keywords: "send share device airdrop localsend phone iphone mac transfer", run: () => Quickshell.execDetached(["alacritty", "--class", "popup", "-e", "sh", "-c", "f=$(mktemp); yazi --chooser-file=$f ~; [ -s $f ] && xargs -d '\\n' share < $f; rm -f $f"]) },
         { id: "screen-ocr", title: "Copy text from screen", subtitle: "Select a region, OCR it (eng + vie)", glyph: "󰊄", keywords: "copy text screen ocr tesseract recognize", run: () => Quickshell.execDetached(["screen-ocr"]) },
+        { id: "home-row-mods", when: () => KbdMods.available, title: "Toggle home-row mods", subtitle: "Keyboard remap: home-row Super/Alt/Shift/Ctrl", glyph: "󰌌", keywords: "home row mods keyboard kanata toggle", run: () => KbdMods.toggle() },
         { id: "screen-qr", title: "Scan QR code", subtitle: "Select a region, decode the QR code", glyph: "󰐲", keywords: "scan qr code barcode zbar", run: () => Quickshell.execDetached(["screen-qr"]) }
     ]
 
     function actionItems(query) {
         const terms = query.toLowerCase().split(/\s+/).filter(t => t);
-        return terms.length ? actions.filter(a => terms.every(t => a.keywords.includes(t))) : [];
+        return terms.length ? actions.filter(a => (!a.when || a.when()) && terms.every(t => a.keywords.includes(t))) : [];
     }
 
     function items(p) {
@@ -73,6 +77,8 @@ Singleton {
             return [calcItem(p.query)].filter(x => x);
         case "file":
             return FileSearch.items();
+        case "note":
+            return p.query ? [{ id: "note", title: p.query, subtitle: "Enter to save to inbox  ·  " + Settings.notesInbox, glyph: "󰎞", run: () => Notes.save(p.query) }] : [];
         case "web":
             return WebSearch.items(p.query);
         case "wall":

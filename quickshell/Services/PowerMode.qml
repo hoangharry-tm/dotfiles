@@ -14,6 +14,47 @@ Singleton {
 
     readonly property bool lowPower: Settings.lowPower === "always" || (Settings.lowPower === "auto" && Power.hasBattery && !Power.plugged)
 
+    // Motion tier (modules/motion.nix `motion-tier` scores the hardware into
+    // tier.json; Settings.motionTier overrides). Shell-side runtime downgrade:
+    // one tier lower on battery or in the power-saver profile. lowPower still
+    // collapses all motion (Theme.motionScale 0) on top of this.
+    readonly property var tiers: ["low", "balanced", "high"]
+    property string baseTier: "balanced"
+    readonly property int baseLevel: Math.max(0, tiers.indexOf(Settings.motionTier === "auto" ? baseTier : Settings.motionTier))
+    readonly property bool saving: (Power.hasBattery && !Power.plugged) || Power.profile === PowerProfile.PowerSaver
+    readonly property int tierLevel: Math.max(0, baseLevel - (saving ? 1 : 0))
+    readonly property string tier: tiers[tierLevel]
+    readonly property string detectedTier: baseTier
+    readonly property string tierFile: (Quickshell.env("XDG_STATE_HOME") || Quickshell.env("HOME") + "/.local/state") + "/motion/tier.json"
+
+    // Re-score + rewrite niri's motion include when the user changes the setting.
+    Connections {
+        target: Settings
+
+        function onMotionTierChanged() {
+            rescore.running = true;
+        }
+    }
+
+    Process {
+        id: rescore
+
+        command: ["motion-tier", "apply"]
+    }
+
+    FileView {
+        path: root.tierFile
+        watchChanges: true
+        printErrors: false
+        onFileChanged: reload()
+        // "detected" is the auto result even when overridden.
+        onLoaded: {
+            try {
+                root.baseTier = JSON.parse(text()).detected || "balanced";
+            } catch (e) {}
+        }
+    }
+
     readonly property string niriFile: (Quickshell.env("XDG_STATE_HOME") || Quickshell.env("HOME") + "/.local/state") + "/theme/niri-power.kdl"
 
     // Last in config.kdl, so it overrides look.kdl/rules.kdl. Empty = no override.
