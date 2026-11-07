@@ -18,7 +18,19 @@ PanelWindow {
     readonly property int slot: iconSize + Theme.spaceSm     // icon + wash inset
     readonly property int dotBand: Theme.spaceSm              // room for the running dot
     readonly property int sepSpace: Theme.spaceMd             // pinned | running divider
-    readonly property real magnify: 0.12                      // subtle: +12% under the pointer
+    // Magnification stays inside the sheet's padding (+12% max): the glass
+    // never resizes. "macos" spreads it as a cosine wave over neighbours
+    // (reach by motion tier, 0 on low); "minimal" lifts only the hovered icon.
+    readonly property bool mac: Settings.dockStyle !== "minimal"
+    readonly property real magnify: mac ? 0.12 : 0.08
+    readonly property int reach: mac ? Theme.motionLevel + 1 : 0   // neighbours either side that follow
+    readonly property int stride: slot + Theme.spaceXs             // distance between slot starts
+    readonly property bool bounce: mac && Theme.motionLevel >= 1   // launch/attention hops
+
+    // drag-to-reorder (pinned only); DockItem reads these to slide neighbours
+    property string dragKey: ""
+    property int dragIndex: -1
+    property int dragTarget: -1
 
     property var itemsByKey: ({})
     property var keys: []

@@ -30,6 +30,7 @@ import Quickshell.Io
 //   dockEnabled      bool   = true     bottom dock                        (Dock)
 //   dockAutoHide     bool   = true     reveal at the bottom edge only     (Dock)
 //   dockIconSize     int    = 48       app icon px                        (Dock)
+//   dockStyle        string = "macos"  "macos" (wave, bounce, drag) | "minimal" (Dock)
 //   calendarRemindMin int   = 10      reminder toast lead, 0 = off       (CalendarEvents)
 //   calendarChipMin  int    = 30      bar chip shows this long before start (NextEventChip)
 //   notesInbox       string = "~/mh_notes/inbox.norg"  launcher `+` quick-capture target (Notes)
@@ -64,10 +65,12 @@ Singleton {
     property alias dockEnabled: data.dockEnabled
     property alias dockAutoHide: data.dockAutoHide
     property alias dockIconSize: data.dockIconSize
+    property alias dockStyle: data.dockStyle
     property alias dockPinned: data.dockPinned
     property alias focusDefaultMin: data.focusDefaultMin
     property alias lowPower: data.lowPower
     property alias motionTier: data.motionTier
+    property alias controlCenterStyle: data.controlCenterStyle
     property alias calendarRemindMin: data.calendarRemindMin
     property alias calendarChipMin: data.calendarChipMin
     property alias notesInbox: data.notesInbox
@@ -110,10 +113,12 @@ Singleton {
             property bool dockEnabled: true
             property bool dockAutoHide: true
             property int dockIconSize: 48
+            property string dockStyle: "macos"
             property var dockPinned: ["Alacritty", "firefox", "spotify", "yazi", "@settings"]
             property real focusDefaultMin: 25
             property string lowPower: "auto"
             property string motionTier: "auto"
+            property string controlCenterStyle: "classic" // classic | tiles | pages
             property int calendarRemindMin: 10
             property int calendarChipMin: 30
             property string notesInbox: "~/mh_notes/inbox.norg"

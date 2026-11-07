@@ -74,7 +74,9 @@ Singleton {
                 glyph: special?.glyph ?? "",
                 icon: special ? "" : Apps.iconFor(appId, entry),
                 running: wins.length > 0,
-                focused: wins.includes(focused)
+                focused: wins.includes(focused),
+                urgent: wins.some(w => windows[w]?.is_urgent),
+                titles: wins.map(w => ({ id: w, title: windows[w]?.title ?? "" }))
             };
         };
         const out = [];
@@ -129,6 +131,19 @@ Singleton {
     function togglePin(item) {
         const list = Settings.dockPinned.filter(k => k !== item.key);
         setPinned(item.pinned ? list : list.concat([item.key]));
+    }
+
+    // Drag-to-reorder: put `key` at pinned slot `to`.
+    function moveTo(key, to) {
+        const list = Settings.dockPinned.filter(k => k !== key);
+        if (list.length === Settings.dockPinned.length)
+            return;
+        list.splice(Math.max(0, Math.min(to, list.length)), 0, key);
+        setPinned(list);
+    }
+
+    function focusWindow(id) {
+        Niri.action("FocusWindow", { id });
     }
 
     function movePin(key, dir) {

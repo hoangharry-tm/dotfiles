@@ -14,6 +14,7 @@ Item {
     property bool compact: false
     property bool expandable: false
     property bool expanded: false
+    property bool fuse: true    // expanded: square bottom corners to meet its list (off when the list sits apart)
 
     signal toggled
     signal expand
@@ -22,7 +23,7 @@ Item {
     readonly property color fg: checked ? Theme.onTone : Theme.text
     readonly property color fgMuted: checked ? Theme.onToneMuted : Theme.textMuted
     // An expanded tile fuses with its list below: bottom corners go square.
-    readonly property real bottomRadius: expanded ? 0 : radius
+    readonly property real bottomRadius: expanded && fuse ? 0 : radius
 
     implicitHeight: compact ? stack.implicitHeight + Theme.padControl * 2 : Theme.tileHeight
     readonly property real radius: Theme.radiusMd

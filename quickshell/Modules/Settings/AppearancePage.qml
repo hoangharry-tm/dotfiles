@@ -166,6 +166,30 @@ ColumnLayout {
     }
 
     Group {
+        title: "Control Center"
+
+        SettingRow {
+            title: "Layout"
+            subtitle: ({
+                    classic: "One scrolling column of cards",
+                    tiles: "Modular grid; extra cards expand in place",
+                    pages: "Home, System and Inbox, one at a time"
+                })[Settings.controlCenterStyle] ?? ""
+
+            Segmented {
+                width: Theme.launcherWidth / 2
+                model: [
+                    { glyph: "󰕰", label: "Classic", value: "classic" },
+                    { glyph: "󰕮", label: "Tiles", value: "tiles" },
+                    { glyph: "󰓩", label: "Pages", value: "pages" }
+                ]
+                current: Settings.controlCenterStyle
+                onPicked: v => Settings.controlCenterStyle = v
+            }
+        }
+    }
+
+    Group {
         title: "Motion"
 
         SettingRow {

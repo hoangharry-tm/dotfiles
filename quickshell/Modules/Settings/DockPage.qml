@@ -37,6 +37,21 @@ ColumnLayout {
         }
 
         SettingRow {
+            title: "Style"
+            subtitle: "macOS: magnifying wave, launch hop, drag to reorder. Minimal: quiet lift"
+
+            Segmented {
+                width: Theme.launcherWidth / 3
+                model: [
+                    { label: "macOS", value: "macos" },
+                    { label: "Minimal", value: "minimal" }
+                ]
+                current: Settings.dockStyle
+                onPicked: v => Settings.dockStyle = v
+            }
+        }
+
+        SettingRow {
             title: "Icon size"
 
             SettingSlider {

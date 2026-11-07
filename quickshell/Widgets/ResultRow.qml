@@ -3,6 +3,7 @@ import QtQuick.Layouts
 import Quickshell
 import Quickshell.Widgets
 import qs.Common
+import qs.Services
 
 // One launcher result: app icon (or glyph), title, subtitle, enter hint.
 // The selection wash lives in the list's highlight, so the row stays flat.
@@ -41,7 +42,7 @@ Item {
             IconImage {
                 anchors.fill: parent
                 visible: root.iconName !== ""
-                source: root.iconName ? Quickshell.iconPath(root.iconName, "application-x-executable") : ""
+                source: root.iconName ? (Apps.iconSource(root.iconName) || Apps.iconSource("application-x-executable")) : ""
             }
 
             Icon {

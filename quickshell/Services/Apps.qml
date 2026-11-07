@@ -99,9 +99,31 @@ Singleton {
         return appId ? DesktopEntries.heuristicLookup(appId) : null;
     }
 
+    // One icon resolver for every surface. iconPath(name, true) yields "" when
+    // the theme has no such icon, and a bare absolute path when the theme
+    // lookup lands on a file (Nix store icons); an Image treats that as qrc:,
+    // so it becomes a file:// URL. Always returns a usable source (generic
+    // fallback last), so callers never render Qt's missing-image checkerboard.
+    function iconSource(name) {
+        if (!name)
+            return "";
+        if (name.startsWith("file:") || name.startsWith("image:"))
+            return name;
+        if (name.startsWith("/"))
+            return "file://" + name;
+        const p = Quickshell.iconPath(name, true);
+        return p.startsWith("/") ? "file://" + p : p;
+    }
+
     function iconFor(appId, entry) {
-        const name = (entry ?? entryFor(appId))?.icon || (appId ?? "").toLowerCase();
-        return name ? Quickshell.iconPath(name, true) : "";
+        const id = appId ?? "";
+        const e = entry ?? entryFor(id);
+        for (const n of [e?.icon, id, id.toLowerCase(), e?.id]) {
+            const s = iconSource(n);
+            if (s)
+                return s;
+        }
+        return iconSource("application-x-executable");
     }
 
     function launch(app) {

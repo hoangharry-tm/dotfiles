@@ -30,7 +30,7 @@ PopupWindow {
         property color tint: Theme.text
 
         Layout.fillWidth: true
-        implicitWidth: label.implicitWidth + Theme.padControl * 2
+        implicitWidth: Math.min(label.implicitWidth, Theme.launcherWidth / 2) + Theme.padControl * 2
         implicitHeight: Theme.control
         onClicked: {
             Dock.menuKey = "";
@@ -44,6 +44,8 @@ PopupWindow {
 
             anchors.left: parent.left
             anchors.leftMargin: Theme.padControl
+            anchors.right: parent.right
+            anchors.rightMargin: Theme.padControl
             anchors.verticalCenter: parent.verticalCenter
             text: row.text
             color: row.tint
@@ -69,6 +71,36 @@ PopupWindow {
 
             anchors.centerIn: parent
             spacing: 0
+
+            // Title: which app this menu is for (+ its windows, click to focus).
+            Label {
+                Layout.fillWidth: true
+                Layout.leftMargin: Theme.padControl
+                Layout.rightMargin: Theme.padControl
+                Layout.preferredHeight: Theme.control
+                text: root.item.name
+                color: Theme.textMuted
+                font.weight: Font.DemiBold
+            }
+
+            Repeater {
+                model: root.item.titles.length > 1 ? root.item.titles : []
+
+                MenuRow {
+                    required property var modelData
+
+                    text: modelData.title || root.item.name
+                    onAct: Dock.focusWindow(modelData.id)
+                }
+            }
+
+            Rectangle {
+                Layout.fillWidth: true
+                Layout.topMargin: Theme.spaceXs
+                Layout.bottomMargin: Theme.spaceXs
+                implicitHeight: Theme.hairlineWidth
+                color: Theme.hairline
+            }
 
             MenuRow {
                 text: root.item.pinned ? "Unpin from dock" : "Pin to dock"

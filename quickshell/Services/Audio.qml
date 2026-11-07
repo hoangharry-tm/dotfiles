@@ -66,7 +66,7 @@ Singleton {
 
     function streamIcon(node) {
         const name = node.properties["application.icon-name"] || node.properties["application.process.binary"] || "";
-        return name ? Quickshell.iconPath(name, true) : "";
+        return Apps.iconSource(name);
     }
 
     function nameOf(node) {

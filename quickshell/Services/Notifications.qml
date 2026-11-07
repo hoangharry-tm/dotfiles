@@ -120,9 +120,9 @@ Singleton {
     // Icon of the app behind a notification ("" when unknown).
     function appIconOf(n) {
         if (n.appIcon)
-            return n.appIcon.startsWith("/") || n.appIcon.startsWith("file:") ? n.appIcon : Quickshell.iconPath(n.appIcon, true);
+            return Apps.iconSource(n.appIcon);
         const entry = n.desktopEntry ? DesktopEntries.byId(n.desktopEntry) : null;
-        return entry ? Quickshell.iconPath(entry.icon, true) : "";
+        return entry ? Apps.iconSource(entry.icon) : "";
     }
 
     function timeOf(n) {

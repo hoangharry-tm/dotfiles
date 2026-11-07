@@ -116,7 +116,7 @@ Row {
                         width: ws.iconSize
                         height: ws.iconSize
                         sourceSize: Qt.size(Theme.icon, Theme.icon)
-                        source: Quickshell.iconPath(entry?.icon ?? modelData, "application-x-executable")
+                        source: Apps.iconFor(modelData, entry)
                         asynchronous: true
                         smooth: true
                     }

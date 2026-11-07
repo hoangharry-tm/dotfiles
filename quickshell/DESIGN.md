@@ -164,13 +164,31 @@ item-relative tooltips inside other sheets.
 ## Dock
 Optional bottom dock (`Modules/Dock`, `Services/Dock.qml`, namespace `qs-dock`).
 Sheet: radius `radiusLg` 16 (= niri rule), E2, padding `spaceSm`, icons
-`dockIconSize` (default 48, 32-64) in `+spaceSm` wash slots, running dot
-`spaceXs`, accent when focused. Auto-hide reveals by *loading* the sheet
+`dockIconSize` (default 48, 32-64) in `+spaceSm` slots, pinned | running
+divider (hairline, `spaceMd` gap). Auto-hide reveals by *loading* the sheet
 (LazyLoader) when the pointer touches the 4 px `qs-dock-trigger` strip, and
 unloads it 350 ms after the pointer leaves; the sheet is never faded, scaled
-or moved, so niri's blur and shadow stay exact. Only the icons rise in
-(`Enter`) and magnify (+12% on the hovered icon, +6% neighbours, spring).
-The strip is 640 px wide, centred: clear of the bottom-right hot corner.
+or moved, so niri's blur and shadow stay exact. Only icons animate. The strip
+is 640 px wide, centred: clear of the bottom-right hot corner.
+- Style (Settings > Dock, `dockStyle`): **macos** (default) or **minimal**.
+  macos: no hover wash, the icon itself is the cue; magnification is a cosine
+  wave (+12% peak, which is the most the sheet padding can hold without
+  resizing) reaching `motionLevel + 1` neighbours (low 1, balanced 2, high 3);
+  launch hop; drag-to-reorder. minimal: hover wash, only the hovered icon lifts
+  (+8%), no hop.
+- Running: one dot per window (max 3) under the icon, `textMuted`; `primary`
+  when the app is focused; `error` when a window is urgent.
+- Hop (macos, balanced+): the icon rises `spaceSm` (`anim`, OutQuad) and falls
+  (InQuad), looping only while a launch is pending (until the window appears,
+  max `hoverOpen * 12` ms) or a window is urgent. Never at idle. Built-ins
+  (`@settings`) don't hop.
+- Built-ins have no app icon: a `Theme.tile` squircle (`radiusMd`, hairline)
+  with a glyph at half the icon size, so they read as apps next to real icons.
+- Drag (macos, pinned icons only): horizontal drag; neighbours slide one
+  stride aside (`animFast`); release commits via `Dock.moveTo`.
+- Name label: `Tooltip` above the icon after `hoverOpen`. Context menu: title
+  row (app name), one row per window when there are several (click focuses),
+  hairline, then pin / new window / close all.
 
 ## Motion
 Purposeful, fast, one language across shell and compositor. Animate color,
@@ -346,3 +364,23 @@ toasts "Saved to inbox" via notify-send. Target: `Settings.notesInbox`
 (Settings > General > Notes), default `~/mh_notes/inbox.norg` (the nvim neorg
 "notes" workspace). Mod+Shift+N opens the launcher straight in this mode
 (`qs ipc call shell note`).
+
+## Control Center layouts and scrolling
+
+- `Settings.controlCenterStyle` (Settings > Appearance > Control Center) picks
+  one of three layouts, all built from the same blocks (`WifiBlock`,
+  `BluetoothBlock`, `QuickToggles`, `LevelSliders`, `CcCard`) so services and
+  behaviour exist once: **classic** (one column), **tiles** (Wi-Fi and
+  Bluetooth side by side, extra cards as one-line `Module`s that expand in
+  place, one at a time), **pages** (Segmented Home / System / Inbox, only the
+  current page built). `ControlCenter.qml` swaps them with a Loader, so a
+  switch is synchronous and the old items are destroyed.
+- A new card goes into `CcCard` (kind + visibility rule) and is then placed in
+  each layout; never instantiate a card directly in a layout.
+- Scrolling (`Widgets/SmoothWheel.qml`, used by every scrolling sheet): mouse
+  notches move a target that contentY chases with a time-constant ease (bursts
+  stay one glide and accelerate slightly); touchpad deltas move 1:1 and the
+  release velocity coasts on exponential friction (libinput gives clients no
+  momentum). While moving, the Flickable's content is baked into one texture
+  (`layer.enabled`), so a frame shifts one quad instead of re-uploading every
+  card's curve geometry; at rest the live items draw (sharp text).

@@ -31,7 +31,7 @@ RowLayout {
         Layout.leftMargin: Theme.padControl
         Layout.preferredWidth: Theme.icon
         Layout.preferredHeight: Theme.icon
-        source: Quickshell.iconPath(root.entry?.icon ?? root.appId, "application-x-executable")
+        source: Apps.iconFor(root.appId, root.entry)
     }
 
     Label {
