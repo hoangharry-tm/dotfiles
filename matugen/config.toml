@@ -79,3 +79,9 @@ output_path = "~/.local/state/theme/tmux.conf"
 [templates.firefox]
 input_path = "~/.config/matugen/templates/firefox.css"
 output_path = "~/.local/state/theme/firefox.css"
+
+# NeoMutt colours (truecolor); sourced by ~/.config/neomutt/neomuttrc
+# (modules/mail.nix). Picked up on the next neomutt start.
+[templates.neomutt]
+input_path = "~/.config/matugen/templates/neomutt.muttrc"
+output_path = "~/.local/state/theme/neomutt-colors.muttrc"

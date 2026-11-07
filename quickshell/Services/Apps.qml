@@ -89,7 +89,9 @@ Singleton {
     function launch(app) {
         Usage.record(app.id);
         if (app.runInTerminal)
-            Quickshell.execDetached(["alacritty", "-e", ...app.command]);
+            // Desktop-entry field codes (%u, %F, …) must be dropped when we
+            // build the argv ourselves: aerc got a literal "%u" and quit.
+            Quickshell.execDetached(["alacritty", "-e", ...app.command.filter(a => !/^%[fFuUdDnNickvm]$/.test(a))]);
         else
             app.execute();
     }
