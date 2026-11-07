@@ -103,9 +103,12 @@ picks the lowest collapse level whose summed item widths fit. Items report
 feedback loop and no per-frame work; it re-runs only when a width input
 changes (tray icon, track title, scale, output). Labels that can grow elide
 right. Levels, least important first:
-- Right (0-9): 1 weather drops its temperature, 2 media title shortens,
+- Right (0-9): 1 weather drops its temperature, 2 media title shortens and the
+  next-event chip (`NextEventChip`, shown only within the Settings window before
+  an event or while it runs; first on the right, nearest the clock) drops its
+  title (glyph + countdown),
   3 visualiser goes, 4 media is a glyph only, 5 weather chip goes (the Control
-  Center has it), 6 input-method chip goes, 7 tray folds into a "..." chip,
+  Center has it), 6 input-method chip and next-event chip go, 7 tray folds into a "..." chip,
   8 system chip goes, 9 battery % goes. Wi-Fi/Bluetooth/volume/battery icons,
   recording, screen-share (`ScreencastChip`, error-coloured, pulses only
   while a niri cast is active; hover lists casts with Stop / Stop all) and
@@ -118,6 +121,20 @@ right. Levels, least important first:
 - Last resort: the clock drops the weekday ("6 Nov · 09:57").
 Workspace pills: the active pill with icons is a `hairlineWidth` primary ring
 (no fill); empty workspaces stay dots.
+
+## Calendar
+`Services/CalendarEvents` reads `~/.cache/quickshell/calendar.json` (written by
+the `calendar-sync` user service from sops secret ICS feeds, view only). One
+single-shot timer sleeps to the next boundary (start, end, reminder, chip window,
+midnight; capped at 10 min for suspend); nothing else polls. The dropdown shows
+a `dot` (4) under each day with events (max 3, one per calendar colour; none on
+the primary-filled today, it uses `primaryText`), and an agenda (`Agenda.qml`)
+under the grid: a 4 wide colour bar, a `controlXl` time column, title and
+location, a join glyph when the event has a meeting link. It takes the height
+the screen leaves under the popover and scrolls past that; clicking a day shows
+only that day. Reminders are toasts through notify-send with a Join action, once
+per event id (persisted). The desktop line is `textMd` muted under the weather and
+hidden when nothing is within 12 h.
 
 ## Timer
 One countdown, no phases: set a length, Play/Pause, Reset. Focus (DND) is on

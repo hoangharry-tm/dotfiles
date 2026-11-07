@@ -7,7 +7,8 @@ import qs.Services
 
 // Wallpaper-layer clock, date, weather and now-playing, bottom-left.
 // Click-through (empty input region), no focus, no animation: the only
-// update is the SystemClock minute tick.
+// update is the SystemClock minute tick (the calendar line moves only at
+// event boundaries, see CalendarEvents).
 PanelWindow {
     id: root
 
@@ -60,6 +61,15 @@ PanelWindow {
             Layout.maximumWidth: Theme.launcherWidth
             text: Weather.tempText + "  " + Weather.label + "  ·  " + Weather.city
             font.pixelSize: Theme.textLg
+            color: Theme.textMuted
+        }
+
+        // Hidden unless an event runs now or starts within 12 h (CalendarEvents.line).
+        ShadowLabel {
+            visible: CalendarEvents.line !== ""
+            Layout.maximumWidth: Theme.launcherWidth
+            text: CalendarEvents.line
+            font.pixelSize: Theme.textMd
             color: Theme.textMuted
         }
 

@@ -23,6 +23,7 @@ PanelWindow {
         { glyph: "󰂚", title: "Notifications & Focus", page: "NotificationsPage" },
         { glyph: "󰖔", title: "Night Light", page: "NightLightPage" },
         { glyph: "󰍎", title: "Location & Weather", page: "LocationPage" },
+        { glyph: "󰃭", title: "Calendars", page: "CalendarPage" },
         { glyph: "󰎆", title: "Media", page: "MediaPage" },
         { glyph: "󰐥", title: "Power & Idle", page: "PowerPage" },
         { glyph: "󰋽", title: "About", page: "AboutPage" }
@@ -119,6 +120,10 @@ PanelWindow {
                         // Hold presses briefly: a scroll/drag that starts on a control (power
                         // mode, tiles) must scroll the page, never land as a click on it.
                         pressDelay: Theme.pressDelay
+
+                        SmoothWheel {
+                            flick: scroller
+                        }
 
                         // One page alive at a time; a page loads its data when created.
                         Loader {

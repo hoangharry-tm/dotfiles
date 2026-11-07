@@ -18,6 +18,7 @@ BarChip {
     onClicked: modelData.onlyMenu ? openMenu() : modelData.activate()
     onRightClicked: openMenu()
     onMiddleClicked: modelData.secondaryActivate()
+    wheelEnabled: true
     onScrolled: d => modelData.scroll(d, false)
 
     function openMenu() {

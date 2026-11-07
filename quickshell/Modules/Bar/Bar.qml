@@ -86,6 +86,11 @@ PanelWindow {
         levels: 10
         spacing: Theme.barGap
 
+        NextEventChip {
+            screenName: bar.modelData.name
+            level: rightRow.level
+        }
+
         WeatherChip {
             level: rightRow.level
         }

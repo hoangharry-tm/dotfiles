@@ -152,12 +152,14 @@ Singleton {
     readonly property int controlXl: 56         // the one primary round button of a card (timer play/pause)
     readonly property int rowHeight: 40         // detail-list row (48 with subtitle)
     readonly property int rowHeightTall: 48
+    readonly property real agendaRows: 4.5     // calendar agenda height cap, in tall rows
     readonly property int resultHeight: 56      // launcher result row
     readonly property int tileHeight: 64        // control-center tile
     readonly property int fieldHeight: 56       // launcher search field
     readonly property int trackHeight: 8        // slider / progress track
     readonly property int thumb: 16
     readonly property int sliderHeight: 48      // large pill slider (brightness, volume)
+    readonly property int dot: spaceXs          // event marker under a calendar day
     readonly property int trackThin: 2          // progress hairline (media chip)
     readonly property int barHeight: control + 2 * barInset   // 48
     readonly property int barInset: spaceSm     // bar edge <-> chip, top and bottom (radiusLg - inset = chip radius)

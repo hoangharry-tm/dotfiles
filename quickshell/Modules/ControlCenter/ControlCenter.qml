@@ -69,6 +69,7 @@ PanelWindow {
         Keys.onEscapePressed: Panels.close()
 
         Flickable {
+            id: ccScroll
             anchors.fill: parent
             anchors.margins: Theme.padSheet
             contentHeight: content.implicitHeight
@@ -77,6 +78,10 @@ PanelWindow {
             // Hold presses briefly: a scroll/drag that starts on a control (power
             // mode, tiles) must scroll the page, never land as a click on it.
             pressDelay: Theme.pressDelay
+
+            SmoothWheel {
+                flick: ccScroll
+            }
 
             ColumnLayout {
                 id: content

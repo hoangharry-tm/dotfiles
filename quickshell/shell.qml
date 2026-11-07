@@ -307,6 +307,15 @@ ShellRoot {
         }
     }
 
+    // qs ipc call calendar refresh (runs calendar-sync now)
+    IpcHandler {
+        target: "calendar"
+
+        function refresh(): void {
+            CalendarEvents.refresh();
+        }
+    }
+
     // qs ipc call notifications dnd|clear
     IpcHandler {
         target: "notifications"

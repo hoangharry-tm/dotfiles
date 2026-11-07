@@ -15,6 +15,9 @@ Rectangle {
     signal rightClicked
     signal middleClicked
     signal scrolled(int delta)
+    // Opt-in: a wheel handler on every button swallowed scrolling for any list
+    // made of them (calendar agenda, Settings, Control Center rows).
+    property bool wheelEnabled: false
 
     radius: Theme.radiusSm
     color: mouse.pressed ? Theme.pressed : active ? activeColor : mouse.containsMouse ? Theme.hover : "transparent"
@@ -53,6 +56,11 @@ Rectangle {
             else
                 root.clicked(m);
         }
-        onWheel: w => root.scrolled(w.angleDelta.y)
+        onWheel: w => {
+            if (root.wheelEnabled)
+                root.scrolled(w.angleDelta.y);
+            else
+                w.accepted = false; // let the enclosing list scroll
+        }
     }
 }
