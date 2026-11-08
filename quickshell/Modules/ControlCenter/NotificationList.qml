@@ -5,44 +5,31 @@ import qs.Common
 import qs.Services
 import qs.Widgets
 
-// Notification history, grouped by app, with Clear.
-ColumnLayout {
+// Notification history, grouped by app, with Clear. The parent row is titled
+// "Notifications", so the well has no heading of its own.
+Section {
     spacing: Theme.gapSection // between app groups
 
     RowLayout {
         Layout.fillWidth: true
-        Layout.leftMargin: Theme.spaceMd
+        visible: Notifications.history.length > 0
 
-        Label {
+        Item {
             Layout.fillWidth: true
-            text: "Notifications"
-            color: Theme.textMuted
-            font.pixelSize: Theme.textSm
-            font.weight: Font.DemiBold
         }
 
-        Clickable {
-            visible: Notifications.history.length > 0
-            implicitWidth: clear.implicitWidth + Theme.padControl * 2
-            implicitHeight: Theme.controlSm
-            radius: Theme.radiusFull
+        Button {
+            id: clear
+
+            text: "Clear"
+            Layout.rightMargin: -clear.inset // hang: the label stays on the content edge
             onClicked: Notifications.clearAll()
-
-            Label {
-                id: clear
-
-                anchors.centerIn: parent
-                text: "Clear"
-                color: Theme.textMuted
-                font.pixelSize: Theme.textSm
-            }
         }
     }
 
     Label {
         Layout.fillWidth: true
-        Layout.topMargin: Theme.spaceSm
-        Layout.bottomMargin: Theme.spaceSm
+        Layout.preferredHeight: Theme.rowHeight
         visible: Notifications.history.length === 0
         horizontalAlignment: Text.AlignHCenter
         text: "No notifications"

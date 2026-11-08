@@ -4,9 +4,10 @@ import qs.Common
 import qs.Services
 import qs.Widgets
 
-// "Tiles": a macOS-style modular grid. Connectivity sits side by side,
-// toggles and sliders follow, and everything else is a one-line module that
-// expands in place (one at a time), so the sheet is short until asked.
+// The Control Center, top to bottom by how often it is reached for:
+// connectivity, quick toggles, levels, now playing, then one-line modules that
+// expand in place (one at a time; those with nothing to say are absent),
+// notifications, and a quiet session footer.
 ColumnLayout {
     id: root
 
@@ -14,23 +15,11 @@ ColumnLayout {
 
     spacing: Theme.gapSection
 
-    Header {
-        Layout.fillWidth: true
-        active: root.cc.shown
-    }
-
-    // Now playing leads: the card with the most to say, only while playing.
-    CcCard {
-        Layout.fillWidth: true
-        cc: root.cc
-        kind: "media"
-    }
-
+    // Wi-Fi and Bluetooth share a row; their lists span the full width below.
     ColumnLayout {
         Layout.fillWidth: true
         spacing: Theme.gapStack
 
-        // Wi-Fi and Bluetooth share a row; their lists span the full width below.
         RowLayout {
             Layout.fillWidth: true
             spacing: Theme.gapStack
@@ -77,68 +66,80 @@ ColumnLayout {
         cc: root.cc
     }
 
-    ColumnLayout {
+    CcCard {
         Layout.fillWidth: true
-        spacing: Theme.gapStack
+        cc: root.cc
+        kind: "media"
+    }
+
+    Group {
+        id: modules
+
+        Layout.fillWidth: true
 
         Module {
             Layout.fillWidth: true
-            visible: Power.hasBattery || Power.hasPerformance
             cc: root.cc
+            rowRadius: modules.rowRadius
             kind: "battery"
-            glyph: Power.icon
+            glyph: Glyphs.battery()
             title: "Battery"
             summary: Math.round(Power.percent * 100) + "%  ·  " + (Power.timeLabel || "")
         }
 
         Module {
             Layout.fillWidth: true
-            visible: Weather.ready
             cc: root.cc
+            rowRadius: modules.rowRadius
             kind: "weather"
-            glyph: Weather.glyph
+            glyph: Glyphs.weather()
             title: "Weather"
-            summary: Weather.tempText + "  \u00b7  " + Weather.label
+            summary: Weather.tempText + "  ·  " + Weather.label
         }
 
         Module {
             Layout.fillWidth: true
             cc: root.cc
-            kind: "updates"
-            glyph: "󰚰"
-            title: "Updates"
-        }
-
-        Module {
-            Layout.fillWidth: true
-            cc: root.cc
-            kind: "backup"
-            glyph: "󰁯"
-            title: "Backup"
-        }
-
-        Module {
-            Layout.fillWidth: true
-            visible: Devices.any
-            cc: root.cc
+            rowRadius: modules.rowRadius
             kind: "devices"
-            glyph: "󰄜"
+            glyph: "devices"
             title: "Devices"
         }
 
-        CcCard {
+        Module {
             Layout.fillWidth: true
             cc: root.cc
-            kind: "kbd"
+            rowRadius: modules.rowRadius
+            kind: "updates"
+            glyph: Updates.ok ? "update" : "error"
+            title: "Updates"
+            summary: Updates.checking ? "Checking…" : !Updates.ok ? "Check failed" : Updates.count + " changes"
+        }
+
+        Module {
+            Layout.fillWidth: true
+            cc: root.cc
+            rowRadius: modules.rowRadius
+            kind: "backup"
+            glyph: BackupStatus.ok ? "backup" : "error"
+            title: "Backup"
+            summary: BackupStatus.ok ? "Last " + BackupStatus.ago(BackupStatus.last) : "Failed"
         }
     }
 
-    Module {
+    Group {
+        id: inbox
+
         Layout.fillWidth: true
-        cc: root.cc
-        kind: "notifications"
-        glyph: "󰂚"
-        title: "Notifications"
-        summary: Notifications.history.length > 0 ? Notifications.history.length + " in history" : "All clear"
+
+        Module {
+            Layout.fillWidth: true
+            cc: root.cc
+            rowRadius: inbox.rowRadius
+            kind: "notifications"
+            glyph: "notifications"
+            title: "Notifications"
+            summary: Notifications.history.length > 0 ? Notifications.history.length + " in history" : "All clear"
+        }
     }
 }

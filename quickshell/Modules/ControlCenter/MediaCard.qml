@@ -12,10 +12,6 @@ Section {
     // Position polling runs only while this card is on screen.
     property bool live: false
 
-    // Tint the card with the (palette-harmonised) album-art accent.
-    fillA: Qt.tint(Theme.toneRestA, Qt.alpha(Media.tone, Media.hasTint ? 0.22 : 0))
-    fillB: Qt.tint(Theme.toneRestB, Qt.alpha(Media.tone, Media.hasTint ? 0.12 : 0))
-
     // Lyrics are fetched and cava runs only while the card is on screen.
     onLiveChanged: live ? Lyrics.hold() : Lyrics.release()
     Component.onCompleted: if (live)
@@ -49,7 +45,7 @@ Section {
 
             Icon {
                 anchors.centerIn: parent
-                glyph: "󰎆"
+                glyph: "music_note"
                 size: Theme.iconXl
                 visible: Media.art === ""
             }
@@ -61,7 +57,7 @@ Section {
             Label {
                 width: parent.width
                 text: Media.title
-                font.weight: Font.DemiBold
+                font.weight: Theme.weightEmphasis
             }
 
             Label {
@@ -76,7 +72,7 @@ Section {
             visible: Media.playing && root.live
             implicitHeight: Theme.controlLg
             barGap: Theme.spaceXs
-            color: Media.tone
+            color: Theme.textMuted
             Layout.alignment: Qt.AlignVCenter
         }
     }
@@ -90,7 +86,7 @@ Section {
         Label {
             width: parent.width
             text: Lyrics.current || "♪"
-            font.weight: Font.DemiBold
+            font.weight: Theme.weightEmphasis
             horizontalAlignment: Text.AlignHCenter
         }
 
@@ -113,24 +109,27 @@ Section {
             text: Media.formatTime(Media.position)
             color: Theme.textMuted
             font.pixelSize: Theme.textXs
-            font.family: Theme.mono
+            font.features: {
+                "tnum": 1
+            }
         }
 
         Rectangle {
             Layout.fillWidth: true
             implicitHeight: Theme.trackHeight / 2
             radius: Theme.radiusFull
-            color: Theme.toneRecessA
+            color: Theme.fillRecess
 
             Rectangle {
                 width: parent.width * Media.progress
                 height: parent.height
                 radius: Theme.radiusFull
-                color: Media.tone
+                color: Theme.text
 
                 Behavior on width {
                     NumberAnimation {
                         duration: Theme.animSlow
+                        easing.type: Theme.easing
                     }
                 }
             }
@@ -140,7 +139,9 @@ Section {
             text: Media.formatTime(Media.length)
             color: Theme.textMuted
             font.pixelSize: Theme.textXs
-            font.family: Theme.mono
+            font.features: {
+                "tnum": 1
+            }
         }
     }
 
@@ -151,9 +152,9 @@ Section {
 
         Repeater {
             model: [
-                { glyph: "󰒮", main: false, run: () => Media.previous() },
-                { glyph: Media.playing ? "󰏤" : "󰐊", main: true, run: () => Media.toggle() },
-                { glyph: "󰒭", main: false, run: () => Media.next() }
+                { glyph: "skip_previous", main: false, run: () => Media.previous() },
+                { glyph: Media.playing ? "pause" : "play_arrow", main: true, run: () => Media.toggle() },
+                { glyph: "skip_next", main: false, run: () => Media.next() }
             ]
 
             Clickable {
@@ -169,7 +170,7 @@ Section {
                     anchors.fill: parent
                     visible: parent.modelData.main
                     radius: parent.radius
-                    variant: "accent"
+                    variant: "solid"
                     hovered: parent.hovered
                     pressed: parent.pressed
                 }
@@ -178,7 +179,7 @@ Section {
                     anchors.centerIn: parent
                     glyph: parent.modelData.glyph
                     size: Theme.iconLg
-                    color: parent.modelData.main ? Theme.onAccent : Theme.text
+                    color: parent.modelData.main ? Theme.onSolid : Theme.text
                 }
             }
         }

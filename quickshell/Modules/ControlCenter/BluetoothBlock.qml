@@ -12,17 +12,17 @@ ColumnLayout {
     property bool list: true
 
     visible: BluetoothState.available
-    spacing: 0
+    spacing: Theme.gapStack
 
     Tile {
         Layout.fillWidth: true
-        glyph: BluetoothState.icon
+        glyph: Glyphs.bluetooth()
         title: "Bluetooth"
         subtitle: BluetoothState.label
         checked: BluetoothState.enabled
         expandable: true
         expanded: root.cc.detail === "bluetooth"
-        fuse: root.list
+        fuse: false
         onToggled: BluetoothState.setEnabled(!BluetoothState.enabled)
         onExpand: root.cc.toggleDetail("bluetooth")
     }

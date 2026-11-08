@@ -9,33 +9,36 @@ import qs.Widgets
 DetailList {
     id: root
 
-    attached: true
     title: "Bluetooth"
-    actionGlyph: "󰑓"
+    actionGlyph: "refresh"
     actionActive: BluetoothState.scanning
+    actionTip: BluetoothState.scanning ? "Scanning, " + BluetoothState.scanMinutesLeft + " min left. Click to stop" : "Refresh"
     count: devices.length
-    emptyText: BluetoothState.enabled ? "Searching for devices…" : "Bluetooth is off"
-    onAction: BluetoothState.setScanning(!BluetoothState.scanning)
+    emptyText: BluetoothState.enabled ? (BluetoothState.scanning ? "Searching for devices…" : "No devices") : "Bluetooth is off"
+    onAction: BluetoothState.scanning ? BluetoothState.stopScan() : BluetoothState.scanFor(Settings.scanWindow * 1000)
 
-    // Unnamed new devices are noise; show them only once they have a name.
-    readonly property var devices: BluetoothState.devices.filter(d => d.paired || d.connected || d.name).slice(0, 10)
+    readonly property var devices: BluetoothState.shown.slice(0, 10)
 
-    Repeater {
-        model: root.devices
+    ListBlock {
+        count: root.devices.length
 
-        ListRow {
-            required property var modelData
+        Repeater {
+            model: root.devices
 
-            Layout.fillWidth: true
-            glyph: BluetoothState.deviceIcon(modelData)
-            title: BluetoothState.nameOf(modelData)
-            subtitle: modelData.connected ? "Connected" + (modelData.batteryAvailable ? " · " + Math.round(modelData.battery * 100) + "%" : "") : modelData.paired ? "Paired" : "Tap to pair"
-            trailingGlyph: modelData.connected ? "󰄬" : ""
-            selected: modelData.connected
-            busy: modelData.pairing || modelData.state === BluetoothDeviceState.Connecting || modelData.state === BluetoothDeviceState.Disconnecting
-            onClicked: BluetoothState.activate(modelData)
-            onRightClicked: if (modelData.paired)
-                modelData.forget()
+            ListRow {
+                required property var modelData
+
+                Layout.fillWidth: true
+                glyph: Glyphs.btDevice(modelData)
+                title: BluetoothState.nameOf(modelData)
+                subtitle: modelData.connected ? "Connected" : modelData.paired ? "Paired" : "Tap to pair"
+                meta: modelData.connected && modelData.batteryAvailable ? Math.round(modelData.battery * 100) + "%" : ""
+                marked: modelData.connected
+                busy: modelData.pairing || modelData.state === BluetoothDeviceState.Connecting || modelData.state === BluetoothDeviceState.Disconnecting
+                onClicked: BluetoothState.activate(modelData)
+                onRightClicked: if (modelData.paired)
+                    modelData.forget()
+            }
         }
     }
 }

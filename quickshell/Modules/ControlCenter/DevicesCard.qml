@@ -5,7 +5,9 @@ import qs.Services
 import qs.Widgets
 
 // Phone / Mac link (KDE Connect). Hidden until a device is known; tap a
-// device for its actions. Battery shows only when the device reports it.
+// device for its actions. The parent row is titled "Devices", so no heading.
+// Rows hang by the well's padding so their wash meets the well edges while
+// their content stays on column A.
 Section {
     id: root
 
@@ -17,12 +19,6 @@ Section {
         target: Devices
         property: "active"
         value: root.live
-    }
-
-    Label {
-        Layout.leftMargin: Theme.spaceMd
-        text: "Devices"
-        font.weight: Font.DemiBold
     }
 
     Repeater {
@@ -39,11 +35,12 @@ Section {
 
             ListRow {
                 Layout.fillWidth: true
-                glyph: Devices.icon(entry.modelData)
+                Layout.leftMargin: -root.pad
+                Layout.rightMargin: -root.pad
+                glyph: Glyphs.device(entry.modelData)
                 title: entry.modelData.name
                 subtitle: Devices.state(entry.modelData)
-                selected: entry.usable
-                trailingGlyph: !entry.modelData.paired ? "󰌷" : root.open === entry.modelData.id ? "󰅃" : "󰅀"
+                trailingGlyph: !entry.modelData.paired ? "link" : root.open === entry.modelData.id ? "expand_less" : "expand_more"
                 onClicked: {
                     if (!entry.modelData.paired)
                         Devices.run("pair", entry.modelData.id);
@@ -59,34 +56,20 @@ Section {
 
                 Repeater {
                     model: [
-                        { glyph: "󰅍", label: "Clipboard", cmd: "clipboard" },
-                        { glyph: "󰈔", label: "File", cmd: "send-file" },
-                        { glyph: "󰂚", label: "Ping", cmd: "ping" }
+                        { glyph: "content_paste", label: "Clipboard", cmd: "clipboard" },
+                        { glyph: "upload_file", label: "File", cmd: "send-file" },
+                        { glyph: "notifications", label: "Ping", cmd: "ping" }
                     ]
 
-                    Clickable {
+                    Button {
                         required property var modelData
 
                         Layout.fillWidth: true
                         Layout.preferredWidth: 1
-                        implicitHeight: Theme.control
-                        radius: Theme.radiusSm
+                        variant: "tonal"
+                        glyph: modelData.glyph
+                        text: modelData.label
                         onClicked: modelData.cmd === "send-file" ? Devices.sendFile(entry.modelData.id) : Devices.run(modelData.cmd, entry.modelData.id)
-
-                        Row {
-                            anchors.centerIn: parent
-                            spacing: Theme.gapInline
-
-                            Icon {
-                                glyph: modelData.glyph
-                                color: Theme.primary
-                            }
-
-                            Label {
-                                text: modelData.label
-                                font.pixelSize: Theme.textSm
-                            }
-                        }
                     }
                 }
             }

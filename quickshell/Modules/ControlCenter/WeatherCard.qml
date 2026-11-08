@@ -4,44 +4,52 @@ import qs.Common
 import qs.Services
 import qs.Widgets
 
-// Current conditions, a 12 h trend and the 5-day outlook. Tap to refresh.
+// Where, how it feels, a 12 h trend and the 5-day outlook. The parent row
+// already says the temperature and sky, so this does not repeat them.
 Section {
     id: root
 
-    Clickable {
+    // Static headline: place on column A's badge box, text on column B.
+    RowLayout {
         Layout.fillWidth: true
-        implicitHeight: head.implicitHeight
-        onClicked: Weather.refresh()
+        spacing: Theme.spaceMd
 
-        RowLayout {
-            id: head
-
-            anchors.fill: parent
-            spacing: Theme.gapInline
+        Item {
+            Layout.preferredWidth: Theme.control
+            Layout.preferredHeight: Theme.control
 
             Icon {
-                glyph: Weather.glyph
-                size: Theme.iconXl
-                color: Theme.primary
+                anchors.centerIn: parent
+                glyph: "location_on"
+                color: Theme.textMuted
             }
+        }
+
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: 0
 
             Label {
-                text: Weather.tempText
-                font.pixelSize: Theme.textXl
-                font.weight: Font.DemiBold
+                Layout.fillWidth: true
+                text: Weather.city
             }
 
             Label {
                 Layout.fillWidth: true
-                text: Weather.label
-                color: Theme.textMuted
-            }
-
-            Label {
-                text: Weather.city
+                text: "Feels like " + Math.round(Weather.feels) + "°  ·  " + Math.round(Weather.humidity) + "% humidity"
+                font.features: { "tnum": 1 }
                 color: Theme.textMuted
                 font.pixelSize: Theme.textXs
             }
+        }
+
+        Button {
+            id: refresh
+
+            glyph: "refresh"
+            tip: "Refresh"
+            Layout.rightMargin: -refresh.inset // hang: the icon stays on the content edge
+            onClicked: Weather.refresh()
         }
     }
 

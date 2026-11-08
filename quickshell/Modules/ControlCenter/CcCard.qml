@@ -1,12 +1,11 @@
 import QtQuick
 import qs.Common
 import qs.Services
-import qs.Widgets
 
 // One Control Center card by name, built only while it has something to
-// show. Every layout places cards through this, so the cards, their
-// visibility rules and their services exist once (no per-layout copies).
-//   kind: battery | weather | backup | updates | kbd | devices | media | notifications
+// show. The layout places cards through this, so the cards, their
+// visibility rules and their services exist once.
+//   kind: battery | weather | backup | updates | devices | media | notifications
 Loader {
     id: root
 
@@ -16,9 +15,8 @@ Loader {
     readonly property bool wanted: ({
             battery: Power.hasBattery || Power.hasPerformance,
             weather: Weather.ready,
-            backup: true,
-            updates: true,
-            kbd: KbdMods.available,
+            backup: BackupStatus.attention,
+            updates: Updates.count > 0 || Updates.checking || (Updates.known && !Updates.ok),
             devices: Devices.any,
             media: Media.active,
             notifications: cc.shown // pauses the cards' minute clock when closed
@@ -31,16 +29,18 @@ Loader {
             weather: weather,
             backup: backup,
             updates: updates,
-            kbd: kbd,
             devices: devices,
             media: media,
             notifications: notifications
         })[kind]
 
-    // A card shown under a header tile fuses with it: flat top corners.
-    property bool attach: false
-    onLoaded: if (attach && item.attached !== undefined)
-        item.attached = true
+    // A card opened under a row of a Group becomes its L2 well (Section.flat).
+    property bool flat: false
+    property real wellRadius: Theme.radiusSm // the group's rowRadius
+    onLoaded: if (flat && item.flat !== undefined) {
+        item.flat = true;
+        item.radius = wellRadius;
+    }
 
     Component {
         id: battery
@@ -61,17 +61,6 @@ Loader {
         id: updates
 
         UpdatesRow {}
-    }
-    Component {
-        id: kbd
-
-        Tile {
-            glyph: "󰌌"
-            title: "Home-row mods"
-            subtitle: KbdMods.on ? "On  ·  Shift+Shift toggles" : "Off"
-            checked: KbdMods.on
-            onToggled: KbdMods.toggle()
-        }
     }
     Component {
         id: devices

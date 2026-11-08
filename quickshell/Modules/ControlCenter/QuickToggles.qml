@@ -1,17 +1,20 @@
 import QtQuick
 import QtQuick.Layouts
-import Quickshell
 import qs.Common
 import qs.Services
 import qs.Widgets
 
-// Quick toggles: equal-width compact tiles (3 columns = two full rows).
+// Quick toggles: equal-width compact tiles. Five always (one row) plus
+// Home-row mods when kanata is present (two rows of 3). No Capture tile: the
+// screenshot keys already do that.
 GridLayout {
     id: root
 
     required property var cc
 
-    columns: 3
+    // Rows are always full: up to 5 tiles share one row, 6 make two rows of 3.
+    readonly property int count: children.filter(c => c.visible !== false && c instanceof Tile).length
+    columns: count > 5 ? 3 : Math.max(1, count)
     columnSpacing: Theme.gapStack
     rowSpacing: Theme.gapStack
 
@@ -19,7 +22,7 @@ GridLayout {
         Layout.fillWidth: true
         Layout.preferredWidth: 1 // equal widths
         compact: true
-        glyph: Notifications.dnd ? "󰂛" : "󰂚"
+        glyph: Notifications.dnd ? "do_not_disturb_on" : "notifications"
         title: "Focus"
         checked: Notifications.dnd
         onToggled: Notifications.dnd = !Notifications.dnd
@@ -48,7 +51,7 @@ GridLayout {
         Layout.fillWidth: true
         Layout.preferredWidth: 1
         compact: true
-        glyph: KeepAwake.enabled ? "󰅶" : "󰾪"
+        glyph: "coffee"
         title: "Awake"
         checked: KeepAwake.enabled
         onToggled: KeepAwake.enabled = !KeepAwake.enabled
@@ -58,7 +61,7 @@ GridLayout {
         Layout.fillWidth: true
         Layout.preferredWidth: 1
         compact: true
-        glyph: Audio.micIcon
+        glyph: Glyphs.mic()
         title: Audio.micMuted ? "Mic off" : "Mic"
         checked: Audio.micMuted
         onToggled: Audio.toggleMicMute()
@@ -69,7 +72,7 @@ GridLayout {
         Layout.fillWidth: true
         Layout.preferredWidth: 1
         compact: true
-        glyph: NightLight.active ? "󰖔" : "󰖙"
+        glyph: "nightlight"
         title: NightLight.mode === "auto" ? "Night auto" : "Night"
         checked: NightLight.active
         onToggled: NightLight.cycle()
@@ -79,7 +82,7 @@ GridLayout {
         Layout.fillWidth: true
         Layout.preferredWidth: 1
         compact: true
-        glyph: Recorder.recording ? "󰻃" : "󰑊"
+        glyph: "screen_record"
         title: Recorder.recording ? Recorder.elapsedLabel : "Record"
         checked: Recorder.recording
         onToggled: {
@@ -92,11 +95,10 @@ GridLayout {
         Layout.fillWidth: true
         Layout.preferredWidth: 1
         compact: true
-        glyph: "󰹑"
-        title: "Capture"
-        onToggled: {
-            Panels.close();
-            Quickshell.execDetached(["sh", "-c", "sleep 0.3; niri msg action screenshot"]);
-        }
+        visible: KbdMods.available
+        glyph: "keyboard"
+        title: "Home-row"
+        checked: KbdMods.on
+        onToggled: KbdMods.toggle()
     }
 }

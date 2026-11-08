@@ -49,7 +49,7 @@ Item {
 
         Icon {
             anchors.centerIn: parent
-            glyph: "󰅂"
+            glyph: "chevron_right"
             color: Theme.textMuted
             rotation: root.expanded ? 90 : 0
 

@@ -4,21 +4,20 @@ import qs.Common
 import qs.Widgets
 
 // A grouped card inside the Control Center. `recessed` makes it a child
-// surface one level below its parent (inset); `attached` flattens the top
-// corners so it fuses with the tile above it.
+// surface one level below its parent (inset). `flat` = the L2 disclosure well
+// of a Module row inside a Group (DESIGN.md "Hierarchy"): recessed, padding
+// `spaceMd` (= padControl, so content lands on the rows' column A).
 Surface {
-    property int pad: Theme.padCard
-    variant: recessed ? "recessed" : "rest"
     property bool recessed: false
-    property bool attached: false
+    property bool flat: false
+    property int pad: flat ? Theme.spaceMd : Theme.padCard
+    variant: recessed || flat ? "recessed" : "rest"
 
     default property alias content: column.data
     property alias spacing: column.spacing
 
     implicitHeight: column.implicitHeight + pad * 2
     radius: Theme.radiusMd
-    topLeftRadius: attached ? 0 : radius
-    topRightRadius: attached ? 0 : radius
 
     ColumnLayout {
         id: column

@@ -2,7 +2,6 @@ import QtQuick
 import QtQuick.Layouts
 import qs.Common
 import qs.Services
-import qs.Widgets
 
 // Display and sound levels; the volume chevron opens the sound list.
 ColumnLayout {
@@ -16,7 +15,7 @@ ColumnLayout {
         Layout.fillWidth: true
         visible: Brightness.available
         value: Brightness.value
-        glyph: "󰃠"
+        glyph: "brightness_6"
         expandable: false
         onMoved: v => Brightness.set(v)
     }
@@ -24,7 +23,7 @@ ColumnLayout {
     SliderRow {
         Layout.fillWidth: true
         value: Audio.volume
-        glyph: Audio.volumeIcon
+        glyph: Glyphs.volume()
         dimmed: Audio.muted
         expanded: root.cc.detail === "sound"
         onMoved: v => Audio.setVolume(v)
