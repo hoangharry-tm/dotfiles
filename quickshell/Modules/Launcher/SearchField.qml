@@ -3,14 +3,15 @@ import QtQuick.Layouts
 import qs.Common
 import qs.Widgets
 
-// Search input with a mode glyph and a subtle mode chip. Owns key handling and
+// Search input with a mode symbol (in the same iconApp box as a result's icon,
+// so the two share column A) and a neutral mode chip. Owns key handling and
 // reports intent; the launcher decides what navigation means per mode.
 RowLayout {
     id: root
 
     property alias text: input.text
     property string placeholder: ""
-    property string glyph: "󰍉"
+    property string glyph: "search"
     property string chip: ""      // shown when a prefix mode is active
 
     signal navigate(int dx, int dy)
@@ -26,23 +27,25 @@ RowLayout {
         input.forceActiveFocus();
     }
 
-    spacing: Theme.spaceMd
+    spacing: Theme.gapInline
 
-    Icon {
-        glyph: root.glyph
-        size: Theme.iconLg
-        color: root.chip ? Theme.primary : Theme.textMuted
+    Item {
+        Layout.preferredWidth: Theme.iconApp
+        Layout.preferredHeight: Theme.iconApp
+
+        Icon {
+            anchors.centerIn: parent
+            glyph: root.glyph
+            size: Theme.iconXl
+            color: Theme.textMuted
+        }
     }
 
-    TextInput {
+    Input {
         id: input
 
         Layout.fillWidth: true
-        color: Theme.text
-        font.family: Theme.font
         font.pixelSize: Theme.textXl
-        selectionColor: Theme.selection
-        clip: true
 
         Keys.onEscapePressed: root.dismissed()
         Keys.onReturnPressed: e => root.accepted(!!(e.modifiers & Qt.ShiftModifier))
@@ -90,21 +93,21 @@ RowLayout {
 
     property bool gridNav: false
 
-    Rectangle {
+    Surface {
         visible: root.chip !== ""
-        implicitWidth: chipLabel.implicitWidth + Theme.spaceLg
+        implicitWidth: chipLabel.implicitWidth + Theme.padControl * 2
         implicitHeight: Theme.controlSm
         radius: Theme.radiusFull
-        color: Theme.primaryWash
+        variant: "on"
 
         Label {
             id: chipLabel
 
             anchors.centerIn: parent
             text: root.chip
-            color: Theme.primary
+            color: Theme.textMuted
             font.pixelSize: Theme.textXs
-            font.weight: Font.DemiBold
+            font.weight: Theme.weightEmphasis
         }
     }
 }

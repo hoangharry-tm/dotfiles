@@ -177,6 +177,7 @@ PanelWindow {
                     text: "+" + root.folded + " more app" + (root.folded > 1 ? "s" : "")
                     color: Theme.textMuted
                     font.pixelSize: Theme.textXs
+                    font.features: { "tnum": 1 }
                 }
             }
         }

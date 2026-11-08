@@ -19,8 +19,8 @@ PanelWindow {
     readonly property int headH: Theme.controlSm
     readonly property int searchH: Theme.controlLg
     readonly property int footerH: Theme.control
-    // Search + hairline + footer + the gaps between them + sheet padding.
-    readonly property int chrome: searchH + Theme.hairlineWidth + footerH + Theme.gapSection * 3 + Theme.padSheet * 2
+    // Search + footer + the gaps around the body + sheet padding.
+    readonly property int chrome: searchH + footerH + Theme.gapSection * 2 + Theme.padSheet * 2
 
     readonly property var columns: split(Keybinds.filter(search.text), cols)
     // Sized for the unfiltered content so the sheet doesn't resize (and jump) while typing.
@@ -82,45 +82,44 @@ PanelWindow {
             anchors.margins: Theme.padSheet
             spacing: Theme.gapSection
 
-            // Search
-            RowLayout {
+            // Search: a recessed field (sheet radiusXl - padSheet = radiusMd)
+            Surface {
                 Layout.fillWidth: true
                 Layout.preferredHeight: root.searchH
-                spacing: Theme.gapInline
+                radius: Theme.radiusMd
+                variant: "recessed"
 
-                Icon {
-                    glyph: "󰌌"
-                    size: Theme.iconLg
-                    color: search.text ? Theme.primary : Theme.textMuted
-                }
+                RowLayout {
+                    anchors.fill: parent
+                    anchors.leftMargin: Theme.padControl
+                    anchors.rightMargin: Theme.padControl
+                    spacing: Theme.gapInline
 
-                TextInput {
-                    id: search
-
-                    Layout.fillWidth: true
-                    color: Theme.text
-                    font.family: Theme.font
-                    font.pixelSize: Theme.textXl
-                    selectionColor: Theme.primary
-                    selectedTextColor: Theme.primaryText
-                    clip: true
-                    Keys.onEscapePressed: Panels.close()
-
-                    Label {
-                        anchors.verticalCenter: parent.verticalCenter
-                        width: parent.width
-                        visible: search.text === ""
-                        text: "Search shortcuts"
+                    Icon {
+                        glyph: "search"
+                        size: Theme.iconLg
                         color: Theme.textMuted
+                    }
+
+                    Input {
+                        id: search
+
+                        Layout.fillWidth: true
+                        Layout.fillHeight: true
+                        verticalAlignment: TextInput.AlignVCenter
                         font.pixelSize: Theme.textXl
+                        Keys.onEscapePressed: Panels.close()
+
+                        Label {
+                            anchors.verticalCenter: parent.verticalCenter
+                            width: parent.width
+                            visible: search.text === ""
+                            text: "Search shortcuts"
+                            color: Theme.textMuted
+                            font.pixelSize: Theme.textXl
+                        }
                     }
                 }
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.preferredHeight: Theme.hairlineWidth
-                color: Theme.hairline
             }
 
             // Columns of groups; scrolls if the screen is too short.

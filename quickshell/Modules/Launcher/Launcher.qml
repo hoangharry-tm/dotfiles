@@ -140,7 +140,7 @@ PanelWindow {
         id: sheet
 
         width: parent.width
-        implicitHeight: column.implicitHeight + Theme.spaceMd * 2
+        implicitHeight: column.implicitHeight + Theme.spaceMd * 2 // sheet inset 12: 28 - 12 = 16 highlight
         radius: Theme.radiusXl // = qs-launcher layer rule in niri/rules.kdl
 
         ColumnLayout {
@@ -150,7 +150,7 @@ PanelWindow {
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.margins: Theme.spaceMd
-            spacing: Theme.spaceXs
+            spacing: Theme.gapStack
 
             SearchField {
                 id: search
@@ -162,8 +162,8 @@ PanelWindow {
 
                 Layout.fillWidth: true
                 Layout.preferredHeight: Theme.fieldHeight
-                Layout.leftMargin: Theme.spaceMd
-                Layout.rightMargin: Theme.spaceMd
+                Layout.leftMargin: Theme.padControl
+                Layout.rightMargin: Theme.padControl
                 placeholder: Launch.modes[root.mode].placeholder
                 glyph: Launch.modes[root.mode].glyph
                 chip: root.mode === "apps" ? "" : root.clipMode ? Clipboard.chipLabel(root.parsed.query) : Launch.modes[root.mode].label
@@ -176,14 +176,6 @@ PanelWindow {
                 onOpenRequested: root.openLink()
                 onClearRequested: root.clearAll()
                 onDismissed: Panels.close()
-            }
-
-            Rectangle {
-                Layout.fillWidth: true
-                Layout.leftMargin: Theme.spaceMd
-                Layout.rightMargin: Theme.spaceMd
-                Layout.preferredHeight: Theme.hairlineWidth
-                color: Theme.hairline
             }
 
             ResultList {
@@ -236,8 +228,8 @@ PanelWindow {
             // Footer: key hints, plus prefix modes while the field is empty.
             RowLayout {
                 Layout.fillWidth: true
-                Layout.leftMargin: Theme.spaceMd
-                Layout.rightMargin: Theme.spaceMd
+                Layout.leftMargin: Theme.padControl
+                Layout.rightMargin: Theme.padControl
                 Layout.preferredHeight: Theme.control
                 spacing: Theme.spaceLg
 

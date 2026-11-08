@@ -1,9 +1,11 @@
 import QtQuick
+import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 import qs.Common
 import qs.Services
 import qs.Widgets
+import qs.Modules.ControlCenter
 
 // On-screen indicator for volume, mic mute and brightness changes: a glass
 // pill near the bottom of the focused screen that fades out.
@@ -46,15 +48,15 @@ Scope {
 
         // Muted reads as empty, like macOS.
         function onVolumeChanged() {
-            root.show(Audio.volumeIcon, Audio.muted ? 0 : Audio.volume);
+            root.show(Glyphs.volume(), Audio.muted ? 0 : Audio.volume);
         }
 
         function onMutedChanged() {
-            root.show(Audio.volumeIcon, Audio.muted ? 0 : Audio.volume);
+            root.show(Glyphs.volume(), Audio.muted ? 0 : Audio.volume);
         }
 
         function onMicMutedChanged() {
-            root.show(Audio.micIcon, 0, false);
+            root.show(Glyphs.mic(), 0, false);
         }
     }
 
@@ -62,7 +64,7 @@ Scope {
         target: Brightness
 
         function onChangedByUser() {
-            root.show("󰃠", Brightness.value);
+            root.show("brightness_medium", Brightness.value);
         }
     }
 
@@ -78,7 +80,7 @@ Scope {
             visible: root.shown && Panels.focusedScreen() === modelData.name
             anchors.bottom: true
             margins.bottom: Theme.space2xl * 2
-            implicitWidth: root.showValue ? 280 : Theme.fieldHeight
+            implicitWidth: root.showValue ? Theme.popoverWidth - Theme.space2xl : Theme.fieldHeight
             implicitHeight: Theme.fieldHeight
             exclusiveZone: 0
             color: "transparent"
@@ -89,71 +91,69 @@ Scope {
                 anchors.fill: parent
                 radius: Theme.fieldHeight / 2 // pill; = qs-osd layer rule
 
-                Icon {
-                    id: icon
-
-                    anchors.left: parent.left
+                // symbol + thin track + tabular %: calm and neutral, never coloured
+                RowLayout {
+                    anchors.fill: parent
                     anchors.leftMargin: root.showValue ? Theme.spaceXl : 0
-                    anchors.horizontalCenter: root.showValue ? undefined : parent.horizontalCenter
-                    anchors.verticalCenter: parent.verticalCenter
-                    glyph: root.glyph
-                    size: Theme.iconLg
+                    anchors.rightMargin: root.showValue ? Theme.spaceXl : 0
+                    spacing: Theme.gapInline
 
-                    // Content eases in (the pill is a glass sheet: not animated).
-                    Enter {
-                        active: osd.visible
-                    }
-                }
+                    Icon {
+                        Layout.alignment: Qt.AlignVCenter | (root.showValue ? Qt.AlignLeft : Qt.AlignHCenter)
+                        Layout.fillWidth: !root.showValue
+                        glyph: root.glyph
+                        size: Theme.iconLg
+                        filled: true
 
-                Rectangle {
-                    visible: root.showValue
-                    anchors.left: icon.right
-                    anchors.leftMargin: Theme.spaceMd
-                    anchors.right: percent.left
-                    anchors.rightMargin: Theme.spaceMd
-                    anchors.verticalCenter: parent.verticalCenter
-                    height: Theme.trackHeight
-                    radius: Theme.trackHeight / 2
-                    color: Theme.tile
-
-                    Enter {
-                        active: osd.visible
-                        index: 1
+                        // Content eases in (the pill is a glass sheet: not animated).
+                        Enter {
+                            active: osd.visible
+                        }
                     }
 
-                    Rectangle {
-                        width: parent.width * Math.min(1, root.value)
-                        height: parent.height
-                        radius: Theme.trackHeight / 2
-                        color: Theme.primary
+                    Surface {
+                        Layout.fillWidth: true
+                        Layout.preferredHeight: Theme.trackHeight
+                        visible: root.showValue
+                        radius: Theme.radiusFull
+                        variant: "track"
 
-                        Behavior on width {
-                            NumberAnimation {
-                                duration: Theme.animFast
-                                easing.type: Easing.BezierSpline
-                                easing.bezierCurve: Theme.curveDecelerate
+                        Enter {
+                            active: osd.visible
+                            index: 1
+                        }
+
+                        Surface {
+                            width: Math.max(height, parent.width * Math.min(1, root.value))
+                            height: parent.height
+                            radius: Theme.radiusFull
+                            variant: "solid"
+
+                            Behavior on width {
+                                NumberAnimation {
+                                    duration: Theme.animFast
+                                    easing.type: Easing.BezierSpline
+                                    easing.bezierCurve: Theme.curveDecelerate
+                                }
                             }
                         }
                     }
-                }
 
-                Label {
-                    id: percent
+                    Label {
+                        visible: root.showValue
+                        Layout.preferredWidth: Theme.control
+                        horizontalAlignment: Text.AlignRight
+                        text: Math.round(root.value * 100)
+                        font.pixelSize: Theme.textXs
+                        font.features: {
+                            "tnum": 1
+                        }
+                        color: Theme.textMuted
 
-                    visible: root.showValue
-                    anchors.right: parent.right
-                    anchors.rightMargin: Theme.spaceXl
-                    anchors.verticalCenter: parent.verticalCenter
-                    width: Theme.spaceXl + Theme.spaceSm
-                    horizontalAlignment: Text.AlignRight
-                    text: Math.round(root.value * 100)
-                    font.family: Theme.mono
-                    font.pixelSize: Theme.textXs
-                    color: Theme.textMuted
-
-                    Enter {
-                        active: osd.visible
-                        index: 2
+                        Enter {
+                            active: osd.visible
+                            index: 2
+                        }
                     }
                 }
             }

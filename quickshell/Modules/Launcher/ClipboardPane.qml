@@ -36,7 +36,7 @@ RowLayout {
 
         highlight: Rectangle {
             radius: Theme.radiusLg // sheet radius (28) - sheet inset (12)
-            color: Theme.hover
+            color: Theme.primaryWash // the one accent mark, as in ResultList
         }
 
         delegate: ClipboardRow {

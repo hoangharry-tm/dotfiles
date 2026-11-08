@@ -15,11 +15,11 @@ PanelWindow {
     property int selected: 0
 
     readonly property var actions: [
-        { glyph: "󰌾", label: "Lock", command: ["lock-screen"] },
-        { glyph: "󰤄", label: "Sleep", command: ["systemctl", "suspend"] },
-        { glyph: "󰍃", label: "Log out", command: ["niri", "msg", "action", "quit", "--skip-confirmation"] },
-        { glyph: "󰜉", label: "Restart", command: ["systemctl", "reboot"] },
-        { glyph: "󰐥", label: "Shut down", command: ["systemctl", "poweroff"] }
+        { glyph: "lock", label: "Lock", command: ["lock-screen"] },
+        { glyph: "bedtime", label: "Sleep", command: ["systemctl", "suspend"] },
+        { glyph: "logout", label: "Log out", command: ["niri", "msg", "action", "quit", "--skip-confirmation"] },
+        { glyph: "restart_alt", label: "Restart", danger: true, command: ["systemctl", "reboot"] },
+        { glyph: "power_settings_new", label: "Shut down", danger: true, command: ["systemctl", "poweroff"] }
     ]
 
     function run(i) {
@@ -34,7 +34,7 @@ PanelWindow {
     anchors.left: true
     anchors.right: true
     exclusionMode: ExclusionMode.Ignore
-    color: Theme.scrim
+    color: Theme.imageScrim // niri blurs the wallpaper here, so image ink, not mode ink
     WlrLayershell.namespace: "qs-power"
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: shown ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
@@ -75,6 +75,7 @@ PanelWindow {
             text: "Goodbye for now"
             font.pixelSize: Theme.textHero
             font.weight: Font.Light
+            color: Theme.onImage
         }
 
         Row {
@@ -102,7 +103,7 @@ PanelWindow {
                         width: Theme.space2xl * 3
                         height: width
                         radius: width / 2
-                        color: action.current ? Theme.primary : mouse.containsMouse ? Theme.glassSolid : Theme.glass
+                        color: action.current ? (action.modelData.danger ? Theme.error : Theme.fillSolid) : mouse.containsMouse ? Theme.glassSolid : Theme.glass
                         border.width: Theme.hairlineWidth
                         border.color: Theme.hairline
                         scale: mouse.pressed ? Theme.pressScale : action.current ? 1 + (1 - Theme.pressScale) : 1
@@ -125,7 +126,8 @@ PanelWindow {
                             anchors.centerIn: parent
                             glyph: action.modelData.glyph
                             size: Theme.iconHero
-                            color: action.current ? Theme.primaryText : Theme.text
+                            filled: action.current
+                            color: action.current ? (action.modelData.danger ? Theme.surface : Theme.onSolid) : Theme.text
                         }
 
                         MouseArea {
@@ -142,7 +144,8 @@ PanelWindow {
                     Label {
                         anchors.horizontalCenter: parent.horizontalCenter
                         text: action.modelData.label
-                        color: action.current ? Theme.text : Theme.textMuted
+                        color: action.current ? Theme.onImage : Theme.onImageMuted
+                        font.weight: action.current ? Theme.weightEmphasis : Font.Normal
                     }
                 }
             }

@@ -86,7 +86,7 @@ Item {
         }
 
         SequentialAnimation {
-            running: tile.hopping
+            running: tile.hopping && Theme.motionScale > 0
             loops: Animation.Infinite
             onRunningChanged: if (!running) hop.lift = 0
 
@@ -95,14 +95,16 @@ Item {
                 property: "lift"
                 to: Theme.spaceSm
                 duration: Theme.anim
-                easing.type: Easing.OutQuad
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Theme.curveDecelerate
             }
             NumberAnimation {
                 target: hop
                 property: "lift"
                 to: 0
                 duration: Theme.anim
-                easing.type: Easing.InQuad
+                easing.type: Easing.BezierSpline
+                easing.bezierCurve: Theme.curveAccelerate
             }
             PauseAnimation {
                 duration: Theme.animFast
@@ -157,12 +159,10 @@ Item {
                 height: width
                 radius: Theme.radiusMd
                 color: Theme.tile
-                border.width: Theme.hairlineWidth
-                border.color: Theme.hairline
 
                 Icon {
                     anchors.centerIn: parent
-                    glyph: tile.item?.glyph || "󰖯"
+                    glyph: tile.item?.glyph || "web_asset"
                     size: Math.round(dock.iconSize / 2)
                     color: Theme.text
                 }

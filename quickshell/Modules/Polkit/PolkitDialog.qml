@@ -74,15 +74,16 @@ PanelWindow {
 
             Icon {
                 Layout.alignment: Qt.AlignHCenter
-                glyph: "󰌆"
+                glyph: "lock"
                 size: Theme.iconHero
-                color: Theme.primary
+                filled: true
             }
 
             Label {
                 Layout.fillWidth: true
                 text: root.message || "Authentication required"
                 font.pixelSize: Theme.textLg
+                font.weight: Theme.weightTitle
                 horizontalAlignment: Text.AlignHCenter
                 wrapMode: Text.Wrap
                 elide: Text.ElideNone
@@ -97,26 +98,22 @@ PanelWindow {
                 horizontalAlignment: Text.AlignHCenter
             }
 
-            Rectangle {
+            Surface {
                 Layout.fillWidth: true
                 Layout.preferredHeight: Theme.controlLg
-                radius: Theme.radiusMd
-                color: Theme.glassSolid
-                border.width: Theme.hairlineWidth
-                border.color: root.failedOnce ? Theme.error : Theme.hairline
+                radius: Theme.radiusMd // sheet radiusXl - padSheet
+                variant: "recessed"
+                border.width: root.failedOnce ? Theme.hairlineWidth : 0
+                border.color: Theme.error
 
-                TextInput {
+                Input {
                     id: input
 
                     anchors.fill: parent
                     anchors.leftMargin: Theme.padControl
                     anchors.rightMargin: Theme.padControl
                     verticalAlignment: TextInput.AlignVCenter
-                    color: Theme.text
-                    font.family: Theme.font
                     font.pixelSize: Theme.textLg
-                    selectionColor: Theme.selection
-                    clip: true
                     echoMode: root.flow?.responseVisible ? TextInput.Normal : TextInput.Password
                     enabled: root.flow?.isResponseRequired ?? false
 
@@ -149,31 +146,19 @@ PanelWindow {
                 Layout.fillWidth: true
                 spacing: Theme.gapInline
 
-                Clickable {
+                Item {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: Theme.controlLg
-                    radius: Theme.radiusMd
-                    onClicked: root.flow?.cancelAuthenticationRequest()
-
-                    Label {
-                        anchors.centerIn: parent
-                        text: "Cancel"
-                    }
                 }
 
-                Clickable {
-                    Layout.fillWidth: true
-                    Layout.preferredHeight: Theme.controlLg
-                    radius: Theme.radiusMd
-                    color: pressed ? Qt.darker(Theme.primary, 1.1) : hovered ? Qt.lighter(Theme.primary, 1.08) : Theme.primary
-                    onClicked: root.submit()
+                Button {
+                    text: "Cancel"
+                    onClicked: root.flow?.cancelAuthenticationRequest()
+                }
 
-                    Label {
-                        anchors.centerIn: parent
-                        text: "Authenticate"
-                        color: Theme.primaryText
-                        font.weight: Font.DemiBold
-                    }
+                Button {
+                    text: "Authenticate"
+                    variant: "tonal"
+                    onClicked: root.submit()
                 }
             }
         }

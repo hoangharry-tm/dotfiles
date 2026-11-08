@@ -119,13 +119,14 @@ PanelWindow {
                     width: root.tileW
                     height: root.tileH
 
-                    Rectangle {
+                    // Selection is a neutral "on" fill, not an accent: the switcher
+                    // is a transient chooser, and the app icons already carry colour.
+                    Surface {
                         anchors.fill: parent
-                        radius: Theme.radiusMd
-                        color: tile.current ? Theme.toneHover : "transparent"
-                        // Same ring as the bar's active workspace pill.
-                        border.width: tile.current ? Theme.hairlineWidth : 0
-                        border.color: Theme.primaryRing
+                        radius: Theme.radiusMd // sheet radiusXl - padSheet
+                        fillA: tile.current ? Theme.fillOn : "transparent"
+                        hovered: pick.containsMouse
+                        pressed: pick.pressed
                     }
 
                     Column {
@@ -146,7 +147,7 @@ PanelWindow {
 
                             Icon {
                                 anchors.centerIn: parent
-                                glyph: "󰖯"
+                                glyph: "web_asset"
                                 size: root.iconBox / 2
                                 color: Theme.textMuted
                                 visible: tile.icon === ""
@@ -160,7 +161,7 @@ PanelWindow {
                             elide: Text.ElideMiddle
                             maximumLineCount: 2
                             wrapMode: Text.Wrap
-                            font.weight: tile.current ? Font.DemiBold : Font.Normal
+                            font.weight: tile.current ? Theme.weightEmphasis : Font.Normal
                         }
 
                         Label {
@@ -173,7 +174,11 @@ PanelWindow {
                     }
 
                     MouseArea {
+                        id: pick
+
                         anchors.fill: parent
+                        hoverEnabled: true
+                        cursorShape: Qt.PointingHandCursor
                         onClicked: Switcher.pick(tile.index)
                     }
                 }

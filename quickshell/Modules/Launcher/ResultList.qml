@@ -22,7 +22,7 @@ ListView {
 
     highlight: Rectangle {
         radius: Theme.radiusLg // sheet radius (28) - sheet inset (12)
-        color: Theme.hover
+        color: Theme.primaryWash // the one accent mark: what Enter will do
     }
 
     delegate: ResultRow {
@@ -34,6 +34,7 @@ ListView {
         subtitle: modelData.subtitle ?? ""
         iconName: modelData.icon ?? ""
         glyph: modelData.glyph ?? ""
+        tabular: modelData.id === "calc"
         current: index === root.current
         onClicked: root.chosen(index)
         onEntered: root.hovered(index)

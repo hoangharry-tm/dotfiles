@@ -5,7 +5,7 @@ import qs.Services
 import qs.Widgets
 
 // One compact clipboard row: type glyph (or colour swatch), one-line preview,
-// pin mark. The selection wash is the list's highlight, so the row stays flat.
+// pin mark (all neutral: selection is the list highlight's accent). The selection wash is the list's highlight, so the row stays flat.
 Item {
     id: root
 
@@ -28,20 +28,19 @@ Item {
 
     RowLayout {
         anchors.fill: parent
-        anchors.leftMargin: Theme.spaceMd
-        anchors.rightMargin: Theme.spaceMd
+        anchors.leftMargin: Theme.padControl
+        anchors.rightMargin: Theme.padControl
         spacing: Theme.gapInline
 
         Item {
-            Layout.preferredWidth: Theme.iconLg
-            Layout.preferredHeight: Theme.iconLg
+            Layout.preferredWidth: Theme.icon
+            Layout.preferredHeight: Theme.icon
 
             Icon {
                 anchors.centerIn: parent
                 visible: root.kind !== "color"
                 glyph: Clipboard.kinds[root.kind]?.glyph ?? ""
-                size: Theme.icon
-                color: root.current ? Theme.primary : Theme.textMuted
+                color: Theme.textMuted
             }
 
             // Colour entries show the colour itself instead of a glyph.
@@ -67,9 +66,10 @@ Item {
 
         Icon {
             visible: !!root.item?.entry?.pinned
-            glyph: "󰐃"
+            glyph: "push_pin"
+            filled: true
             size: Theme.iconSm
-            color: Theme.primary
+            color: Theme.textMuted
         }
     }
 }

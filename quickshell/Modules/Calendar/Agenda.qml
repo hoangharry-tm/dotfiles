@@ -5,7 +5,8 @@ import qs.Services
 import qs.Widgets
 
 // Events under the month grid: a picked day, else today plus the next days
-// that have something. Scrolls when it outgrows `maxHeight` (the popover's
+// that have something, one Group per day under a muted header on column A.
+// Scrolls when it outgrows `maxHeight` (the popover's
 // height budget). A row with a meeting link opens it on click.
 Item {
     id: root
@@ -59,11 +60,12 @@ Item {
             id: list
 
             width: scroller.width
-            spacing: Theme.spaceSm
+            spacing: Theme.gapSection
 
             Label {
                 visible: CalendarEvents.calendars.length === 0
                 Layout.fillWidth: true
+                Layout.leftMargin: Theme.columnA
                 text: "No calendars yet. Run calendar-add in a terminal."
                 color: Theme.textMuted
                 font.pixelSize: Theme.textXs
@@ -77,97 +79,107 @@ Item {
                     id: group
 
                     required property var modelData
+                    readonly property bool empty: modelData.events.length === 0
 
                     Layout.fillWidth: true
-                    spacing: Theme.spaceXs
+                    spacing: Theme.spaceSm
 
+                    // Day header: muted section label on column A, above its group.
                     Label {
+                        Layout.leftMargin: Theme.columnA
                         text: group.modelData.label
                         color: Theme.textMuted
                         font.pixelSize: Theme.textXs
-                        font.weight: Font.DemiBold
+                        font.weight: Theme.weightEmphasis
                     }
 
                     Label {
-                        visible: group.modelData.events.length === 0 && CalendarEvents.calendars.length > 0
+                        Layout.leftMargin: Theme.columnA
+                        visible: group.empty && CalendarEvents.calendars.length > 0
                         text: "Nothing planned"
                         color: Theme.textMuted
                         font.pixelSize: Theme.textXs
                     }
 
+                    // One Group per day (a Group with no rows would still draw), so only built when there are events.
                     Repeater {
-                        model: group.modelData.events
+                        model: group.empty ? [] : [group.modelData.events]
 
-                        Clickable {
-                            id: row
+                        Group {
+                            id: events
 
                             required property var modelData
-                            readonly property bool done: !modelData.allDay && modelData.end <= CalendarEvents.now
 
                             Layout.fillWidth: true
-                            Layout.preferredHeight: modelData.location ? Theme.rowHeightTall : Theme.rowHeight
-                            cursor: modelData.link ? Qt.PointingHandCursor : Qt.ArrowCursor
-                            opacity: done ? 0.5 : 1 // finished events recede
-                            onClicked: if (modelData.link) {
-                                CalendarEvents.open(modelData.link);
-                                root.opened();
-                            }
 
-                            Rectangle {
-                                id: bar
+                            Repeater {
+                                model: events.modelData
 
-                                anchors.left: parent.left
-                                anchors.leftMargin: Theme.spaceXs
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: Theme.spaceXs
-                                height: parent.height - Theme.spaceSm * 2
-                                radius: Theme.radiusFull
-                                color: CalendarEvents.colorOf(row.modelData)
-                            }
+                                Clickable {
+                                    id: row
 
-                            Label {
-                                id: time
+                                    required property var modelData
+                                    readonly property bool done: !modelData.allDay && modelData.end <= CalendarEvents.now
 
-                                anchors.left: bar.right
-                                anchors.leftMargin: Theme.spaceSm
-                                anchors.verticalCenter: parent.verticalCenter
-                                width: Theme.controlXl
-                                text: row.modelData.allDay ? "All day" : CalendarEvents.fmtTime(row.modelData.start)
-                                color: Theme.textMuted
-                                font.pixelSize: Theme.textXs
-                                font.features: { "tnum": 1 }
-                            }
+                                    Layout.fillWidth: true
+                                    Layout.preferredHeight: modelData.location ? Theme.rowHeightTall : Theme.rowHeight
+                                    cursor: modelData.link ? Qt.PointingHandCursor : Qt.ArrowCursor
+                                    onClicked: if (modelData.link) {
+                                        CalendarEvents.open(modelData.link);
+                                        root.opened();
+                                    }
 
-                            Column {
-                                anchors.left: time.right
-                                anchors.right: join.left
-                                anchors.rightMargin: Theme.spaceSm
-                                anchors.verticalCenter: parent.verticalCenter
+                                    RowLayout {
+                                        anchors.fill: parent
+                                        anchors.leftMargin: Theme.padControl
+                                        anchors.rightMargin: Theme.padControl
+                                        spacing: Theme.gapInline
 
-                                Label {
-                                    width: parent.width
-                                    text: row.modelData.title
-                                    font.weight: Font.DemiBold
+                                        // Data colour: a small bar, never a fill.
+                                        Rectangle {
+                                            Layout.preferredWidth: Theme.spaceXs
+                                            Layout.fillHeight: true
+                                            Layout.topMargin: Theme.spaceSm
+                                            Layout.bottomMargin: Theme.spaceSm
+                                            radius: Theme.radiusFull
+                                            color: CalendarEvents.colorOf(row.modelData)
+                                        }
+
+                                        Label {
+                                            Layout.preferredWidth: Theme.controlXl
+                                            text: row.modelData.allDay ? "All day" : CalendarEvents.fmtTime(row.modelData.start)
+                                            color: Theme.textMuted
+                                            font.pixelSize: Theme.textXs
+                                            font.features: { "tnum": 1 }
+                                        }
+
+                                        // Finished events recede by value (muted title), never by opacity: muted text keeps its contrast.
+                                        ColumnLayout {
+                                            Layout.fillWidth: true
+                                            spacing: 0
+
+                                            Label {
+                                                Layout.fillWidth: true
+                                                text: row.modelData.title
+                                                color: row.done ? Theme.textMuted : Theme.text
+                                            }
+
+                                            Label {
+                                                Layout.fillWidth: true
+                                                visible: text !== ""
+                                                text: row.modelData.location
+                                                color: Theme.textMuted
+                                                font.pixelSize: Theme.textXs
+                                            }
+                                        }
+
+                                        Icon {
+                                            visible: row.modelData.link !== ""
+                                            glyph: "videocam"
+                                            color: Theme.textMuted
+                                        }
+                                    }
                                 }
-
-                                Label {
-                                    width: parent.width
-                                    visible: text !== ""
-                                    text: row.modelData.location
-                                    color: Theme.textMuted
-                                    font.pixelSize: Theme.textXs
-                                }
-                            }
-
-                            Icon {
-                                id: join
-
-                                anchors.right: parent.right
-                                anchors.rightMargin: Theme.spaceSm
-                                anchors.verticalCenter: parent.verticalCenter
-                                visible: row.modelData.link !== ""
-                                glyph: "󰕧"
-                                color: Theme.primary
                             }
                         }
                     }

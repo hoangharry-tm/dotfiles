@@ -27,11 +27,12 @@ PopupWindow {
         id: row
 
         property string text
-        property color tint: Theme.text
+        property bool danger: false // error only while the pointer is on it, never at rest
 
         Layout.fillWidth: true
         implicitWidth: Math.min(label.implicitWidth, Theme.launcherWidth / 2) + Theme.padControl * 2
         implicitHeight: Theme.control
+        radius: Theme.radiusXs // card radiusMd - spaceSm inset
         onClicked: {
             Dock.menuKey = "";
             row.act();
@@ -48,7 +49,7 @@ PopupWindow {
             anchors.rightMargin: Theme.padControl
             anchors.verticalCenter: parent.verticalCenter
             text: row.text
-            color: row.tint
+            color: row.danger && row.hovered ? Theme.error : Theme.text
         }
     }
 
@@ -80,7 +81,7 @@ PopupWindow {
                 Layout.preferredHeight: Theme.control
                 text: root.item.name
                 color: Theme.textMuted
-                font.weight: Font.DemiBold
+                font.weight: Theme.weightEmphasis
             }
 
             Repeater {
@@ -116,7 +117,7 @@ PopupWindow {
             MenuRow {
                 visible: root.item.running
                 text: "Close all windows"
-                tint: Theme.error
+                danger: true
                 onAct: Dock.closeAll(root.item)
             }
         }

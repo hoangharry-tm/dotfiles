@@ -13,9 +13,9 @@ Column {
     Label {
         width: parent.width
         height: root.headHeight
-                text: root.group.name
-        color: Theme.primary
-        font.weight: Font.DemiBold
+        text: root.group.name
+        color: Theme.text
+        font.weight: Theme.weightEmphasis
     }
 
     Repeater {

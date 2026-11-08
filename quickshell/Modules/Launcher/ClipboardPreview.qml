@@ -6,7 +6,7 @@ import qs.Widgets
 
 // Right pane: the selected entry in full. Reads Clipboard.inspected*; the
 // service decodes only this one entry (text) or thumbnails it (image).
-Rectangle {
+Surface {
     id: root
 
     readonly property var entry: Clipboard.inspected
@@ -16,7 +16,6 @@ Rectangle {
     readonly property string meta: kind === "image" ? entry.meta : kind === "link" ? Clipboard.domain(body) : body.length + " chars" + (body.split("\n").length > 1 ? " · " + body.split("\n").length + " lines" : "")
 
     radius: Theme.radiusLg // sheet radius (28) - sheet inset (12)
-    color: Theme.tile
 
     ColumnLayout {
         anchors.fill: parent
@@ -27,20 +26,20 @@ Rectangle {
         RowLayout {
             spacing: Theme.gapInline
 
-            Rectangle {
-                implicitWidth: kindLabel.implicitWidth + Theme.spaceLg
+            Surface {
+                implicitWidth: kindLabel.implicitWidth + Theme.padControl * 2
                 implicitHeight: Theme.controlSm
                 radius: Theme.radiusFull
-                color: Theme.primaryWash
+                variant: "on"
 
                 Label {
                     id: kindLabel
 
                     anchors.centerIn: parent
                     text: Clipboard.kinds[root.kind].label + (root.entry?.pinned ? " · Pinned" : "")
-                    color: Theme.primary
+                    color: Theme.textMuted
                     font.pixelSize: Theme.textXs
-                    font.weight: Font.DemiBold
+                    font.weight: Theme.weightEmphasis
                 }
             }
 
@@ -49,6 +48,7 @@ Rectangle {
                 text: root.meta
                 color: Theme.textMuted
                 font.pixelSize: Theme.textXs
+                font.features: { "tnum": 1 }
             }
         }
 
@@ -79,7 +79,7 @@ Rectangle {
             visible: root.kind === "link"
             text: Clipboard.domain(root.body)
             font.pixelSize: Theme.textLg
-            font.weight: Font.DemiBold
+            font.weight: Theme.weightTitle
         }
 
         Flickable {

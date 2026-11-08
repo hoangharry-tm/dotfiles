@@ -64,7 +64,7 @@ GridView {
                 anchors.right: parent.right
                 anchors.bottom: parent.bottom
                 height: Theme.controlSm
-                color: Qt.alpha(Theme.surface, 0.7)
+                color: Theme.glassSolid
                 visible: cell.index === root.current
 
                 Label {

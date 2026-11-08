@@ -82,7 +82,7 @@ PanelWindow {
             anchors.right: parent.right
             anchors.top: parent.top
             anchors.margins: Theme.padSheet
-            spacing: Theme.spaceSm
+            spacing: Theme.gapSection
 
             ColumnLayout {
                 id: head
@@ -97,65 +97,51 @@ PanelWindow {
 
                     Label {
                         text: Qt.formatDateTime(clock.date, "dddd")
-                        color: Theme.primary
-                        font.weight: Font.DemiBold
+                        color: Theme.textMuted
+                        font.weight: Theme.weightEmphasis
                     }
 
                     Label {
                         text: Qt.formatDateTime(clock.date, "d MMMM yyyy")
                         font.pixelSize: Theme.textXl
-                        font.weight: Font.DemiBold
+                        font.weight: Theme.weightTitle
+                        font.features: { "tnum": 1 }
                     }
                 }
 
                 RowLayout {
                     Layout.fillWidth: true
                     Layout.topMargin: Theme.spaceSm
-                    spacing: Theme.spaceXs
+                    spacing: 0
 
                     Label {
                         Layout.fillWidth: true
                         text: Qt.formatDate(root.month, "MMMM yyyy")
-                        font.weight: Font.DemiBold
+                        font.weight: Theme.weightEmphasis
+                        font.features: { "tnum": 1 }
                     }
 
-                    Clickable {
+                    Button {
                         visible: !root.onCurrentMonth
-                        Layout.preferredHeight: Theme.controlSm
-                        Layout.preferredWidth: todayLabel.implicitWidth + Theme.padControl * 2
-                        radius: Theme.radiusFull
+                        text: "Today"
                         onClicked: root.month = new Date()
-
-                        Label {
-                            id: todayLabel
-
-                            anchors.centerIn: parent
-                            text: "Today"
-                            color: Theme.primary
-                            font.pixelSize: Theme.textXs
-                            font.weight: Font.DemiBold
-                        }
                     }
 
-                    Repeater {
-                        model: [{ g: "󰅁", d: -1 }, { g: "󰅂", d: 1 }]
+                    Button {
+                        glyph: "chevron_left"
+                        tip: "Previous month"
+                        onClicked: root.shift(-1)
+                    }
 
-                        Clickable {
-                            required property var modelData
-
-                            Layout.preferredWidth: Theme.control
-                            Layout.preferredHeight: Theme.control
-                            radius: Theme.radiusFull
-                            onClicked: root.shift(modelData.d)
-
-                            Icon {
-                                anchors.centerIn: parent
-                                glyph: parent.modelData.g
-                            }
-                        }
+                    Button {
+                        glyph: "chevron_right"
+                        tip: "Next month"
+                        onClicked: root.shift(1)
                     }
                 }
 
+                // Header and grid both fill the sheet width, so the seven
+                // columns of each are the same columns.
                 DayOfWeekRow {
                     Layout.fillWidth: true
                     locale: grid.locale
@@ -183,26 +169,31 @@ PanelWindow {
 
                         required property var model
                         readonly property bool today: model.today
+                        readonly property bool inMonth: model.month === grid.month
                         readonly property bool picked: root.picked !== null && root.picked.getTime() === model.date.getTime()
 
                         implicitWidth: Theme.control + Theme.spaceXs
                         implicitHeight: Theme.control + Theme.spaceXs
 
-                        Rectangle {
+                        // Days of the neighbouring months stay empty (the grid keeps its rhythm).
+                        // Today is the one filled accent day; a picked day is a neutral disc.
+                        Surface {
+                            visible: day.inMonth
                             anchors.centerIn: parent
                             width: Theme.control
                             height: Theme.control
                             radius: Theme.radiusFull
-                            color: day.today ? Theme.primary : "transparent"
-                            border.width: day.picked ? Theme.hairlineWidth : 0
-                            border.color: Theme.primaryRing
+                            variant: day.today ? "accent" : "on"
+                            opacity: day.today || day.picked ? 1 : 0 // picked (neutral "on") and today share one disc
                         }
 
                         Label {
+                            visible: day.inMonth
                             anchors.centerIn: parent
                             text: day.model.day
-                            color: day.today ? Theme.primaryText : day.model.month === grid.month ? Theme.text : Qt.alpha(Theme.textMuted, 0.5)
-                            font.weight: day.today ? Font.DemiBold : Font.Normal
+                            font.features: { "tnum": 1 }
+                            color: day.today ? Theme.onAccent : Theme.text
+                            font.weight: day.today ? Theme.weightEmphasis : Font.Normal
                         }
 
                         // One dot per calendar with events that day (max 3).
@@ -213,7 +204,7 @@ PanelWindow {
                             spacing: Theme.dot / 2
 
                             Repeater {
-                                model: CalendarEvents.dotsOn(day.model.date)
+                                model: day.inMonth ? CalendarEvents.dotsOn(day.model.date) : []
 
                                 Rectangle {
                                     required property color modelData
@@ -221,7 +212,7 @@ PanelWindow {
                                     width: Theme.dot
                                     height: Theme.dot
                                     radius: Theme.radiusFull
-                                    color: day.today ? Theme.primaryText : modelData
+                                    color: day.today ? Theme.onAccent : modelData
                                 }
                             }
                         }
@@ -251,10 +242,11 @@ PanelWindow {
             Label {
                 id: footer
 
-                Layout.topMargin: Theme.spaceXs
+                Layout.leftMargin: Theme.columnA
                 text: "Week " + root.weekNumber(clock.date) + "  \u00b7  Day " + root.dayOfYear(clock.date)
                 color: Theme.textMuted
                 font.pixelSize: Theme.textXs
+                font.features: { "tnum": 1 }
             }
         }
     }
