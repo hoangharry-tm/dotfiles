@@ -10,5 +10,7 @@ layout {
 }
 
 overview {
-    backdrop-color "{{colors.surface_container_lowest.default.hex}}"
+    // = Theme.surface: the session's first frame matches the greeter's last
+    // and the splash (one colour at every cut, DESIGN.md "Arrival").
+    backdrop-color "{{colors.surface.default.hex}}"
 }

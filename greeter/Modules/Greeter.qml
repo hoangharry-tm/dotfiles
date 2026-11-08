@@ -17,9 +17,13 @@ import qs.Modules.Desktop
 //
 // Transitions fade content, never glass: the backdrop starts as the plymouth
 // surface colour (no flash after the splash), the image fades in, then the
-// content rises in. On a successful login the content fades and the blurred
-// image dissolves into the sharp wallpaper (what the desktop shows) before
-// greetd launches the session (Login.leaveMs). No niri layer rules exist in
+// content rises in. On a successful login the content and the image fade
+// back to the surface colour (Login.leaveMs) before greetd launches the
+// session. Every cut lands on the same colour: splash surface -> greeter ->
+// surface -> (compositor hand-off, unavoidably blank) -> the session niri's
+// backdrop (= surface, matugen niri.kdl) -> the wallpaper fades in
+// (`wallpaper restore`). Ending on the sharp wallpaper made the blank
+// hand-off read as a black flash between two bright images. No niri layer rules exist in
 // the greeter's niri, so the pill is a flat Glass fill, as on the lock.
 PanelWindow {
     id: root
@@ -64,22 +68,7 @@ PanelWindow {
         source: "file://" + Login.stateDir + "/lock.jpg"
         fillMode: Image.PreserveAspectCrop
         asynchronous: true
-        opacity: root.ready ? 1 : 0
-
-        Behavior on opacity {
-            NumberAnimation {
-                duration: Theme.animSlow
-            }
-        }
-    }
-
-    // The desktop's wallpaper, sharp: only while leaving (dissolve to session).
-    Image {
-        anchors.fill: parent
-        source: "file://" + Login.stateDir + "/wallpaper.jpg"
-        fillMode: Image.PreserveAspectCrop
-        asynchronous: true
-        opacity: Login.leaving ? 1 : 0
+        opacity: root.ready && !Login.leaving ? 1 : 0
 
         Behavior on opacity {
             NumberAnimation {
