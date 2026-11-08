@@ -146,6 +146,12 @@ a `hairline` edge. App windows: translucent apps (Alacritty, dropdown, yazi)
 and xdg-popup menus share one global `blur {}` in `niri/look.kdl` (radius 12,
 menus at 0.94); opaque apps (browsers, video) are never blurred.
 
+**Reduce transparency** (Settings > Appearance > Display, Apple's
+accessibility setting): `glass` and `glassSolid` become the surface at alpha 1
+and niri blur is off for `qs-*` layers via `niri-transparency.kdl`
+(`Services/Transparency`, sharing `Services/NiriInclude` with low power).
+Modules never read the setting; app windows are unaffected.
+
 ## Windows (niri)
 - **One edge.** `Theme.edge` 12 = niri `gaps` 12: the bar, every sheet,
   toasts, the dock and every window share one left/right edge, and the space
@@ -513,7 +519,8 @@ directly:
 6. Notifications.
 7. Footer, pinned to the sheet's bottom edge (the content scrolls above it):
    Wallpaper, Settings, Lock, Power as bare muted icons, a fill only on hover.
-Service state maps to symbol names in `Modules/ControlCenter/Glyphs.qml`.
+Services expose symbol names directly (`Network.icon`, `Audio.volumeIcon`,
+`Power.icon`, `BluetoothState.deviceIcon(d)`, ...); no module translates them.
 Groups are `gapSection` apart, items `gapStack`; sheet `radiusXl` 28 with
 `padSheet` 16, so cards are `radiusMd` 12. Modules are rows of one `Group`
 and Notifications is its own `Group`, so the larger gap between them reads as
@@ -616,9 +623,17 @@ login, lock, unlock and power-off are designed as one continuous gesture.
   copies of the theme state (`brightness.json`, `wallpaper.jpg`, palette) from
   `scripts/system-setup.sh`.
 - Cross-fades, never cuts: lock in = the sharp wallpaper dissolves to blur
-  while content rises; unlock and greeter -> session = content fades and the
-  blur dissolves back to the sharp wallpaper, then the hand-off happens
-  (`animSlow`; 0 in low power). Content fades, never the glass.
+  while content rises; unlock = content fades and the blur dissolves back to
+  the sharp wallpaper (`animSlow`; 0 in low power). Content fades, never the
+  glass.
+- **Every cut lands on the same colour.** Greeter -> session crosses a
+  compositor hand-off that is unavoidably blank, so the greeter fades its
+  image *back to the surface* before it, and the session niri's
+  `backdrop-color` is that same surface (matugen `niri.kdl`); the wallpaper
+  then fades in (`wallpaper watch`, 0.8 s). Splash surface -> greeter ->
+  surface -> niri surface -> wallpaper: in dark mode the gap disappears, in
+  light mode it is a brief dip instead of a black flash between two bright
+  images.
 - Boot / power-off splash (Plymouth, `configs/plymouth/hh`): the palette
   surface and one slowly breathing dot, no spinner. `system-setup.sh` bakes
   the mode in use into it (`@SURFACE@`, `@TEXT@`, `dot.png` or `dot-ink.png`),
@@ -716,12 +731,7 @@ shadowing, property overrides) must be clean. CI:
 `.github/workflows/lint.yml` in the dotfiles repo.
 
 ## Known gaps (code not yet matching this direction)
-- Services still emitting Nerd Font codepoints (Network, Audio, Power,
-  BluetoothState) are mapped to symbols in the modules that draw them (bar
-  chips locally, `Modules/ControlCenter/Glyphs.qml`). Moving the names into
-  the services would delete those mapping layers.
-- The greeter's `greeter → niri-session` hand-off still shows a black frame
-  between greetd stopping the greeter and niri drawing its first frame.
+- None known. Add here what you find, with the rule it breaks.
 
 ---
 
