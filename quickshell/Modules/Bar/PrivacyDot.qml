@@ -12,7 +12,7 @@ BarChip {
     // Never collapsed: it is a safety/recording indicator.
 
     Icon {
-        glyph: Privacy.cameraActive ? "󰄀" : "󰍬"
+        glyph: Privacy.cameraActive ? "videocam" : "mic"
         color: Theme.tertiary
 
         // Shared stepped pulse (Common/Pulse.qml): no per-frame repaints.
@@ -26,7 +26,7 @@ BarChip {
 
         InfoRow {
             visible: Privacy.micActive
-            glyph: "󰍬"
+            glyph: "mic"
             label: "Microphone"
             value: Privacy.micApps.join(", ")
             valueColor: Theme.tertiary
@@ -34,7 +34,7 @@ BarChip {
 
         InfoRow {
             visible: Privacy.cameraActive
-            glyph: "󰄀"
+            glyph: "videocam"
             label: "Camera"
             value: Privacy.cameraApps.join(", ")
             valueColor: Theme.tertiary

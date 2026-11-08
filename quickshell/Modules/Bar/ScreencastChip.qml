@@ -31,7 +31,7 @@ BarChip {
     }
 
     Icon {
-        glyph: "󰹑"
+        glyph: "screen_record"
         color: Theme.error
 
         // Shared stepped pulse (Common/Pulse.qml): no per-frame repaints.

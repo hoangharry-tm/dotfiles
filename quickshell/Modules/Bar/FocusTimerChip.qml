@@ -8,12 +8,12 @@ import qs.Widgets
 BarChip {
     id: root
 
-    // Collapse: mm:ss goes from level 5, the whole chip from 8 (the tray folds
-    // first at 7, so the ring outlives it). The Control Center still has it.
-    readonly property bool showText: level < 5
+    // Collapse: mm:ss goes from level 2, the whole chip from 4. The Control
+    // Center still has it.
+    readonly property bool showText: level < 2
 
     wanted: FocusTimer.active
-    widthAt: l => l >= 8 ? 0 : chipWidth(Theme.icon + (l < 5 ? Theme.gapInline + clock.implicitWidth : 0))
+    widthAt: l => l >= 4 ? 0 : chipWidth(Theme.icon + (l < 2 ? Theme.gapInline + clock.implicitWidth : 0))
     onClicked: FocusTimer.toggle()
 
     // Tick registration (one count per bar, so several screens add up): seconds
@@ -40,6 +40,7 @@ BarChip {
         implicitWidth: Theme.icon
         implicitHeight: Theme.icon
         value: FocusTimer.fraction
+        tone: Theme.text
         opacity: FocusTimer.running ? 1 : 0.5 // paused reads as dimmed
     }
 

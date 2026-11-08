@@ -1,5 +1,4 @@
 import QtQuick
-import QtQuick.Layouts
 import Quickshell
 import Quickshell.Wayland
 import qs.Common
@@ -27,7 +26,7 @@ PanelWindow {
     // Radius must equal the qs-bar layer rule in niri/rules.kdl.
     Glass {
         anchors.fill: parent
-        radius: Theme.radiusLg
+        radius: Theme.radiusBar
     }
 
     // Layout model: the clock is truly centred and never overlapped. Each
@@ -40,30 +39,16 @@ PanelWindow {
     }
 
     // Drop the weekday only if even fully-collapsed sides don't fit.
-    readonly property int clockLevel: Math.max(leftRow.minTotal, rightRow.minTotal) > sideRoom(clock.widths[0]) ? 1 : 0
+    readonly property int clockLevel: Math.max(workspaces.width + workspaces.edge, rightRow.minTotal) > sideRoom(clock.widths[0]) ? 1 : 0
 
     // Left: where you are
-    ResponsiveRow {
-        id: leftRow
+    Workspaces {
+        id: workspaces
 
         anchors.left: parent.left
-        anchors.leftMargin: Theme.barPadX
+        anchors.leftMargin: Theme.barPadX + workspaces.edge
         anchors.verticalCenter: parent.verticalCenter
-        width: available
-        available: bar.sideRoom(clock.widths[bar.clockLevel])
-        levels: 3 // workspace pills show 3, 2, then 1 icon
-        spacing: Theme.barGap
-
-        Workspaces {
-            output: bar.modelData.name
-            level: leftRow.level
-        }
-
-        FocusedWindow {
-            level: leftRow.level
-            Layout.fillWidth: true
-            Layout.maximumWidth: 320 // content cap, not spacing
-        }
+        output: bar.modelData.name
     }
 
     // Center: when
@@ -83,7 +68,7 @@ PanelWindow {
         anchors.rightMargin: Theme.barPadX
         anchors.verticalCenter: parent.verticalCenter
         available: bar.sideRoom(clock.widths[bar.clockLevel])
-        levels: 10
+        levels: 6 // 0 full, 1 titles shorten, 2 glyph-only media, 3 context chips go, 4 system+timer go, 5 battery % goes
         spacing: Theme.barGap
 
         NextEventChip {
@@ -91,9 +76,7 @@ PanelWindow {
             level: rightRow.level
         }
 
-        WeatherChip {
-            level: rightRow.level
-        }
+        // No weather chip: the Control Center and desktop show it (calm bar).
 
         MediaChip {
             level: rightRow.level

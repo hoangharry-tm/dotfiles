@@ -8,14 +8,14 @@ import qs.Widgets
 BarChip {
     id: root
 
-    // Collapse: hidden from level 8 (hover card is a secondary view).
-    widthAt: l => l >= 8 ? 0 : implicitWidth
-
     readonly property bool busy: System.cpu > 0.8 || System.mem > 0.9 || System.temp > 85
 
+    // Shown only under load. Collapse: hidden from level 4.
+    wanted: busy
+    widthAt: l => l >= 4 ? 0 : implicitWidth
+
     Icon {
-        glyph: "󰍛"
-        color: root.busy ? Theme.tertiary : Theme.textMuted
+        glyph: "memory"
     }
 
     // `ps` and the extra reads run only while the card is open.
@@ -38,18 +38,19 @@ BarChip {
             spacing: Theme.gapInline
 
             Icon {
-                glyph: "󰍛"
-                color: Theme.primary
+                glyph: "memory"
+                color: Theme.textMuted
             }
 
             Label {
                 Layout.fillWidth: true
                 text: "System"
-                font.weight: Font.DemiBold
+                font.weight: Theme.weightEmphasis
             }
 
             Label {
                 text: "Up " + System.formatUptime(System.uptime)
+                font.features: { "tnum": 1 }
                 color: Theme.textMuted
                 font.pixelSize: Theme.textXs
             }
@@ -60,13 +61,14 @@ BarChip {
             name: "CPU  ·  " + Math.round(System.temp) + "°C"
             value: Math.round(System.cpu * 100) + "%"
             history: System.cpuHistory
+            color: Theme.text
         }
 
         StatRow {
             name: "Memory" + (System.swapTotal > 0 ? "  ·  Swap " + System.swapUsed.toFixed(1) + " GiB" : "")
             value: System.memUsed.toFixed(1) + " / " + System.memTotal.toFixed(1) + " GiB"
             history: System.memHistory
-            color: Theme.secondary
+            color: Theme.text
         }
 
         StatRow {
@@ -74,7 +76,7 @@ BarChip {
             value: "↓ " + System.formatRate(System.netDown)
             history: System.netDownHistory
             maxValue: 0
-            color: Theme.tertiary
+            color: Theme.text
         }
 
         // Sensors found by name at runtime; rows hide when the machine lacks them.
@@ -130,7 +132,9 @@ BarChip {
 
                 Label {
                     text: Math.round(modelData.cpu * 100) + "%"
-                    font.family: Theme.mono
+                    font.features: {
+                        "tnum": 1
+                    }
                     font.pixelSize: Theme.textSm
                     color: Theme.textMuted
                 }

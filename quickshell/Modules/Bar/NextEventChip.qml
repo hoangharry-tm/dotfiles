@@ -26,10 +26,10 @@ BarChip {
     readonly property string detail: ev ? (running ? "until " + CalendarEvents.fmtTime(ev.end) : countdown) : ""
     readonly property int titleCap: Theme.panelWidth / 2 // content cap, not spacing
 
-    // Collapse (DESIGN.md "Bar: responsive priorities"): title goes at level 2
-    // (glyph + countdown), the whole chip at 6 with the input-method chip.
+    // Collapse (DESIGN.md "Bar: responsive priorities"): title goes at level 1
+    // (glyph + countdown), the whole chip at 3 with the input-method chip.
     wanted: ev !== null
-    widthAt: l => l >= 6 ? 0 : chipWidth(Theme.icon + Theme.gapInline + (l < 2 ? Math.min(title.width, titleCap) + Theme.gapInline + dot.width + Theme.gapInline : 0) + detailMetrics.width)
+    widthAt: l => l >= 3 ? 0 : chipWidth(Theme.icon + Theme.gapInline + (l < 1 ? Math.min(title.width, titleCap) + Theme.gapInline + dot.width + Theme.gapInline : 0) + detailMetrics.width)
     onClicked: Panels.toggle("calendar", screenName)
 
     SystemClock {
@@ -61,18 +61,18 @@ BarChip {
     }
 
     Icon {
-        glyph: "󰃭"
-        color: root.running ? Theme.primary : Theme.textMuted
+        glyph: "event"
+        color: root.running ? Theme.text : Theme.textMuted
     }
 
     Label {
-        visible: root.level < 2
+        visible: root.level < 1
         Layout.maximumWidth: root.titleCap
         text: root.ev?.title ?? ""
     }
 
     Label {
-        visible: root.level < 2
+        visible: root.level < 1
         text: "·"
         color: Theme.textMuted
     }
@@ -81,7 +81,8 @@ BarChip {
         id: detailLabel
 
         text: root.detail
-        color: root.running ? Theme.primary : Theme.textMuted
+        font.features: { "tnum": 1 }
+        color: root.running ? Theme.text : Theme.textMuted
     }
 
     Popover {

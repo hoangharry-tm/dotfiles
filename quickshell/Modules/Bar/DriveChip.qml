@@ -6,11 +6,11 @@ import qs.Widgets
 
 // Shown only while a removable drive is mounted (Services/Drives, event
 // driven). Hover lists the drives with an Eject pill; click ejects the only one.
-// Collapse: goes at level 6 with the input-method chip.
+// Collapse: goes at level 3 with the input-method chip.
 BarChip {
     id: root
 
-    readonly property int hideLevel: 6
+    readonly property int hideLevel: 3
 
     wanted: Drives.any
     widthAt: l => l < hideLevel ? chipWidth(Theme.icon) : 0
@@ -19,7 +19,7 @@ BarChip {
         Drives.eject(Drives.drives[0])
 
     Icon {
-        glyph: "󱊞"
+        glyph: "usb"
     }
 
     Popover {

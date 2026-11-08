@@ -43,6 +43,7 @@ BarChip {
         id: label
 
         text: root.texts[Math.min(root.level, 1)]
-        font.weight: Font.DemiBold
+        font.weight: Theme.weightEmphasis // calmer than DemiBold; the clock is already the only full-contrast text
+        font.features: { "tnum": 1 } // tabular figures: digits don't jitter
     }
 }

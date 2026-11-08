@@ -27,8 +27,8 @@ BarChip {
     }
 
     Icon {
-        glyph: Media.playing ? "󰎈" : "󰏤"
-        color: Media.playing ? Media.tone : Theme.textMuted
+        glyph: Media.playing ? "music_note" : "pause"
+        color: Media.playing ? Theme.text : Theme.textMuted
     }
 
     Label {
@@ -49,7 +49,7 @@ BarChip {
         height: Theme.trackThin
         radius: Theme.trackThin / 2
         width: (parent.width - Theme.padControl * 2) * Media.progress
-        color: Qt.alpha(Media.tone, Media.playing ? 0.8 : 0.35)
+        color: Qt.alpha(Theme.text, Media.playing ? 0.5 : 0.2)
     }
 
     // Interactive: stays open while the pointer is on the card.
@@ -81,7 +81,7 @@ BarChip {
 
                 Icon {
                     anchors.centerIn: parent
-                    glyph: "󰎆"
+                    glyph: "music_note"
                     size: Theme.iconXl
                     color: Theme.textMuted
                     visible: Media.art === ""
@@ -96,7 +96,7 @@ BarChip {
                     Layout.fillWidth: true
                     text: Media.title
                     font.pixelSize: Theme.textLg
-                    font.weight: Font.DemiBold
+                    font.weight: Theme.weightTitle
                 }
 
                 Label {
@@ -120,7 +120,7 @@ BarChip {
             // is a single short-lived window.
             Visualizer {
                 visible: Media.playing
-                color: Media.tone
+                color: Theme.textMuted
                 Layout.alignment: Qt.AlignVCenter
             }
         }
@@ -143,14 +143,18 @@ BarChip {
                     Layout.fillWidth: true
                     text: Media.formatTime(Media.position)
                     color: Theme.textMuted
-                    font.family: Theme.mono
+                    font.features: {
+                        "tnum": 1
+                    }
                     font.pixelSize: Theme.textXs
                 }
 
                 Label {
                     text: Media.formatTime(Media.length)
                     color: Theme.textMuted
-                    font.family: Theme.mono
+                    font.features: {
+                        "tnum": 1
+                    }
                     font.pixelSize: Theme.textXs
                 }
             }
@@ -162,9 +166,9 @@ BarChip {
 
             Repeater {
                 model: [
-                    { glyph: "󰒮", main: false, run: () => Media.previous() },
-                    { glyph: Media.playing ? "󰏤" : "󰐊", main: true, run: () => Media.toggle() },
-                    { glyph: "󰒭", main: false, run: () => Media.next() }
+                    { glyph: "skip_previous", main: false, run: () => Media.previous() },
+                    { glyph: Media.playing ? "pause" : "play_arrow", main: true, run: () => Media.toggle() },
+                    { glyph: "skip_next", main: false, run: () => Media.next() }
                 ]
 
                 Clickable {
@@ -179,15 +183,14 @@ BarChip {
                         anchors.fill: parent
                         visible: parent.modelData.main
                         radius: parent.radius
-                        color: Theme.primary
-                        opacity: parent.pressed ? 0.7 : parent.hovered ? 0.88 : 1
+                        color: parent.pressed || parent.hovered ? Theme.pressed : Theme.hover
                     }
 
                     Icon {
                         anchors.centerIn: parent
                         glyph: parent.modelData.glyph
                         size: parent.modelData.main ? Theme.iconLg : Theme.icon
-                        color: parent.modelData.main ? Theme.primaryText : Theme.text
+                        color: Theme.text
                     }
                 }
             }

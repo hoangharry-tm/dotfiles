@@ -3,7 +3,7 @@ import qs.Common
 import qs.Services
 import qs.Widgets
 
-// Pulsing red dot and elapsed time while recording; click to stop.
+// Pulsing dot and elapsed time while recording; click to stop.
 BarChip {
     id: root
 
@@ -15,7 +15,7 @@ BarChip {
         implicitWidth: Theme.spaceSm
         implicitHeight: Theme.spaceSm
         radius: Theme.radiusFull
-        color: Theme.error
+        color: Theme.tertiary
 
         // Shared stepped pulse (Common/Pulse.qml): no per-frame repaints.
         opacity: root.visible ? Pulse.opacity : 1
