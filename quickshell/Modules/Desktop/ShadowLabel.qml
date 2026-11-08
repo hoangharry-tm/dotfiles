@@ -9,8 +9,9 @@ Item {
 
     property alias text: face.text
     property alias font: face.font
-    property alias color: face.color
+    property alias color: face.color  // defaults to onWallpaper
     property alias horizontalAlignment: face.horizontalAlignment
+    property color shadowColor: Theme.wallpaperShadow
 
     implicitWidth: face.implicitWidth
     implicitHeight: face.implicitHeight
@@ -21,7 +22,7 @@ Item {
         width: parent.width
         text: face.text
         font: face.font
-        color: Theme.textShadow
+        color: root.shadowColor
         horizontalAlignment: face.horizontalAlignment
     }
 
@@ -29,5 +30,6 @@ Item {
         id: face
 
         width: parent.width
+        color: Theme.onWallpaper
     }
 }

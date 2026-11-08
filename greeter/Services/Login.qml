@@ -24,6 +24,10 @@ Singleton {
     property bool failed: false
     property bool busy: false
     property string pending: ""   // password waiting for greetd's prompt
+    // Login accepted: the UI dissolves to the wallpaper for leaveMs (set by
+    // the greeter from Theme.animSlow; 0 in low power) before the session starts.
+    property bool leaving: false
+    property int leaveMs: 0
 
     readonly property var user: users[userIndex] ?? { name: "", full: "" }
     readonly property var session: sessions[sessionIndex] ?? { name: "Session", exec: "" }
@@ -55,6 +59,15 @@ Singleton {
     }
 
     Timer {
+        id: launch
+
+        onTriggered: {
+            // quit=true: quickshell exits 0 and greeter-session ends niri.
+            Greetd.launch(root.session.exec.split(" "), [], true);
+        }
+    }
+
+    Timer {
         id: previewTimer
 
         interval: 700
@@ -78,8 +91,9 @@ Singleton {
             root.fail("Wrong password");
         }
         function onReadyToLaunch() {
-            // quit=true: quickshell exits 0 and greeter-session ends niri.
-            Greetd.launch(root.session.exec.split(" "), [], true);
+            root.leaving = true;
+            launch.interval = Math.max(1, root.leaveMs);
+            launch.restart();
         }
         function onError(error) {
             root.fail(error);

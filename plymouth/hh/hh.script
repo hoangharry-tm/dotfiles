@@ -1,47 +1,58 @@
-# hh boot splash: flat dark background, small spinner, and the LUKS prompt
-# (a script theme must draw it itself, or the passphrase prompt is invisible).
-# Colors are fixed (matugen's default surface/text), not wallpaper-derived:
-# the initramfs can't read ~/.local/state.
-Window.SetBackgroundTopColor(0.098, 0.071, 0.047);
-Window.SetBackgroundBottomColor(0.098, 0.071, 0.047);
+# hh boot/shutdown splash: the first and last frame of the desktop. A flat
+# surface and one slow-breathing dot, no spinner; it also draws the LUKS
+# prompt (a script theme must, or the passphrase prompt is invisible).
+#
+# Colours follow the mode in use when scripts/system-setup.sh last ran: it
+# fills @SURFACE@ / @TEXT@ from the palette (Theme.surface / Theme.text) and
+# @DOT@ with dot.png (light dot, dark mode) or dot-ink.png (ink dot, light
+# mode), because the initramfs can't read ~/.local/state at boot. The greeter
+# starts from the same surface, so splash -> login has no flash.
+Window.SetBackgroundTopColor(@SURFACE@);
+Window.SetBackgroundBottomColor(@SURFACE@);
 
 cx = Window.GetWidth() / 2;
 cy = Window.GetHeight() / 2;
 
-base = Image("spinner.png");
-spin = Sprite();
-spin.SetX(cx - base.GetWidth() / 2);
-spin.SetY(cy - base.GetHeight() / 2);
+dot_img = Image("@DOT@");
+dot = Sprite(dot_img);
+dot.SetX(cx - dot_img.GetWidth() / 2);
+dot.SetY(cy - dot_img.GetHeight() / 2);
+dot.SetOpacity(0);
 
-angle = 0;
+# Breathing: ~2.8 s per cycle at 50 Hz (slower than Theme.animPulse), and a
+# ~0.6 s fade-in so the dot arrives instead of popping.
+t = 0;
+resting = 1;   # 0 while the passphrase prompt is up
 fun refresh() {
-    angle += 0.12;          # one turn ~1 s at 50 Hz
-    spin.SetImage(base.Rotate(angle));
+    t++;
+    arrive = Math.Min(1, t / 30);
+    breath = 0.55 + 0.35 * Math.Sin(t * 0.0449);
+    dot.SetOpacity(arrive * breath * (0.6 + 0.4 * resting));
 }
 Plymouth.SetRefreshFunction(refresh);
 
-# Passphrase prompt: label + bullets under the spinner.
+# Passphrase prompt: label + bullets under the dot.
 prompt = Sprite();
 bullets = Sprite();
 fun show_text(sprite, text, y) {
-    img = Image.Text(text, 0.937, 0.878, 0.839);
+    img = Image.Text(text, @TEXT@);
     sprite.SetImage(img);
     sprite.SetX(cx - img.GetWidth() / 2);
     sprite.SetY(y);
 }
 fun password(prompt_text, count) {
-    spin.SetOpacity(0.4);
+    resting = 0;
     prompt.SetOpacity(1);
     bullets.SetOpacity(1);
-    show_text(prompt, prompt_text, cy + base.GetHeight());
+    show_text(prompt, prompt_text, cy + 48);
     s = " ";
     for (i = 0; i < count; i++) s += "*";
-    show_text(bullets, s, cy + base.GetHeight() + 32);
+    show_text(bullets, s, cy + 80);
 }
 fun password_done() {
     prompt.SetOpacity(0);
     bullets.SetOpacity(0);
-    spin.SetOpacity(1);
+    resting = 1;
 }
 Plymouth.SetDisplayPasswordFunction(password);
 Plymouth.SetDisplayNormalFunction(password_done);

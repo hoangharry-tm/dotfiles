@@ -1,6 +1,6 @@
 [Plymouth Theme]
 Name=hh
-Description=Dark, centered spinner; matches the desktop shell
+Description=Flat surface, one slow-breathing dot; matches the desktop shell
 ModuleName=script
 
 [script]

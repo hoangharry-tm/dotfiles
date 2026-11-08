@@ -32,28 +32,13 @@ PanelWindow {
         id: passthrough
     }
 
-    // Minute precision: Qt aligns the tick to the minute boundary.
-    SystemClock {
-        id: clock
-
-        precision: SystemClock.Minutes
-    }
-
     ColumnLayout {
         id: column
 
         spacing: Theme.spaceXs
 
-        ShadowLabel {
-            text: Qt.formatTime(clock.date, "HH:mm")
-            font.pixelSize: Theme.textDisplay
-            font.weight: Font.Light
-        }
-
-        ShadowLabel {
-            text: Qt.formatDate(clock.date, "dddd, d MMMM")
-            font.pixelSize: Theme.textXl
-        }
+        // Same lockup as the lock screen and greeter (one clock).
+        ClockLockup {}
 
         ShadowLabel {
             visible: Weather.ready
@@ -61,7 +46,7 @@ PanelWindow {
             Layout.maximumWidth: Theme.launcherWidth
             text: Weather.tempText + "  " + Weather.label + "  ·  " + Weather.city
             font.pixelSize: Theme.textLg
-            color: Theme.textMuted
+            color: Theme.onWallpaperMuted
         }
 
         // Hidden unless an event runs now or starts within 12 h (CalendarEvents.line).
@@ -70,7 +55,7 @@ PanelWindow {
             Layout.maximumWidth: Theme.launcherWidth
             text: CalendarEvents.line
             font.pixelSize: Theme.textMd
-            color: Theme.textMuted
+            color: Theme.onWallpaperMuted
         }
 
         ShadowLabel {
@@ -78,7 +63,7 @@ PanelWindow {
             Layout.maximumWidth: Theme.launcherWidth
             text: "♪  " + Media.title + (Media.artist ? "  —  " + Media.artist : "")
             font.pixelSize: Theme.textMd
-            color: Theme.textMuted
+            color: Theme.onWallpaperMuted
         }
     }
 }

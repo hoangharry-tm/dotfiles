@@ -6,16 +6,39 @@ import Quickshell.Wayland
 import qs.Common
 import qs.Services
 import qs.Widgets
+import qs.Modules.Desktop
 
-// One full-screen greeter per output: wallpaper, dim, centered card with
-// clock, avatar + name, password pill and session selector.
-// No niri layer rules apply here (the greeter has its own niri config), so
-// the card is flat: glassSolid fill + hairline, as DESIGN.md says for
-// unblurred surfaces.
+// One full-screen greeter per output. It is the lock screen's twin
+// (Modules/Lock/LockContent.qml): the same blurred wallpaper (lock.jpg of the
+// mode in use) under the same scrim, the same centred clock lockup, the same
+// glass password pill, so boot -> login -> desktop and lock -> unlock read as
+// one gesture. The differences are the avatar/name above the field and the
+// session chip at the bottom (the lock's status line).
+//
+// Transitions fade content, never glass: the backdrop starts as the plymouth
+// surface colour (no flash after the splash), the image fades in, then the
+// content rises in. On a successful login the content fades and the blurred
+// image dissolves into the sharp wallpaper (what the desktop shows) before
+// greetd launches the session (Login.leaveMs). No niri layer rules exist in
+// the greeter's niri, so the pill is a flat Glass fill, as on the lock.
 PanelWindow {
     id: root
 
     required property ShellScreen modelData
+
+    // Content waits for the wallpaper (or its failure) so nothing pops in.
+    readonly property bool ready: lock.status === Image.Ready || lock.status === Image.Error
+    // 1 = hidden (entering / leaving), 0 = fully shown.
+    readonly property real veilTarget: (Login.leaving || !ready) ? 1 : 0
+    property real veil: veilTarget
+
+    Behavior on veil {
+        NumberAnimation {
+            duration: Theme.animSlow
+            easing.type: Easing.BezierSpline
+            easing.bezierCurve: Login.leaving ? Theme.curveAccelerate : Theme.curveDecelerate
+        }
+    }
 
     screen: modelData
     anchors.top: true
@@ -28,80 +51,83 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Overlay
     WlrLayershell.keyboardFocus: WlrKeyboardFocus.Exclusive
 
-    SystemClock {
-        id: clock
-
-        precision: SystemClock.Minutes
+    Component.onCompleted: {
+        Login.leaveMs = Theme.animSlow;
+        input.forceActiveFocus();
     }
 
+    // Blurred wallpaper: same file the lock screen shows.
     Image {
+        id: lock
+
         anchors.fill: parent
         source: "file://" + Login.stateDir + "/lock.jpg"
         fillMode: Image.PreserveAspectCrop
         asynchronous: true
+        opacity: root.ready ? 1 : 0
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: Theme.animSlow
+            }
+        }
+    }
+
+    // The desktop's wallpaper, sharp: only while leaving (dissolve to session).
+    Image {
+        anchors.fill: parent
+        source: "file://" + Login.stateDir + "/wallpaper.jpg"
+        fillMode: Image.PreserveAspectCrop
+        asynchronous: true
+        opacity: Login.leaving ? 1 : 0
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: Theme.animSlow
+            }
+        }
     }
 
     Rectangle {
         anchors.fill: parent
-        color: Qt.alpha(Theme.surface, 0.35)
+        color: Theme.imageScrim
+        opacity: root.ready && !Login.leaving ? 1 : 0
+
+        Behavior on opacity {
+            NumberAnimation {
+                duration: Theme.animSlow
+            }
+        }
     }
 
-    Rectangle {
-        id: card
+    Item {
+        anchors.fill: parent
+        // Never exactly 0: invisible items drop keyboard focus.
+        opacity: Math.max(0.001, 1 - root.veil)
 
-        anchors.centerIn: parent
-        width: Theme.panelWidth
-        height: col.implicitHeight + 2 * Theme.spaceXl
-        radius: Theme.radiusXl
-        color: Theme.glassSolid
-        border.width: Theme.hairlineWidth
-        border.color: Theme.hairline
-
-        // Entrance: rises and fades in (nothing here is compositor-drawn).
-        property real shown: 0
-
-        opacity: shown
         transform: Translate {
-            y: (1 - card.shown) * Theme.enterRise
-        }
-        Component.onCompleted: {
-            shown = 1;
-            input.forceActiveFocus();
-        }
-        Behavior on shown {
-            NumberAnimation {
-                duration: Theme.anim
-                easing.type: Easing.BezierSpline
-                easing.bezierCurve: Theme.curveDecelerate
-            }
+            y: root.veil * Theme.enterRise
         }
 
         ColumnLayout {
-            id: col
-
-            anchors.fill: parent
-            anchors.margins: Theme.spaceXl
+            anchors.centerIn: parent
             spacing: Theme.gapSection
 
-            Label {
+            ClockLockup {
                 Layout.alignment: Qt.AlignHCenter
-                text: Qt.formatTime(clock.date, "HH:mm")
-                font.pixelSize: Theme.textHero * 2
-                font.weight: Font.Light
+                ink: Theme.onImage
+                inkMuted: Theme.onImageMuted
+                alignment: Qt.AlignHCenter
             }
 
-            Label {
-                Layout.alignment: Qt.AlignHCenter
-                Layout.topMargin: -Theme.gapSection + Theme.spaceXs
-                text: Qt.formatDate(clock.date, "dddd, d MMMM")
-                font.pixelSize: Theme.textLg
-                color: Theme.textMuted
+            Item {
+                Layout.preferredHeight: Theme.spaceMd
+                Layout.preferredWidth: 1
             }
 
             // Avatar: ~/.face if the setup script staged one, else initial.
             Clickable {
                 Layout.alignment: Qt.AlignHCenter
-                Layout.topMargin: Theme.gapSection
                 implicitWidth: Theme.tileHeight
                 implicitHeight: Theme.tileHeight
                 radius: Theme.radiusFull
@@ -138,7 +164,7 @@ PanelWindow {
                     visible: face.status !== Image.Ready
                     text: (Login.user.name || "?").charAt(0).toUpperCase()
                     font.pixelSize: Theme.textXl
-                    font.weight: Font.DemiBold
+                    font.weight: Theme.weightTitle
                 }
             }
 
@@ -147,64 +173,112 @@ PanelWindow {
                 Layout.topMargin: -Theme.gapSection + Theme.spaceSm
                 text: Login.user.full
                 font.pixelSize: Theme.textLg
-                font.weight: Font.DemiBold
+                font.weight: Theme.weightTitle
+                color: Theme.onImage
             }
 
-            // Password pill.
-            Rectangle {
-                Layout.fillWidth: true
-                implicitHeight: Theme.fieldHeight
-                radius: Theme.radiusFull
-                color: Theme.tile
-                border.width: input.activeFocus ? Theme.hairlineWidth : 0
-                border.color: Theme.primary
+            // Password pill: same size, glass and focus ring as the lock's.
+            Glass {
+                id: pill
 
-                TextInput {
+                readonly property bool errored: Login.failed && !Login.busy
+
+                Layout.alignment: Qt.AlignHCenter
+                Layout.preferredWidth: Theme.popoverWidth
+                Layout.preferredHeight: Theme.fieldHeight
+                radius: Theme.radiusFull
+                border.color: errored ? Theme.error : input.activeFocus ? Theme.primary : Theme.hairline
+
+                Behavior on border.color {
+                    ColorAnimation {
+                        duration: Theme.animFast
+                    }
+                }
+
+                transform: Translate {
+                    id: nudge
+                }
+
+                SequentialAnimation {
+                    id: shake
+
+                    NumberAnimation { target: nudge; property: "x"; to: -Theme.spaceMd; duration: Theme.animInstant }
+                    NumberAnimation { target: nudge; property: "x"; to: Theme.spaceMd; duration: Theme.animInstant }
+                    NumberAnimation { target: nudge; property: "x"; to: -Theme.spaceSm; duration: Theme.animInstant }
+                    NumberAnimation { target: nudge; property: "x"; to: 0; duration: Theme.animInstant }
+                }
+
+                Connections {
+                    target: Login
+
+                    function onFailedChanged() {
+                        if (Login.failed) {
+                            shake.restart();
+                            Qt.callLater(input.forceActiveFocus);
+                        }
+                    }
+                }
+
+                Icon {
+                    id: lockIcon
+
+                    anchors.left: parent.left
+                    anchors.leftMargin: Theme.padCard
+                    anchors.verticalCenter: parent.verticalCenter
+                    glyph: Login.busy ? "hourglass_top" : "lock"
+                    size: Theme.iconLg
+                    color: pill.errored ? Theme.error : Theme.textMuted
+                }
+
+                Input {
                     id: input
 
-                    anchors.fill: parent
-                    anchors.leftMargin: Theme.spaceXl
-                    anchors.rightMargin: Theme.fieldHeight
-                    verticalAlignment: TextInput.AlignVCenter
-                    echoMode: TextInput.Password
-                    passwordCharacter: "●"
-                    enabled: !Login.busy
-                    color: Theme.text
-                    selectionColor: Theme.primary
-                    selectedTextColor: Theme.primaryText
-                    font.family: Theme.font
+                    anchors.left: lockIcon.right
+                    anchors.leftMargin: Theme.gapInline
+                    anchors.right: go.left
+                    anchors.rightMargin: Theme.gapInline
+                    anchors.verticalCenter: parent.verticalCenter
                     font.pixelSize: Theme.textLg
-                    clip: true
-                    Keys.onReturnPressed: go()
-                    Keys.onEnterPressed: go()
-                    Keys.onTabPressed: Login.cycle("sessionIndex", Login.sessions.length, 1)
+                    echoMode: TextInput.Password
+                    passwordCharacter: "•"
+                    enabled: !Login.busy
 
-                    function go() {
+                    Keys.onReturnPressed: submit()
+                    Keys.onEnterPressed: submit()
+                    Keys.onTabPressed: Login.cycle("sessionIndex", Login.sessions.length, 1)
+                    onTextChanged: if (text !== "" && Login.failed && !Login.busy) {
+                        Login.failed = false;
+                        Login.message = "";
+                    }
+
+                    function submit() {
                         Login.submit(text);
                         text = "";
                     }
 
                     Label {
-                        anchors.fill: parent
-                        visible: !input.text
-                        text: Login.busy ? "Signing in…" : "Password"
+                        anchors.verticalCenter: parent.verticalCenter
+                        visible: input.text === ""
+                        text: "Password"
                         color: Theme.textMuted
                         font.pixelSize: Theme.textLg
                     }
                 }
 
                 Clickable {
+                    id: go
+
                     anchors.right: parent.right
-                    anchors.verticalCenter: parent.verticalCenter
                     anchors.rightMargin: Theme.spaceSm
+                    anchors.verticalCenter: parent.verticalCenter
                     width: Theme.controlLg
                     height: Theme.controlLg
                     radius: Theme.radiusFull
-                    onClicked: input.go()
+                    onClicked: input.submit()
 
                     Icon {
                         anchors.centerIn: parent
-                        glyph: "󰁔"
+                        glyph: "arrow_forward"
                         size: Theme.iconLg
                     }
                 }
@@ -212,35 +286,38 @@ PanelWindow {
 
             Label {
                 Layout.alignment: Qt.AlignHCenter
-                Layout.topMargin: -Theme.gapSection + Theme.spaceSm
-                visible: Login.message !== ""
-                text: Login.message
+                // Reserve the line so the pill does not jump when an error shows.
+                text: pill.errored && Login.message !== "" ? Login.message : " "
                 color: Theme.error
+                font.pixelSize: Theme.textXs
             }
+        }
 
-            // Session selector: click (or Tab) to cycle.
-            Clickable {
-                Layout.alignment: Qt.AlignHCenter
-                implicitHeight: Theme.control
-                implicitWidth: sessionRow.implicitWidth + 2 * Theme.padControl
-                radius: Theme.radiusFull
-                onClicked: Login.cycle("sessionIndex", Login.sessions.length, 1)
+        // Session chip: click (or Tab) to cycle. Sits where the lock screen
+        // keeps its status line, quiet at the bottom.
+        Clickable {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: Theme.space2xl
+            implicitHeight: Theme.control
+            implicitWidth: sessionRow.implicitWidth + 2 * Theme.padControl
+            radius: Theme.radiusFull
+            onClicked: Login.cycle("sessionIndex", Login.sessions.length, 1)
 
-                Row {
-                    id: sessionRow
+            Row {
+                id: sessionRow
 
-                    anchors.centerIn: parent
-                    spacing: Theme.gapInline
+                anchors.centerIn: parent
+                spacing: Theme.gapInline
 
-                    Icon {
-                        glyph: "󰍹"
-                        color: Theme.textMuted
-                    }
-                    Label {
-                        height: Theme.icon
-                        text: Login.session.name
-                        color: Theme.textMuted
-                    }
+                Icon {
+                    glyph: "desktop_windows"
+                    color: Theme.onImageMuted
+                }
+                Label {
+                    height: Theme.icon
+                    text: Login.session.name
+                    color: Theme.onImageMuted
                 }
             }
         }
