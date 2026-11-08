@@ -12,7 +12,7 @@ Singleton {
 
     // Built-in entries with no .desktop file; stored in the pin list as "@id".
     readonly property var specials: ({
-            "@settings": { name: "Settings", glyph: "󰒓", run: () => Panels.toggle("settings") }
+            "@settings": { name: "Settings", glyph: "settings", run: () => Panels.toggle("settings") }
         })
 
     // --- reveal state (per screen: only one dock is out at a time) ---

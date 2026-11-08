@@ -5,103 +5,90 @@ import Quickshell
 import Quickshell.Io
 import qs.Common
 
-// Screen backlight. Read from sysfs; written with brightnessctl (pacman: it
+// Screen backlight, read and written through brightnessctl (pacman: it
 // ships the udev rules that let users change the backlight).
 Singleton {
     id: root
 
-    readonly property string device: "/sys/class/backlight/intel_backlight"
     property real value: 0          // 0..1
     property bool available: false
 
     signal changedByUser
 
-    // Writes are coalesced: one brightnessctl at a time, and when it exits
-    // the latest requested value is written (intermediate drag values drop).
-    property real wanted: -1
+    // One source of truth: the device. Every brightnessctl call runs through a
+    // single serialized runner and its -m output ("dev,class,cur,pct%,max") is
+    // the real level. Slider drags and key presses only queue intent (latest
+    // wins; steps are summed), so writes never overlap or finish out of order,
+    // and `value` follows the optimistic target only until the device answers.
+    property real wanted: -1    // absolute target (0..1), latest wins
+    property int pendingSteps: 0 // key presses, in percent
+    property bool stepShown: false // show the OSD when the runner finishes
+    property int seq: 0         // bumped per request; stale reads are dropped
 
     function set(v) {
         value = wanted = Math.max(0.01, Math.min(1, v));
+        seq++;
+        pendingSteps = 0; // an explicit target supersedes queued key steps
         flush();
     }
 
-    function flush() {
-        if (setter.running || wanted < 0)
-            return;
-        setter.command = ["brightnessctl", "--class=backlight", "set", Math.round(wanted * 100) + "%"];
-        wanted = -1;
-        setter.running = true;
-    }
-
-    // Brightness keys (via IPC). Relative steps go to brightnessctl, which
-    // reads the real level itself; reading sysfs here returned the level from
-    // before the previous press (FileView reload lags), so steps jumped around
-    // (100 -> 90 -> 95). Presses during a write are summed, never dropped.
-    property int pendingSteps: 0 // in percent
-
     function step(delta) {
         pendingSteps += Math.round(delta * 100);
-        flushSteps();
-    }
-
-    function flushSteps() {
-        if (stepper.running || pendingSteps === 0)
-            return;
-        const d = pendingSteps;
-        pendingSteps = 0;
-        stepper.command = ["brightnessctl", "-m", "--class=backlight", "--min-value=1%", "set", Math.abs(d) + "%" + (d > 0 ? "+" : "-")];
-        stepper.running = true;
+        stepShown = true;
+        seq++;
+        flush();
     }
 
     function refresh() {
-        current.reload();
-        max.reload();
-        if (setter.running || wanted >= 0)
-            return; // our own write is in flight; sysfs would read stale
-        const c = parseInt(current.text()), m = parseInt(max.text());
-        if (m > 0) {
-            value = c / m;
-            available = true;
+        if (!runner.running)
+            read(["brightnessctl", "-m", "--class=backlight", "info"]);
+    }
+
+    function read(cmd) {
+        runner.cmd = cmd;
+        runner.mark = seq;
+        runner.command = cmd;
+        runner.running = true;
+    }
+
+    function flush() {
+        if (runner.running)
+            return; // onRunningChanged re-enters when it exits
+        if (wanted >= 0) {
+            const pct = Math.round(wanted * 100);
+            wanted = -1;
+            read(["brightnessctl", "-m", "--class=backlight", "--min-value=1%", "set", pct + "%"]);
+        } else if (pendingSteps !== 0) {
+            const d = pendingSteps;
+            pendingSteps = 0;
+            read(["brightnessctl", "-m", "--class=backlight", "--min-value=1%", "set", Math.abs(d) + "%" + (d > 0 ? "+" : "-")]);
         }
     }
 
-    FileView {
-        id: current
-
-        path: root.device + "/brightness"
-        blockLoading: true
-    }
-
-    FileView {
-        id: max
-
-        path: root.device + "/max_brightness"
-        blockLoading: true
-    }
-
-    // -m prints "device,class,current,percent%,max": take the new level from
-    // brightnessctl itself, then show the OSD.
     Process {
-        id: stepper
+        id: runner
+
+        property var cmd: []
+        property int mark: 0
 
         stdout: StdioCollector {
             onStreamFinished: {
                 const f = text.trim().split(",");
                 const c = parseInt(f[2]), m = parseInt(f[4]);
-                if (m > 0) {
-                    root.value = c / m;
-                    root.available = true;
+                if (!(m > 0))
+                    return;
+                root.available = true;
+                // Newer intent queued or arrived meanwhile: this answer is
+                // stale, keep the optimistic value instead of jumping back.
+                if (root.seq !== runner.mark || root.wanted >= 0 || root.pendingSteps !== 0)
+                    return;
+                root.value = c / m;
+                if (root.stepShown) {
+                    root.stepShown = false;
                     root.changedByUser();
                 }
             }
         }
-        onRunningChanged: if (!running)
-            root.flushSteps()
-    }
-
-    Process {
-        id: setter
-
         onRunningChanged: if (!running)
             root.flush()
     }

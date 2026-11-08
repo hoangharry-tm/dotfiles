@@ -28,7 +28,12 @@ Singleton {
 
     // Lowercased search fields are computed once per app-list change, not per
     // keystroke. Actions ("New Private Window") are indexed as their own rows.
-    readonly property var index: {
+    // Rebuilt from a coalescing timer, not a binding: while DesktopEntries
+    // loads, every entry's property notifies re-ran a 20 ms binding back to
+    // back (~45x, a 1.2 s main-thread stall on the first launcher open).
+    property var index: []
+
+    function rebuild() {
         const out = [];
         for (const app of DesktopEntries.applications.values) {
             if (app.noDisplay)
@@ -38,8 +43,23 @@ Singleton {
             for (const act of app.actions)
                 out.push({ kind: "action", app, act, id: app.id + "#" + act.id, name: act.name.toLowerCase(), extra: "" });
         }
-        return out;
+        index = out;
     }
+
+    Timer {
+        id: reindex
+
+        interval: 100
+        onTriggered: root.rebuild()
+    }
+    Connections {
+        target: DesktopEntries.applications
+
+        function onValuesChanged() {
+            reindex.restart();
+        }
+    }
+    Component.onCompleted: rebuild()
 
     // Prefix > word prefix > substring > in-order subsequence ("ffx" -> Firefox).
     // Returns a score or -1.

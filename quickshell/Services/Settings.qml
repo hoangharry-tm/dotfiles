@@ -34,6 +34,7 @@ import Quickshell.Io
 //   calendarRemindMin int   = 10      reminder toast lead, 0 = off       (CalendarEvents)
 //   calendarChipMin  int    = 30      bar chip shows this long before start (NextEventChip)
 //   notesInbox       string = "~/mh_notes/inbox.norg"  launcher `+` quick-capture target (Notes)
+//   scanWindow       int    = 60      seconds a Wi-Fi/Bluetooth refresh scans: 60 | 120 | 300 (Network, BluetoothState UI)
 //   dockPinned       list   = [...]    desktop-entry ids ("@settings" = built-in) (Dock)
 //
 // NOT here (owned by Nix, read-only in the panel): swayidle timings
@@ -70,11 +71,11 @@ Singleton {
     property alias focusDefaultMin: data.focusDefaultMin
     property alias lowPower: data.lowPower
     property alias motionTier: data.motionTier
-    property alias controlCenterStyle: data.controlCenterStyle
     property alias scrollStyle: data.scrollStyle
     property alias calendarRemindMin: data.calendarRemindMin
     property alias calendarChipMin: data.calendarChipMin
     property alias notesInbox: data.notesInbox
+    property alias scanWindow: data.scanWindow
 
     FileView {
         id: file
@@ -119,11 +120,11 @@ Singleton {
             property real focusDefaultMin: 25
             property string lowPower: "auto"
             property string motionTier: "auto"
-            property string controlCenterStyle: "classic" // classic | tiles | pages
             property string scrollStyle: "native" // native (Qt Flickable) | smooth (Widgets/SmoothWheel)
             property int calendarRemindMin: 10
             property int calendarChipMin: 30
             property string notesInbox: "~/mh_notes/inbox.norg"
+            property int scanWindow: 60
         }
     }
 

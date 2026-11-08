@@ -93,6 +93,12 @@ Singleton {
             }));
             break;
         }
+        case "WorkspaceUrgencyChanged":
+            // Bar marks an urgent workspace (the indicator's one hue: error).
+            workspaces = workspaces.map(w => w.id === data.id ? Object.assign({}, w, {
+                is_urgent: data.urgent
+            }) : w);
+            break;
         case "WorkspaceActiveWindowChanged":
             workspaces = workspaces.map(w => w.id === data.workspace_id ? Object.assign({}, w, {
                 active_window_id: data.active_window_id

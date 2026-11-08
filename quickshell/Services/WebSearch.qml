@@ -35,8 +35,8 @@ Singleton {
         const s = split(q);
         const e = engines[s.key];
         if (s.terms)
-            return [{ id: "web", title: s.terms, subtitle: e.name, glyph: "󰖟", run: () => open(e.url.replace("%s", encodeURIComponent(s.terms))) }];
+            return [{ id: "web", title: s.terms, subtitle: e.name, glyph: "language", run: () => open(e.url.replace("%s", encodeURIComponent(s.terms))) }];
         // Nothing typed yet: list engines so the sub-prefixes are discoverable.
-        return Object.keys(engines).map(k => ({ id: "web-" + k, title: engines[k].name, subtitle: (k === defaultEngine ? "?  ·  " : "") + "?" + k + " <terms>", glyph: "󰖟", run: () => open(engines[k].home) }));
+        return Object.keys(engines).map(k => ({ id: "web-" + k, title: engines[k].name, subtitle: (k === defaultEngine ? "?  ·  " : "") + "?" + k + " <terms>", glyph: "language", run: () => open(engines[k].home) }));
     }
 }

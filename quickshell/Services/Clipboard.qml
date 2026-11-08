@@ -19,12 +19,12 @@ Singleton {
     readonly property int limit: 200 // newest first; keeps the list light
     readonly property string thumbDir: Quickshell.env("HOME") + "/.cache/quickshell/cliphist-thumbs"
     readonly property var kinds: ({
-            text: { label: "Text", glyph: "󰈙" },
-            link: { label: "Link", glyph: "󰌹" },
-            color: { label: "Colour", glyph: "󰏘" },
-            code: { label: "Code", glyph: "󰅩" },
-            path: { label: "Path", glyph: "󰉋" },
-            image: { label: "Image", glyph: "󰋩" }
+            text: { label: "Text", glyph: "notes" },
+            link: { label: "Link", glyph: "link" },
+            color: { label: "Colour", glyph: "palette" },
+            code: { label: "Code", glyph: "code" },
+            path: { label: "Path", glyph: "folder" },
+            image: { label: "Image", glyph: "image" }
         })
     // `<url foo` style sub-prefixes: first word picks a type filter.
     readonly property var aliases: ({ text: "text", txt: "text", url: "link", link: "link", color: "color", colour: "color", col: "color", code: "code", path: "path", file: "path", img: "image", image: "image", pin: "pin" })
@@ -233,13 +233,20 @@ Singleton {
         inspected = entry;
         inspectedText = entry?.pinned ? entry.full : (entry && textCache[entry.id]) || "";
         inspectedThumb = "";
+        tried = null;
         settle.restart();
     }
 
+    // Entry whose decode already ran for this selection. Without it an image
+    // (which has no text cache to short-circuit on) re-ran its job after every
+    // finish, forever: ~130 `sh` spawns/s, ~15% CPU, even with the launcher closed.
+    property var tried: null
+
     function load() {
         const e = inspected;
-        if (!e || e.pinned || loadJob.running)
+        if (!e || e.pinned || loadJob.running || tried === e)
             return; // a finished job re-checks, so a late selection still loads
+        tried = e;
         if (e.image) {
             // Cached by id (ids only grow), so each image is decoded once.
             loadJob.command = ["sh", "-c", "f=\"$1/$2.png\"; [ -s \"$f\" ] || { mkdir -p \"$1\" && cliphist decode \"$2\" > \"$f.tmp\" && mv \"$f.tmp\" \"$f\"; }; printf '%s' \"$f\"", "sh", thumbDir, e.id];

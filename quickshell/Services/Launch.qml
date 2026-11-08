@@ -16,15 +16,15 @@ Singleton {
     property string seed: ""
 
     readonly property var modes: ({
-            apps: { label: "Apps", placeholder: "Search apps", glyph: "󰍉" },
-            run: { label: "Run", placeholder: "Command to run in a terminal", glyph: "󰆍" },
-            calc: { label: "Calculator", placeholder: "Calculate", glyph: "󰃬" },
-            wall: { label: "Wallpapers", placeholder: "Filter wallpapers", glyph: "󰸉" },
-            clip: { label: "Clipboard", placeholder: "Search clipboard history", glyph: "󰅍" },
-            emoji: { label: "Emoji", placeholder: "Search emoji by name", glyph: "󰞅" },
-            file: { label: "Files", placeholder: "Search files in ~ (empty: recent)", glyph: "󰈔" },
-            note: { label: "Note", placeholder: "Capture a note to the inbox", glyph: "󰎞" },
-            web: { label: "Web", placeholder: "Search the web (?g ?gh ?yt ?nix ?w)", glyph: "󰖟" }
+            apps: { label: "Apps", placeholder: "Search apps", glyph: "search" },
+            run: { label: "Run", placeholder: "Command to run in a terminal", glyph: "terminal" },
+            calc: { label: "Calculator", placeholder: "Calculate", glyph: "calculate" },
+            wall: { label: "Wallpapers", placeholder: "Filter wallpapers", glyph: "wallpaper" },
+            clip: { label: "Clipboard", placeholder: "Search clipboard history", glyph: "content_paste" },
+            emoji: { label: "Emoji", placeholder: "Search emoji by name", glyph: "mood" },
+            file: { label: "Files", placeholder: "Search files in ~ (empty: recent)", glyph: "draft" },
+            note: { label: "Note", placeholder: "Capture a note to the inbox", glyph: "edit_note" },
+            web: { label: "Web", placeholder: "Search the web (?g ?gh ?yt ?nix ?w)", glyph: "language" }
         })
 
     function parse(text) {
@@ -47,21 +47,21 @@ Singleton {
         const v = Calc.evaluate(expr) || Calc.remote(expr);
         if (!v)
             return null;
-        return { id: "calc", title: v, subtitle: expr + "  ·  Enter to copy", glyph: "󰃬", run: () => { Quickshell.clipboardText = v; } };
+        return { id: "calc", title: v, subtitle: expr + "  ·  Enter to copy", glyph: "calculate", run: () => { Quickshell.clipboardText = v; } };
     }
 
     // Actions offered in the apps list when the query matches a keyword.
     readonly property var actions: [
-        { id: "pick-color", title: "Pick colour", subtitle: "Sample a pixel, copy its hex", glyph: "󰴱", keywords: "pick colour color picker eyedropper hex", run: () => Quickshell.execDetached(["pick-color"]) },
+        { id: "pick-color", title: "Pick colour", subtitle: "Sample a pixel, copy its hex", glyph: "colorize", keywords: "pick colour color picker eyedropper hex", run: () => Quickshell.execDetached(["pick-color"]) },
         // Deferred: the launcher closes the open panel right after run().
-        { id: "focus-timer", title: "Focus timer", subtitle: "Count down with Focus on", glyph: "󱎫", keywords: "focus timer countdown pomodoro stopwatch alarm", run: () => Qt.callLater(() => FocusTimer.openCard()) },
+        { id: "focus-timer", title: "Focus timer", subtitle: "Count down with Focus on", glyph: "timer", keywords: "focus timer countdown pomodoro stopwatch alarm", run: () => Qt.callLater(() => FocusTimer.openCard()) },
         // Deferred: the launcher closes the open panel right after run().
-        { id: "settings", title: "Settings", subtitle: "Shell preferences", glyph: "󰒓", keywords: "settings preferences options config", run: () => Qt.callLater(() => Panels.toggle("settings")) },
-        { id: "files", title: "Files", subtitle: "Browse files with yazi", glyph: "󰉋", keywords: "files file manager yazi browse folder", run: () => Apps.run([Apps.terminal, "--class", "yazi", "-e", "yazi"]) },
-        { id: "send-device", title: "Send to device…", subtitle: "Pick files, send via LocalSend or KDE Connect", glyph: "󰒖", keywords: "send share device airdrop localsend phone iphone mac transfer", run: () => Quickshell.execDetached(["alacritty", "--class", "popup", "-e", "sh", "-c", "f=$(mktemp); yazi --chooser-file=$f ~; [ -s $f ] && xargs -d '\\n' share < $f; rm -f $f"]) },
-        { id: "screen-ocr", title: "Copy text from screen", subtitle: "Select a region, OCR it (eng + vie)", glyph: "󰊄", keywords: "copy text screen ocr tesseract recognize", run: () => Quickshell.execDetached(["screen-ocr"]) },
-        { id: "home-row-mods", when: () => KbdMods.available, title: "Toggle home-row mods", subtitle: "Keyboard remap: home-row Super/Alt/Shift/Ctrl", glyph: "󰌌", keywords: "home row mods keyboard kanata toggle", run: () => KbdMods.toggle() },
-        { id: "screen-qr", title: "Scan QR code", subtitle: "Select a region, decode the QR code", glyph: "󰐲", keywords: "scan qr code barcode zbar", run: () => Quickshell.execDetached(["screen-qr"]) }
+        { id: "settings", title: "Settings", subtitle: "Shell preferences", glyph: "settings", keywords: "settings preferences options config", run: () => Qt.callLater(() => Panels.toggle("settings")) },
+        { id: "files", title: "Files", subtitle: "Browse files with yazi", glyph: "folder", keywords: "files file manager yazi browse folder", run: () => Apps.run([Apps.terminal, "--class", "yazi", "-e", "yazi"]) },
+        { id: "send-device", title: "Send to device…", subtitle: "Pick files, send via LocalSend or KDE Connect", glyph: "ios_share", keywords: "send share device airdrop localsend phone iphone mac transfer", run: () => Quickshell.execDetached(["alacritty", "--class", "popup", "-e", "sh", "-c", "f=$(mktemp); yazi --chooser-file=$f ~; [ -s $f ] && xargs -d '\\n' share < $f; rm -f $f"]) },
+        { id: "screen-ocr", title: "Copy text from screen", subtitle: "Select a region, OCR it (eng + vie)", glyph: "document_scanner", keywords: "copy text screen ocr tesseract recognize", run: () => Quickshell.execDetached(["screen-ocr"]) },
+        { id: "home-row-mods", when: () => KbdMods.available, title: "Toggle home-row mods", subtitle: "Keyboard remap: home-row Super/Alt/Shift/Ctrl", glyph: "keyboard", keywords: "home row mods keyboard kanata toggle", run: () => KbdMods.toggle() },
+        { id: "screen-qr", title: "Scan QR code", subtitle: "Select a region, decode the QR code", glyph: "qr_code_scanner", keywords: "scan qr code barcode zbar", run: () => Quickshell.execDetached(["screen-qr"]) }
     ]
 
     function actionItems(query) {
@@ -72,13 +72,13 @@ Singleton {
     function items(p) {
         switch (p.mode) {
         case "run":
-            return p.query ? [{ id: "run", title: p.query, subtitle: "Run in terminal", glyph: "󰆍", run: () => Quickshell.execDetached(["alacritty", "--hold", "-e", "sh", "-c", p.query]) }] : [];
+            return p.query ? [{ id: "run", title: p.query, subtitle: "Run in terminal", glyph: "terminal", run: () => Quickshell.execDetached(["alacritty", "--hold", "-e", "sh", "-c", p.query]) }] : [];
         case "calc":
             return [calcItem(p.query)].filter(x => x);
         case "file":
             return FileSearch.items();
         case "note":
-            return p.query ? [{ id: "note", title: p.query, subtitle: "Enter to save to inbox  ·  " + Settings.notesInbox, glyph: "󰎞", run: () => Notes.save(p.query) }] : [];
+            return p.query ? [{ id: "note", title: p.query, subtitle: "Enter to save to inbox  ·  " + Settings.notesInbox, glyph: "edit_note", run: () => Notes.save(p.query) }] : [];
         case "web":
             return WebSearch.items(p.query);
         case "wall":

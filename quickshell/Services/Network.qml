@@ -34,9 +34,26 @@ Singleton {
         Networking.wifiEnabled = on;
     }
 
-    // Scan only while a network list is on screen.
-    function setScanning(on) {
-        if (wifi)
-            wifi.scannerEnabled = on;
+    // Scans are explicit and bounded (see ScanWindow): the dropdown shows
+    // NetworkManager's cached list until the user asks to refresh.
+    readonly property bool scanning: scan.active
+    readonly property int scanMinutesLeft: scan.minutesLeft
+
+    function scanFor(ms) {
+        if (wifi && wifiEnabled)
+            scan.start(ms);
+    }
+
+    function stopScan() {
+        scan.stop();
+    }
+
+    ScanWindow {
+        id: scan
+
+        onBegin: if (root.wifi)
+            root.wifi.scannerEnabled = true
+        onEnd: if (root.wifi)
+            root.wifi.scannerEnabled = false
     }
 }
