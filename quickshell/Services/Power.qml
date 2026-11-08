@@ -26,12 +26,8 @@ Singleton {
     readonly property var background: [Battery, Leds]
     readonly property real watts: Math.abs(battery?.changeRate ?? 0)
 
-    readonly property string icon: {
-        if (charging)
-            return "󰂄";
-        const icons = ["󰂎", "󰁺", "󰁻", "󰁼", "󰁽", "󰁾", "󰁿", "󰂀", "󰂁", "󰂂", "󰁹"];
-        return icons[Math.round(percent * 10)];
-    }
+    // Material Symbols name: seven fill levels (0..6) like the bar and the CC.
+    readonly property string icon: charging ? "battery_charging_full" : percent >= 0.95 ? "battery_full" : "battery_" + Math.max(0, Math.min(6, Math.floor(percent * 7))) + "_bar"
 
     readonly property string timeLabel: {
         if (secondsLeft <= 0)

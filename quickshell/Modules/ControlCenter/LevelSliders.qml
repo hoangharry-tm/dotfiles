@@ -23,7 +23,7 @@ ColumnLayout {
     SliderRow {
         Layout.fillWidth: true
         value: Audio.volume
-        glyph: Glyphs.volume()
+        glyph: Audio.volumeIcon
         dimmed: Audio.muted
         expanded: root.cc.detail === "sound"
         onMoved: v => Audio.setVolume(v)

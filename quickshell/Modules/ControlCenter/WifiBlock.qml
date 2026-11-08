@@ -16,7 +16,7 @@ ColumnLayout {
 
     Tile {
         Layout.fillWidth: true
-        glyph: Glyphs.wifi()
+        glyph: Network.icon
         title: Network.wiredConnected ? "Ethernet" : "Wi-Fi"
         subtitle: Network.label
         checked: Network.wifiEnabled || Network.wiredConnected

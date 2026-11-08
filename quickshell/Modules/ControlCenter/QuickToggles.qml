@@ -61,7 +61,7 @@ GridLayout {
         Layout.fillWidth: true
         Layout.preferredWidth: 1
         compact: true
-        glyph: Glyphs.mic()
+        glyph: Audio.micIcon
         title: Audio.micMuted ? "Mic off" : "Mic"
         checked: Audio.micMuted
         onToggled: Audio.toggleMicMute()

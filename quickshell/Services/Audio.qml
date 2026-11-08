@@ -24,8 +24,8 @@ Singleton {
     // Streams are only bound while the mixer is on screen (cheap when closed).
     property bool mixerOpen: false
 
-    readonly property string volumeIcon: muted ? "󰝟" : volume < 0.01 ? "󰕿" : volume < 0.5 ? "󰖀" : "󰕾"
-    readonly property string micIcon: micMuted ? "󰍭" : "󰍬"
+    readonly property string volumeIcon: muted ? "volume_off" : volume < 0.01 ? "volume_mute" : volume < 0.5 ? "volume_down" : "volume_up"
+    readonly property string micIcon: micMuted ? "mic_off" : "mic"
 
     function setVolume(value) {
         if (!sink?.audio)

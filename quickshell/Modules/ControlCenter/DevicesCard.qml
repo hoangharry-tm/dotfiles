@@ -37,7 +37,7 @@ Section {
                 Layout.fillWidth: true
                 Layout.leftMargin: -root.pad
                 Layout.rightMargin: -root.pad
-                glyph: Glyphs.device(entry.modelData)
+                glyph: Devices.icon(entry.modelData)
                 title: entry.modelData.name
                 subtitle: Devices.state(entry.modelData)
                 trailingGlyph: !entry.modelData.paired ? "link" : root.open === entry.modelData.id ? "expand_less" : "expand_more"

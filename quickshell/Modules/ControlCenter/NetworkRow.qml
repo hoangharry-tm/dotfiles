@@ -19,7 +19,7 @@ ColumnLayout {
 
     ListRow {
         Layout.fillWidth: true
-        glyph: Glyphs.signal(entry.modelData.signalStrength)
+        glyph: Network.signalIcon(entry.modelData.signalStrength)
         title: entry.modelData.name
         subtitle: entry.modelData.connected ? "Connected" : ""
         trailingGlyph: !entry.modelData.connected && Network.secured(entry.modelData) ? "lock" : ""

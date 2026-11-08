@@ -37,10 +37,9 @@ Singleton {
     readonly property string label: labelFor(code)
     readonly property string tempText: ready ? Math.round(temp) + "°" : "--"
 
-    // WMO weather code -> Material Design weather glyph (Nerd Font) + label.
+    // WMO weather code -> Material Symbols name.
     function iconFor(c, day) {
-        const g = c === 0 ? (day ? 0xF0599 : 0xF0594) : c <= 2 ? (day ? 0xF0595 : 0xF0F31) : c === 3 ? 0xF0590 : c <= 48 ? 0xF0591 : c <= 57 ? 0xF0597 : c <= 65 ? 0xF0597 : c <= 67 ? 0xF067F : c <= 77 ? 0xF0598 : c <= 82 ? 0xF0596 : c <= 86 ? 0xF0598 : c === 95 ? 0xF067E : 0xF067F;
-        return String.fromCodePoint(g);
+        return c === 0 ? (day ? "clear_day" : "clear_night") : c <= 2 ? (day ? "partly_cloudy_day" : "partly_cloudy_night") : c === 3 ? "cloud" : c <= 48 ? "foggy" : c <= 67 ? "rainy" : c <= 77 ? "weather_snowy" : c <= 82 ? "rainy" : c <= 86 ? "weather_snowy" : "thunderstorm";
     }
 
     function labelFor(c) {

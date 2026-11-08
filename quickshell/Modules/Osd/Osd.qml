@@ -5,7 +5,6 @@ import Quickshell.Wayland
 import qs.Common
 import qs.Services
 import qs.Widgets
-import qs.Modules.ControlCenter
 
 // On-screen indicator for volume, mic mute and brightness changes: a glass
 // pill near the bottom of the focused screen that fades out.
@@ -48,15 +47,15 @@ Scope {
 
         // Muted reads as empty, like macOS.
         function onVolumeChanged() {
-            root.show(Glyphs.volume(), Audio.muted ? 0 : Audio.volume);
+            root.show(Audio.volumeIcon, Audio.muted ? 0 : Audio.volume);
         }
 
         function onMutedChanged() {
-            root.show(Glyphs.volume(), Audio.muted ? 0 : Audio.volume);
+            root.show(Audio.volumeIcon, Audio.muted ? 0 : Audio.volume);
         }
 
         function onMicMutedChanged() {
-            root.show(Glyphs.mic(), 0, false);
+            root.show(Audio.micIcon, 0, false);
         }
     }
 

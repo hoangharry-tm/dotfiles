@@ -15,7 +15,7 @@ Singleton {
     readonly property bool any: list.length > 0
 
     function icon(d) {
-        return d.type === "desktop" || d.type === "laptop" ? "󰌢" : d.type === "tablet" ? "󰓶" : "󰏲";
+        return d.type === "desktop" ? "desktop_windows" : d.type === "laptop" ? "laptop_mac" : d.type === "tablet" ? "tablet_mac" : "smartphone";
     }
 
     function state(d) {

@@ -23,7 +23,7 @@ Singleton {
     readonly property var connected: devices.filter(d => d.connected)
 
     readonly property string label: !enabled ? "Off" : connected.length === 1 ? nameOf(connected[0]) : connected.length > 1 ? connected.length + " devices" : "On"
-    readonly property string icon: !enabled ? "󰂲" : connected.length ? "󰂱" : "󰂯"
+    readonly property string icon: !enabled ? "bluetooth_disabled" : connected.length ? "bluetooth_connected" : "bluetooth"
 
     function nameOf(device) {
         return device.name || device.deviceName || device.address;
@@ -79,6 +79,6 @@ Singleton {
 
     function deviceIcon(device) {
         const i = device.icon || "";
-        return i.includes("headset") || i.includes("headphone") ? "󰋋" : i.includes("audio") ? "󰓃" : i.includes("mouse") ? "󰍽" : i.includes("keyboard") ? "󰌌" : i.includes("phone") ? "󰏲" : i.includes("game") ? "󰊴" : "󰂯";
+        return i.includes("headset") || i.includes("headphone") ? "headphones" : i.includes("audio") ? "speaker" : i.includes("mouse") ? "mouse" : i.includes("keyboard") ? "keyboard" : i.includes("phone") ? "smartphone" : i.includes("game") ? "sports_esports" : "bluetooth";
     }
 }

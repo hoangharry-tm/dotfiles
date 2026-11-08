@@ -20,10 +20,10 @@ Singleton {
     readonly property real strength: (active && active.signalStrength) || 0
 
     readonly property string label: wiredConnected ? "Ethernet" : active ? active.name : wifiEnabled ? "Not connected" : "Off"
-    readonly property string icon: wiredConnected ? "󰈀" : !wifiEnabled ? "󰤮" : !active ? "󰤯" : signalIcon(strength)
+    readonly property string icon: wiredConnected ? "lan" : !wifiEnabled || !active ? "wifi_off" : signalIcon(strength)
 
     function signalIcon(s) {
-        return s > 0.75 ? "󰤨" : s > 0.5 ? "󰤥" : s > 0.25 ? "󰤢" : "󰤟";
+        return s > 0.66 ? "wifi" : s > 0.33 ? "wifi_2_bar" : "wifi_1_bar";
     }
 
     function secured(network) {

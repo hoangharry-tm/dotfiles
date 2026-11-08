@@ -24,13 +24,7 @@ BarChip {
 
     spacing: Theme.spaceMd
 
-    // Material Symbols names for the services' state (the services return
-    // legacy Nerd codepoints).
     readonly property bool low: Power.hasBattery && Power.percent < 0.2 && !Power.charging
-    readonly property string wifiIcon: Network.wiredConnected ? "lan" : !Network.wifiEnabled || !Network.active ? "wifi_off" : Network.strength > 0.66 ? "wifi" : Network.strength > 0.33 ? "wifi_2_bar" : "wifi_1_bar"
-    readonly property string btIcon: !BluetoothState.enabled ? "bluetooth_disabled" : BluetoothState.connected.length ? "bluetooth_connected" : "bluetooth"
-    readonly property string volumeSymbol: Audio.muted ? "volume_off" : Audio.volume < 0.01 ? "volume_mute" : Audio.volume < 0.5 ? "volume_down" : "volume_up"
-    readonly property string batterySymbol: Power.charging ? "battery_charging_full" : Power.percent >= 0.95 ? "battery_full" : "battery_" + Math.min(6, Math.floor(Power.percent * 7)) + "_bar"
 
     // Collapse: only the battery percentage goes (level 5); the icons stay.
     // Computed from the data, not implicitWidth, which changes with `level`.
@@ -43,17 +37,17 @@ BarChip {
     }
 
     Icon {
-        glyph: root.wifiIcon
+        glyph: Network.icon
         color: Network.active || Network.wiredConnected ? Theme.text : Theme.textMuted
     }
 
     Icon {
         visible: root.showBluetooth
-        glyph: root.btIcon
+        glyph: BluetoothState.icon
     }
 
     Icon {
-        glyph: root.volumeSymbol
+        glyph: Audio.volumeIcon
         color: Audio.muted ? Theme.textMuted : Theme.text
     }
 
@@ -74,7 +68,7 @@ BarChip {
         spacing: Theme.spaceXs
 
         Icon {
-            glyph: root.batterySymbol
+            glyph: Power.icon
             color: root.low ? Theme.error : Theme.text
         }
 
@@ -94,14 +88,14 @@ BarChip {
         cardWidth: Theme.popoverWidth
 
         InfoRow {
-            glyph: root.wifiIcon
+            glyph: Network.icon
             label: "Network"
             value: Network.label
         }
 
         InfoRow {
             visible: BluetoothState.available
-            glyph: root.btIcon
+            glyph: BluetoothState.icon
             label: "Bluetooth"
             value: BluetoothState.label
         }
@@ -120,14 +114,14 @@ BarChip {
         }
 
         InfoRow {
-            glyph: root.volumeSymbol
+            glyph: Audio.volumeIcon
             label: "Volume"
             value: Audio.muted ? "Muted" : Math.round(Audio.volume * 100) + "%"
         }
 
         InfoRow {
             visible: Power.hasBattery
-            glyph: root.batterySymbol
+            glyph: Power.icon
             label: "Battery"
             value: Math.round(Power.percent * 100) + "%" + (Power.timeLabel ? "  \u00b7  " + Power.timeLabel : "")
             valueColor: root.low ? Theme.error : Theme.text

@@ -82,7 +82,7 @@ ColumnLayout {
             cc: root.cc
             rowRadius: modules.rowRadius
             kind: "battery"
-            glyph: Glyphs.battery()
+            glyph: Power.icon
             title: "Battery"
             summary: Math.round(Power.percent * 100) + "%  ·  " + (Power.timeLabel || "")
         }
@@ -92,7 +92,7 @@ ColumnLayout {
             cc: root.cc
             rowRadius: modules.rowRadius
             kind: "weather"
-            glyph: Glyphs.weather()
+            glyph: Weather.glyph
             title: "Weather"
             summary: Weather.tempText + "  ·  " + Weather.label
         }

@@ -29,7 +29,7 @@ DetailList {
                 required property var modelData
 
                 Layout.fillWidth: true
-                glyph: Glyphs.btDevice(modelData)
+                glyph: BluetoothState.deviceIcon(modelData)
                 title: BluetoothState.nameOf(modelData)
                 subtitle: modelData.connected ? "Connected" : modelData.paired ? "Paired" : "Tap to pair"
                 meta: modelData.connected && modelData.batteryAvailable ? Math.round(modelData.battery * 100) + "%" : ""

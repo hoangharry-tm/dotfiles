@@ -16,7 +16,7 @@ ColumnLayout {
 
     Tile {
         Layout.fillWidth: true
-        glyph: Glyphs.bluetooth()
+        glyph: BluetoothState.icon
         title: "Bluetooth"
         subtitle: BluetoothState.label
         checked: BluetoothState.enabled
