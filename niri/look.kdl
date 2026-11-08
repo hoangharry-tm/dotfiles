@@ -6,6 +6,7 @@ layout {
     // so let it show through workspaces instead of niri's default gray.
     background-color "transparent"
 
+    // = Theme.edge (quickshell): bar, sheets and windows share one 12 px edge.
     gaps 12
     center-focused-column "never"
     always-center-single-column
@@ -17,9 +18,13 @@ layout {
     }
     default-column-width { proportion 0.5; }
 
-    // A thin accent hairline instead of a heavy border.
+    // No focus ring: focus is shown by depth, not an outline (DESIGN.md
+    // "Windows"). The active window sits at E2; inactive windows sit lower
+    // (tighter, lighter shadow, rules.kdl), the way macOS makes inactive
+    // windows "seem farther away". A permanent coloured line around the
+    // active window was the only accent always on screen.
     focus-ring {
-        width 2
+        off
     }
     border {
         off
@@ -43,6 +48,8 @@ layout {
         spread 0
         offset x=0 y=8
         color "#00000047"
+        // Inactive windows: half the darkness (their geometry: rules.kdl).
+        inactive-color "#00000024"
     }
 }
 

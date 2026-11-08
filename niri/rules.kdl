@@ -10,6 +10,17 @@ window-rule {
     draw-border-with-background false
 }
 
+// Depth shows focus: inactive windows sit one step lower than the active
+// one (E2 -> E1-like: tighter, nearer shadow), so the focused window lifts
+// toward you without any outline (look.kdl: focus-ring off).
+window-rule {
+    match is-active=false
+    shadow {
+        softness 24
+        offset x=0 y=4
+    }
+}
+
 // Glass app windows: translucent apps get the shared blur from look.kdl
 // (`blur {}`; `blur { off }` there disables all of it). Radius 12 comes from
 // the catch-all rule at the top, so the blur follows the rounded corners.
@@ -165,7 +176,7 @@ window-rule {
 // use a more opaque fill instead of blur.
 layer-rule {
     match namespace="^qs-bar$"
-    geometry-corner-radius 16
+    geometry-corner-radius 12
     background-effect {
         blur true
     }
