@@ -3,7 +3,7 @@ import qs.Common
 
 // Control Center tile. Wide: icon badge + title + status, chevron opens
 // details when `expandable`. Compact: icon badge over a short label.
-// Tonal gradient; richer container tone with an accent badge when on (Surface).
+// Flat neutral fill; the badge carries the "on" colour (IconBadge).
 Item {
     id: root
 
@@ -14,19 +14,21 @@ Item {
     property bool compact: false
     property bool expandable: false
     property bool expanded: false
+    property bool flat: false   // a row inside a Group: no resting fill, hover/press wash only
+    property real rowRadius: Theme.radiusSm // flat: the group's concentric row radius
     property bool fuse: true    // expanded: square bottom corners to meet its list (off when the list sits apart)
 
     signal toggled
     signal expand
     signal held         // right-click or long-press: a secondary menu
 
-    readonly property color fg: checked ? Theme.onTone : Theme.text
-    readonly property color fgMuted: checked ? Theme.onToneMuted : Theme.textMuted
+    readonly property color fg: Theme.text
+    readonly property color fgMuted: Theme.textMuted
     // An expanded tile fuses with its list below: bottom corners go square.
-    readonly property real bottomRadius: expanded && fuse ? 0 : radius
+    readonly property real bottomRadius: expanded && fuse && !flat ? 0 : radius
 
-    implicitHeight: compact ? stack.implicitHeight + Theme.padControl * 2 : Theme.tileHeight
-    readonly property real radius: Theme.radiusMd
+    implicitHeight: compact ? stack.implicitHeight + Theme.padControl * 2 : flat ? Theme.rowHeightTall : Theme.tileHeight
+    readonly property real radius: flat ? rowRadius : Theme.radiusMd
 
     Surface {
         anchors.fill: parent
@@ -34,6 +36,7 @@ Item {
         bottomLeftRadius: root.bottomRadius
         bottomRightRadius: root.bottomRadius
         variant: root.checked ? "on" : "rest"
+        fillA: root.flat ? "transparent" : root.checked ? Theme.fillOn : Theme.tile
         hovered: main.containsMouse
         pressed: main.pressed
     }
@@ -42,7 +45,7 @@ Item {
     Row {
         visible: !root.compact
         anchors.left: parent.left
-        anchors.leftMargin: Theme.padCard // = (height - badge) / 2: equal on all sides
+        anchors.leftMargin: root.flat ? Theme.padControl : (root.height - Theme.control) / 2 // flat row: column A = padControl; tile: equal on all sides of the badge
         anchors.right: chevron.visible ? chevron.left : parent.right
         anchors.rightMargin: Theme.spaceSm
         anchors.verticalCenter: parent.verticalCenter
@@ -62,7 +65,7 @@ Item {
                 width: parent.width
                 text: root.title
                 color: root.fg
-                font.weight: Font.DemiBold
+                font.weight: Theme.weightEmphasis
             }
 
             Label {
@@ -96,15 +99,17 @@ Item {
             text: root.title
             color: root.fg
             font.pixelSize: Theme.textXs
-            font.weight: Font.DemiBold
+            font.weight: Theme.weightEmphasis
         }
     }
 
     MouseArea {
         id: main
 
-        anchors.fill: parent
-        anchors.rightMargin: chevron.visible ? chevron.width + Theme.spaceSm * 2 : 0
+        anchors.left: parent.left
+        anchors.top: parent.top
+        anchors.bottom: parent.bottom
+        anchors.right: chevron.visible ? chevron.left : parent.right
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
         acceptedButtons: Qt.LeftButton | Qt.RightButton
@@ -120,13 +125,15 @@ Item {
         anchors.top: parent.top
         anchors.bottom: parent.bottom
         anchors.margins: Theme.spaceSm
+        // A row's trailing icon sits padControl from the row edge (hanging box).
+        anchors.rightMargin: root.flat ? Theme.padControl - (Theme.control - Theme.icon) / 2 : Theme.spaceSm
         width: Theme.control
-        radius: Theme.radiusSm
+        radius: Theme.radiusFull
         onClicked: root.expand()
 
         Icon {
             anchors.centerIn: parent
-            glyph: "󰅂"
+            glyph: "chevron_right"
             color: root.fg
             rotation: root.expanded ? 90 : 0
 

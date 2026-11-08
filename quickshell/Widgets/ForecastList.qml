@@ -24,7 +24,7 @@ ColumnLayout {
 
             Icon {
                 glyph: Weather.iconFor(modelData.code, true)
-                color: Theme.primary
+                color: Theme.text
             }
 
             Label {
@@ -36,6 +36,7 @@ ColumnLayout {
 
             Label {
                 text: Math.round(modelData.min) + "°"
+                font.features: { "tnum": 1 }
                 color: Theme.textMuted
             }
 
@@ -43,6 +44,7 @@ ColumnLayout {
                 Layout.preferredWidth: Theme.iconLg + Theme.spaceXs
                 horizontalAlignment: Text.AlignRight
                 text: Math.round(modelData.max) + "°"
+                font.features: { "tnum": 1 }
             }
         }
     }

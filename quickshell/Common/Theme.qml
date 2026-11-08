@@ -11,6 +11,18 @@ import qs.Services
 Singleton {
     id: root
 
+    // Neutral roles keep the wallpaper's hue and lightness but cap HSL saturation:
+    // grey surfaces with a whisper of warmth/coolness (paper and ink), never a
+    // maroon or purple cast. One token governs it; accent roles stay as matugen
+    // gives them. `k` scales the cap (text and muted text use half: ink).
+    readonly property real neutralChroma: 0.08
+    function neutral(c, k) {
+        // Palette entries are strings (JsonAdapter); make a color first, or
+        // hslHue is undefined and every neutral role turns black.
+        const q = Qt.lighter(c, 1);
+        return Qt.hsla(Math.max(0, q.hslHue), Math.min(q.hslSaturation, neutralChroma * (k || 1)), q.hslLightness, q.a);
+    }
+
     // Palette (Material You roles). Usage rules: DESIGN.md "Color".
     readonly property color primary: palette.primary
     readonly property color primaryText: palette.primaryText
@@ -21,93 +33,120 @@ Singleton {
     readonly property color tertiaryContainer: palette.tertiaryContainer
     readonly property color tertiary: palette.tertiary
     readonly property color error: palette.danger
-    readonly property color surface: palette.surface
-    readonly property color surfaceHigh: palette.surfaceContainerHigh
-    readonly property color text: palette.text
-    readonly property color textMuted: palette.textMuted
-    readonly property color outline: palette.outline
-    readonly property color outlineVariant: palette.outlineVariant
+    readonly property color surface: neutral(palette.surface)
+    readonly property color surfaceHigh: neutral(palette.surfaceContainerHigh)
+    readonly property color text: neutral(palette.text, 0.5)
+    readonly property color textMuted: neutral(palette.textMuted, 0.5)
+    readonly property color textFaint: Qt.alpha(textMuted, 0.4)   // decorative only (empty-workspace dots); never for text
+    readonly property color outline: neutral(palette.outline)
+    readonly property color outlineVariant: neutral(palette.outlineVariant)
 
     // Surfaces: glass (niri blurs behind layer surfaces), hairlines, states.
     // Fills are the only separators inside a sheet; hairlines are reserved
     // for a sheet's own edge (see DESIGN.md "Surfaces").
-    readonly property color glass: Qt.alpha(surface, 0.66)
+    // 0.78: the lowest alpha where muted text keeps 4.5:1 and body text 7:1
+    // even over the worst backdrop (dark glass on a white page, light glass on
+    // black), computed for both modes. Legibility before translucency.
+    readonly property color glass: Qt.alpha(surface, 0.78)
     readonly property color glassSolid: Qt.alpha(surface, 0.92)
-    readonly property color hairline: Qt.alpha(outlineVariant, 0.5)
+    // Light glass has less contrast between sheet and backdrop, so its edge is
+    // drawn from `outline` (darker than outlineVariant) a little stronger.
+    readonly property color hairline: dark ? Qt.alpha(outlineVariant, 0.5) : Qt.alpha(outline, 0.35)
     readonly property color tile: Qt.alpha(text, 0.06)
     readonly property color hover: Qt.alpha(text, 0.08)
     readonly property color pressed: Qt.alpha(text, 0.14)
     readonly property color selection: Qt.alpha(primary, 0.4)       // text selection highlight
     readonly property color primaryWash: Qt.alpha(primary, 0.16)    // quiet primary fill (selected row, chart area)
     readonly property color primaryRing: Qt.alpha(primary, 0.7)     // focus / current ring
-    readonly property color scrim: Qt.alpha(surface, 0.35)          // dim behind full-screen overlays
+    // Dim behind full-screen overlays: dark mode tints with the surface; light
+    // mode dims with ink (a white veil would flatten the screen), but lighter.
+    readonly property color scrim: dark ? Qt.alpha(surface, 0.35) : Qt.alpha(text, 0.22)
     readonly property bool dark: surface.hslLightness < 0.5
     function mix(base, over, amount) {
         return Qt.tint(base, Qt.alpha(over, amount));
     }
 
-    // Hue turn (degrees) keeping saturation, lightness, alpha; greys pass through.
-    function rotate(c, deg) {
-        return c.hslHue < 0 ? c : Qt.hsla(((c.hslHue * 360 + deg) % 360 + 360) % 360 / 360, c.hslSaturation, c.hslLightness, c.a);
-    }
-    // Stable non-negative hash of a string (djb2), to seed per-app variation.
-    function hash(str) {
-        let h = 5381;
-        for (let i = 0; i < str.length; i++)
-            h = ((h << 5) + h + str.charCodeAt(i)) & 0x7fffffff;
-        // Avalanche: djb2 alone makes near-identical names near-identical seeds.
-        h = Math.imul(h ^ (h >>> 15), 0x2c1b3c6d) >>> 0;
-        return (Math.imul(h ^ (h >>> 12), 0x297a2d39) >>> 0) & 0x7fffffff;
-    }
-
-    // Tonal-gradient recipe (Widgets/Surface). Every Control Center component
-    // is a diagonal two-stop gradient derived from the wallpaper palette, so
-    // it works with any wallpaper: rest = quiet low-chroma lift of the sheet,
-    // on = richer container tone (analogous primary -> tertiary), accent =
-    // vivid fills (sliders, play), recess = darker well one level below.
-    readonly property color toneRestA: Qt.alpha(mix(surfaceHigh, primaryContainer, 0.30), 0.80)
-    readonly property color toneRestB: Qt.alpha(mix(surface, primaryContainer, 0.16), 0.62)
-    readonly property color toneOnA: mix(primaryContainer, primary, dark ? 0.10 : 0.30)
-    readonly property color toneOnB: mix(mix(tertiaryContainer, primaryContainer, 0.40), tertiary, dark ? 0.08 : 0.20)
-    readonly property color toneAccentA: mix(primary, primaryContainer, 0.20)
-    readonly property color toneAccentB: mix(tertiary, primary, 0.35)
-    readonly property color toneRecessA: Qt.rgba(0, 0, 0, dark ? 0.32 : 0.10)    // top: inner shadow
-    readonly property color toneRecessB: Qt.rgba(0, 0, 0, dark ? 0.16 : 0.04)
-    // aurora (notification cards): secondary -> primary -> tertiary container
-    // diagonal, plus two low-alpha blooms. All from the palette, so any wallpaper works.
-    readonly property color toneAuroraA: Qt.alpha(mix(surfaceHigh, secondaryContainer, 0.35), 0.85)
-    readonly property color toneAuroraM: Qt.alpha(mix(surfaceHigh, primaryContainer, 0.40), 0.85)
-    readonly property color toneAuroraB: Qt.alpha(mix(surfaceHigh, tertiaryContainer, 0.35), 0.85)
-    // Blooms use the container roles (muted), never vivid primary/tertiary: calm, low contrast.
-    readonly property color bloomColorA: primaryContainer
-    readonly property color bloomColorB: tertiaryContainer
-    readonly property real bloomA: 0.30
-    readonly property real bloomB: 0.24
-    readonly property color toneRim: Qt.alpha(text, 0.10)
-    readonly property color toneOnRim: Qt.alpha(primary, 0.45)
-    readonly property color toneRecessRim: Qt.alpha(text, 0.05)
+    // Flat material (Widgets/Surface): neutral fills, one accent. Colour is
+    // for state only (DESIGN.md "Color").
+    readonly property color fillOn: Qt.alpha(text, 0.12)                          // "on" tile: stronger neutral
+    // Large fills (slider level, play button, meters): the LIGHTEST neutral in
+    // both modes (Apple's white slider), over `fillTrack`, which is always
+    // darker. The accent is too loud at this size; it stays on small "on" marks.
+    // WCAG (surface/ink from the shipped palettes): onSolid on fillSolid 12.2
+    // dark, 17.2 light; fillSolid vs fillTrack 12.6 dark, 1.53 light (non-text;
+    // 3:1 would need a heavy grey track).
+    readonly property color fillSolid: dark ? Qt.alpha(text, 0.92) : Qt.rgba(1, 1, 1, 1)
+    readonly property color onSolid: dark ? surface : text                        // text/glyph on fillSolid
+    readonly property color fillRecess: dark ? Qt.rgba(0, 0, 0, 0.24) : Qt.alpha(text, 0.07)  // well one level down: a soft ink wash in light
+    readonly property color fillTrack: dark ? fillRecess : Qt.alpha(text, 0.18)   // slider/meter track under fillSolid
+    readonly property color fillTrackInset: dark ? tile : fillTrack               // the same, inside a recessed well (dark: lifts off it)
     readonly property color toneHover: Qt.alpha(text, 0.07)                      // overlay step, not a new colour
     readonly property color tonePress: Qt.alpha(text, 0.13)
-    readonly property color onTone: containerText                                // text/glyph on "on" (AA on toneOn*)
-    readonly property color onToneMuted: Qt.alpha(containerText, 0.90)
-    readonly property color onAccent: primaryText                                // text/glyph on accent fills
-    readonly property real grainOpacity: dark ? 0.35 : 0.25                      // baked tile is 9% alpha; this scales it
+    readonly property color onAccent: primaryText                                // text/glyph on the accent
     readonly property int hairlineWidth: 1
 
-    // Type: generic families; fontconfig (hh-nix-config fonts.nix) resolves
-    // them to JetBrainsMono Nerd Font, which also provides every icon glyph.
-    // Five steps, 4/2/2/5/12 apart; weight does the rest (Normal, DemiBold).
-    readonly property string font: "sans-serif"
+    // Type: Inter (variable, hh-nix-config fonts.nix) for the shell's UI text;
+    // `mono` resolves through fontconfig. Sizes follow one ratio (1.25, a
+    // major third): 11 / 13 / 16 / 20 / 32 / 40 / 96 (32 x 1.25 = 40,
+    // 40 x 1.25^4 ~ 96). Weight does the rest (Normal, DemiBold).
+    readonly property string font: "Inter Variable"
+    // Inter's dynamic metrics (rsms.me/inter/dynmetrics): tracking in em =
+    // -0.0223 + 0.185 x e^(-0.1745 x px). Slightly open at 11, tight at
+    // display sizes. Widgets/Label applies it with the optical size axis.
+    function tracking(px) {
+        return px * (-0.0223 + 0.185 * Math.exp(-0.1745 * px));
+    }
+    // Applies tracking + optical size to a Text/TextInput. Called from
+    // onFontChanged, never as a binding: a binding on font.letterSpacing that
+    // reads font.pixelSize loops (same font group). Writes only on change, so
+    // the fontChanged it causes settles in one step. Other families (mono)
+    // get no tracking.
+    function fitType(t) {
+        const ours = t.font.family === font;
+        const px = t.font.pixelSize;
+        const ls = ours ? tracking(px) : 0;
+        if (Math.abs(t.font.letterSpacing - ls) > 0.01)
+            t.font.letterSpacing = ls;
+        const opsz = Math.max(14, Math.min(32, px));
+        if (ours && t.font.variableAxes.opsz !== opsz)
+            t.font.variableAxes = { "opsz": opsz };
+    }
+    // Weights: titles (16 px and up) 600; emphasis at 13 / 11 px 500 (Inter's
+    // 600 is too heavy that small); body 400; Light only for display sizes.
+    readonly property int weightTitle: Font.DemiBold
+    readonly property int weightEmphasis: Font.Medium
     readonly property string mono: "monospace"
+    readonly property string symbols: "Material Symbols Rounded" // UI icons (Widgets/Icon `name`)
+    readonly property int iconWeight: 400   // symbol stroke: matches Inter Regular at textMd
+    // Grade: light symbols on dark glass bloom; Google advises -25 there.
+    readonly property int iconGrade: dark ? -25 : 0
     readonly property int textXs: 11        // meta: timestamps, keycaps, chips
     readonly property int textMd: 13        // body and controls (default)
     readonly property int textSm: textMd    // alias: secondary text differs by color, not size
-    readonly property int textLg: 15        // titles, result names
+    readonly property int textLg: 16        // titles, result names
     readonly property int textXl: 20        // headings, search input
     readonly property int textHero: 32      // display (power menu)
     readonly property int textTimer: 40     // timer readout (Light weight, tabular figures)
     readonly property int textDisplay: 96   // desktop clock (Light weight only)
-    readonly property color textShadow: Qt.rgba(0, 0, 0, 0.45) // legibility on any wallpaper (desktop widgets)
+    // Text drawn straight on the wallpaper follows the IMAGE's brightness, not
+    // the mode: `wallpaper` writes brightness.json (luma of the whole image,
+    // deskLuma of the corner the desktop widgets sit on). Dark image: light
+    // ink + dark soft shadow; bright image: dark ink + light soft shadow.
+    function inkOn(l) {
+        return l < 0.5 ? Qt.rgba(1, 1, 1, 0.96) : Qt.rgba(0.07, 0.07, 0.09, 0.92);
+    }
+    function inkMutedOn(l) {
+        return l < 0.5 ? Qt.rgba(1, 1, 1, 0.78) : Qt.rgba(0.07, 0.07, 0.09, 0.74);
+    }
+    function shadowOn(l) {
+        return l < 0.5 ? Qt.rgba(0, 0, 0, 0.45) : Qt.rgba(1, 1, 1, 0.5);
+    }
+    readonly property color onWallpaper: inkOn(brightness.deskLuma)             // desktop widgets
+    readonly property color onWallpaperMuted: inkMutedOn(brightness.deskLuma)
+    readonly property color wallpaperShadow: shadowOn(brightness.deskLuma)
+    readonly property color onImage: inkOn(brightness.luma)                     // whole image (lock screen)
+    readonly property color onImageMuted: inkMutedOn(brightness.luma)
+    readonly property color imageScrim: brightness.luma < 0.5 ? Qt.rgba(0, 0, 0, 0.25) : Qt.rgba(1, 1, 1, 0.25)
     readonly property real lineHeight: 1.25 // wrapped body text only (single lines: leave 1, it shifts glyphs down)
 
     // Icons (glyph em-size): sit on the same optical size as body text + 3.
@@ -135,7 +174,11 @@ Singleton {
     readonly property int padSheet: spaceLg     // inside a sheet, to its content
     readonly property int pad: padSheet         // alias (legacy name)
     readonly property int gap: gapStack         // alias (legacy name)
-    readonly property int edge: spaceSm         // sheet <-> screen edge / bar <-> sheet
+    // One screen margin for everything that meets a screen edge (bar, sheets,
+    // toasts, dock) = niri `gaps` (niri/look.kdl), so the bar, the windows and
+    // every sheet share one left/right edge and one rhythm. Was 8: windows
+    // sat 4 px inside the bar on every screen.
+    readonly property int edge: spaceMd
 
     // Radius: nested = outer - padding (a card inset 4 in a 16 bar is 12).
     readonly property int radiusXs: 4           // keycaps
@@ -161,12 +204,24 @@ Singleton {
     readonly property int sliderHeight: 48      // large pill slider (brightness, volume)
     readonly property int dot: spaceXs          // event marker under a calendar day
     readonly property int trackThin: 2          // progress hairline (media chip)
-    readonly property int barHeight: control + 2 * barInset   // 48
-    readonly property int barInset: spaceSm     // bar edge <-> chip, top and bottom (radiusLg - inset = chip radius)
+    readonly property int barHeight: control + 2 * barInset   // 40
+    readonly property int barInset: spaceXs     // bar edge <-> chip, top and bottom (radiusBar - inset = chip radius 8)
+    readonly property int radiusBar: radiusMd   // the bar pill (= qs-bar layer rule); slimmer bar, quieter frame
     readonly property int barPadX: spaceMd      // bar edge <-> first/last chip, left and right (wider: the pill's curve eats space)
     readonly property int barGap: spaceSm       // between bar items
     readonly property int barMargin: edge       // bar <-> screen top (and sides)
     readonly property int panelWidth: 400
+    readonly property int columnA: spaceXs + padControl   // icon column inside a Group: group inset + row padding
+    readonly property real disabledOpacity: 0.5           // a control that can't act right now (dimmed, still legible)
+    readonly property int settingsHeight: launcherWidth   // Settings sheet: 640 high, width = height x ratio
+    // Sheet proportion: height = width x golden ratio, snapped to the 4-pt grid
+    // (400 -> 648). A fixed, deliberate shape (never "whatever is left"); content
+    // scrolls inside. Capped by the screen in the sheet itself.
+    readonly property real ratio: 1.618
+    function grid(px) {
+        return Math.round(px / spaceXs) * spaceXs;
+    }
+    readonly property int panelHeight: grid(panelWidth * ratio)
     readonly property int launcherWidth: 640
     readonly property int launcherWidthWide: 880 // launcher in a two-pane mode (clipboard list + preview)
     readonly property int popoverWidth: 320     // bar hover cards
@@ -188,7 +243,6 @@ Singleton {
     readonly property int animFast: Math.round(120 * motionScale)
     readonly property int anim: Math.round(220 * motionScale)
     readonly property int animSlow: Math.round(340 * motionScale)
-    readonly property int animAmbient: 9000 // one drift of an "on" gradient (only while a sheet is open)
     readonly property int driftIdle: 240000 // lock-screen shader stops after this long without pointer movement
     readonly property int animSpin: 1000    // one turn of a busy spinner
     readonly property int pressDelay: 120 // ms: Flickable press hold-off (scroll vs click)
@@ -219,6 +273,19 @@ Singleton {
     readonly property real stackFade: 0.22    // material opacity lost per layer
     readonly property real springStiff: 3.2   // QML SpringAnimation: snappy, slight settle
     readonly property real springDamp: 0.32
+
+    FileView {
+        path: (Quickshell.env("XDG_STATE_HOME") || Quickshell.env("HOME") + "/.local/state") + "/theme/brightness.json"
+        watchChanges: true
+        onFileChanged: reload()
+
+        JsonAdapter {
+            id: brightness
+
+            property real luma: 0.2
+            property real deskLuma: 0.2
+        }
+    }
 
     FileView {
         path: (Quickshell.env("XDG_STATE_HOME") || Quickshell.env("HOME") + "/.local/state") + "/theme/quickshell.json"

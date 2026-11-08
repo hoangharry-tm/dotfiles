@@ -93,7 +93,7 @@ ColumnLayout {
         spacing: Theme.gapInline
 
         RoundButton {
-            glyph: "󰍴"
+            glyph: "remove"
             repeat: true
             enabled: root.editable
             opacity: root.editable ? 1 : 0 // keeps the ring centred while running
@@ -140,7 +140,7 @@ ColumnLayout {
                         font.features: { "tnum": 1 }
                     }
 
-                    TextInput {
+                    Input {
                         id: field
 
                         anchors.centerIn: parent
@@ -148,9 +148,7 @@ ColumnLayout {
                         width: Theme.timerRing - Theme.space2xl
                         horizontalAlignment: TextInput.AlignHCenter
                         color: Theme.primary
-                        selectionColor: Theme.selection
                         selectedTextColor: Theme.text
-                        font.family: Theme.font
                         font.pixelSize: Theme.textTimer
                         font.weight: Font.Light
                         font.features: { "tnum": 1 }
@@ -175,7 +173,7 @@ ColumnLayout {
         }
 
         RoundButton {
-            glyph: "󰐕"
+            glyph: "add"
             repeat: true
             enabled: root.editable
             opacity: root.editable ? 1 : 0
@@ -219,14 +217,14 @@ ColumnLayout {
         spacing: Theme.spaceLg
 
         RoundButton {
-            glyph: "󰑙"
+            glyph: "restart_alt"
             enabled: FocusTimer.active
             onActivated: FocusTimer.reset()
         }
 
         RoundButton {
             filled: true
-            glyph: FocusTimer.running ? "󰏤" : "󰐊"
+            glyph: FocusTimer.running ? "pause" : "play_arrow"
             onActivated: {
                 const wasIdle = !FocusTimer.active;
                 root.editing = false;

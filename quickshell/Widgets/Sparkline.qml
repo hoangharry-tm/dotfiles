@@ -8,7 +8,7 @@ Canvas {
 
     property var values: []
     property real maxValue: 1
-    property color color: Theme.primary
+    property color color: Theme.textMuted
 
     implicitWidth: 120
     implicitHeight: 28

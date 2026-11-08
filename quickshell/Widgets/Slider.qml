@@ -1,8 +1,8 @@
 import QtQuick
 import qs.Common
 
-// Large pill slider, iOS style: a recessed track with a vivid gradient
-// fill that carries the icon in dark ink (tap it to mute); drag or scroll anywhere else to set the value.
+// Large pill slider, iOS style: a recessed track with a flat neutral (solid)
+// fill that carries the icon in its ink (tap it to mute); drag or scroll anywhere else to set the value.
 Item {
     id: root
 
@@ -29,13 +29,13 @@ Item {
     Surface {
         anchors.fill: parent
         radius: Theme.radiusFull
-        variant: "recessed"
+        variant: "track"
 
         Surface {
             width: root.fillWidth
             height: parent.height
             radius: Theme.radiusFull
-            variant: root.dimmed ? "rest" : "accent"
+            variant: root.dimmed ? "rest" : "solid"
             pressed: drag.pressed
 
             Behavior on width {
@@ -94,7 +94,7 @@ Item {
             anchors.centerIn: parent
             glyph: root.glyph
             size: Theme.iconLg
-            color: root.dimmed ? Theme.textMuted : Theme.onAccent
+            color: root.dimmed ? Theme.textMuted : Theme.onSolid
         }
     }
 
@@ -106,8 +106,10 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         text: root.trailing
         // Dark ink once the fill reaches the readout.
-        color: root.fillWidth > readout.x ? Theme.onAccent : Theme.textMuted
+        color: root.fillWidth > readout.x ? Theme.onSolid : Theme.textMuted
         font.pixelSize: Theme.textXs
-        font.family: Theme.mono
+        font.features: {
+            "tnum": 1
+        }
     }
 }

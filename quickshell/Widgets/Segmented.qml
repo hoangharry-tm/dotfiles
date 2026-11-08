@@ -1,7 +1,7 @@
 import QtQuick
 import qs.Common
 
-// Segmented control: a sliding "on" pill over a recessed well behind equal-width options.
+// Segmented control: a sliding neutral "on" pill over a recessed well behind equal-width options.
 // model: [{ glyph, label, value }]
 Surface {
     id: root
@@ -56,16 +56,17 @@ Surface {
                     spacing: Theme.spaceXs
 
                     Icon {
-                        glyph: seg.modelData.glyph
-                        color: seg.on ? Theme.onTone : Theme.textMuted
+                        visible: (seg.modelData.glyph ?? "") !== "" // label-only segments stay centred
+                        glyph: seg.modelData.glyph ?? ""
+                        color: seg.on ? Theme.text : Theme.textMuted
                     }
 
                     Label {
                         anchors.verticalCenter: parent.verticalCenter
                         text: seg.modelData.label
-                        color: seg.on ? Theme.onTone : Theme.textMuted
+                        color: seg.on ? Theme.text : Theme.textMuted
                         font.pixelSize: Theme.textXs
-                        font.weight: Font.DemiBold
+                        font.weight: Theme.weightEmphasis
                     }
                 }
 

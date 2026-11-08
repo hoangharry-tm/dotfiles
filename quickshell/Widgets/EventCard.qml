@@ -32,7 +32,7 @@ ColumnLayout {
                 Layout.fillWidth: true
                 text: root.event?.title ?? ""
                 font.pixelSize: Theme.textLg
-                font.weight: Font.DemiBold
+                font.weight: Theme.weightTitle
             }
 
             Label {
@@ -58,7 +58,7 @@ ColumnLayout {
         Layout.preferredHeight: Theme.control
         Layout.fillWidth: true
         radius: Theme.radiusSm
-        color: pressed ? Theme.toneAccentB : hovered ? Theme.toneAccentA : Theme.primary
+        color: Qt.tint(Theme.primary, pressed ? Theme.tonePress : hovered ? Theme.toneHover : "transparent")
         onClicked: CalendarEvents.open(root.event.link)
 
         Row {
@@ -66,7 +66,7 @@ ColumnLayout {
             spacing: Theme.gapInline
 
             Icon {
-                glyph: "󰕧"
+                glyph: "videocam"
                 color: Theme.primaryText
             }
 
@@ -74,7 +74,7 @@ ColumnLayout {
                 anchors.verticalCenter: parent.verticalCenter
                 text: "Join"
                 color: Theme.primaryText
-                font.weight: Font.DemiBold
+                font.weight: Theme.weightEmphasis
             }
         }
     }

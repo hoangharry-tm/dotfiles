@@ -120,11 +120,14 @@ Item {
         }
     }
 
-    // Fan only once the pointer has rested on a group after a scroll.
+    // Hover intent (Control Center): fan only once the pointer *rests* on a
+    // group. Every pointer move restarts this, so sweeping across groups on
+    // the way to another one never fans them; a still pointer fans after
+    // hoverClose. Toasts keep the instant fan (they sit apart, no sweeping).
     Timer {
         id: opener
 
-        interval: Theme.hoverOpen
+        interval: Theme.hoverClose
         onTriggered: if (hover.hovered && !root.scrolling)
             root.hot = true
     }
@@ -163,9 +166,9 @@ Item {
         NumberAnimation {
             id: heightAnim
 
-            duration: root.fanned ? Theme.animSlow : Theme.anim
+            duration: root.fanned ? Theme.animSlow : Theme.animExit
             easing.type: Easing.BezierSpline
-            easing.bezierCurve: Theme.curveDecelerate
+            easing.bezierCurve: root.fanned ? Theme.curveDecelerate : Theme.curveAccelerate
             onRunningChanged: if (!running && !root.fanned)
                 root.keepAll = false
         }
@@ -198,7 +201,7 @@ Item {
 
                 Icon {
                     anchors.centerIn: parent
-                    glyph: "󰂚"
+                    glyph: "notifications"
                     visible: parent.source === ""
                 }
             }
@@ -208,37 +211,29 @@ Item {
                 text: root.name
                 color: Theme.textMuted
                 font.pixelSize: Theme.textSm
-                font.weight: Font.DemiBold
+                font.weight: Theme.weightEmphasis
             }
 
-            Clickable {
+            Label {
+                visible: root.items.length > 1
+                text: root.items.length
+                color: Theme.textMuted
+                font.pixelSize: Theme.textXs
+                font.features: {
+                    "tnum": 1
+                }
+            }
+
+            Button {
                 visible: root.expandable
-                Layout.preferredHeight: Theme.controlSm
-                Layout.preferredWidth: less.implicitWidth + Theme.padControl * 2
-                radius: Theme.radiusFull
+                text: root.open ? "Show less" : "Show all"
                 onClicked: Notifications.toggleGroup(root.groupKey)
-
-                Label {
-                    id: less
-
-                    anchors.centerIn: parent
-                    text: root.open ? "Show less" : "Show all"
-                    color: Theme.textMuted
-                    font.pixelSize: Theme.textXs
-                }
             }
 
-            Clickable {
-                Layout.preferredWidth: Theme.controlSm
-                Layout.preferredHeight: Theme.controlSm
-                radius: Theme.radiusFull
+            Button {
+                glyph: "close"
+                tip: "Clear"
                 onClicked: Notifications.dismissAll(root.items)
-
-                Icon {
-                    anchors.centerIn: parent
-                    glyph: "󰅖"
-                    size: Theme.iconSm
-                }
             }
         }
 
@@ -298,11 +293,19 @@ Item {
                         return; // frozen; settle() re-reads hover when scrolling stops
                     if (hovered) {
                         grace.stop();
-                        root.hot = true;
-                    } else if (root.hot) {
-                        grace.restart();
+                        if (root.toast)
+                            root.hot = true;
+                        else
+                            opener.restart();
+                    } else {
+                        opener.stop();
+                        if (root.hot)
+                            grace.restart();
                     }
                 }
+                // Still moving over a closed group: not an intent to open yet.
+                onPointChanged: if (hovered && !root.hot && !root.toast && !root.scrolling)
+                    opener.restart()
             }
 
             Item {
@@ -380,9 +383,9 @@ Item {
                                 }
 
                                 NumberAnimation {
-                                    duration: root.fanned ? Math.max(0, Theme.animSlow - Math.min(card.index, Theme.staggerMax) * Theme.stagger) : Theme.anim
+                                    duration: root.fanned ? Math.max(0, Theme.animSlow - Math.min(card.index, Theme.staggerMax) * Theme.stagger) : Theme.animExit
                                     easing.type: Easing.BezierSpline
-                                    easing.bezierCurve: Theme.curveDecelerate
+                                    easing.bezierCurve: root.fanned ? Theme.curveDecelerate : Theme.curveAccelerate
                                 }
                             }
                         }

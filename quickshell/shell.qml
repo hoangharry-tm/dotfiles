@@ -41,8 +41,9 @@ ShellRoot {
 
             required property ShellScreen modelData
 
+            // On every output: a click on the other monitor closes the popout too.
             LazyLoader {
-                active: Panels.open !== "" && Panels.open !== "power" && Panels.screen === perScreen.modelData.name
+                active: Panels.open !== "" && Panels.open !== "power"
 
                 Scrim {
                     modelData: perScreen.modelData
@@ -149,7 +150,7 @@ ShellRoot {
     LazyLoader {
         active: Switcher.open
 
-        Switcher {}
+        SwitcherSheet {} // module sheet; `Switcher` is the service (Services/Switcher.qml)
     }
 
     // qs ipc call switcher next|prev (Alt+Tab / Alt+Shift+Tab in niri/binds.kdl)

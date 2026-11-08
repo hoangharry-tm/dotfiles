@@ -25,12 +25,14 @@ ColumnLayout {
         Label {
             Layout.fillWidth: true
             text: Weather.hourly.length ? Qt.formatTime(Weather.hourly[0].time, "HH:mm") : ""
+            font.features: { "tnum": 1 }
             color: Theme.textMuted
             font.pixelSize: Theme.textXs
         }
 
         Label {
             text: Math.round(lo) + "° – " + Math.round(hi) + "°"
+            font.features: { "tnum": 1 }
             color: Theme.textMuted
             font.pixelSize: Theme.textXs
         }

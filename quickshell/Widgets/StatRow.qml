@@ -11,7 +11,7 @@ ColumnLayout {
     property string value
     property var history: []
     property real maxValue: 1
-    property color color: Theme.primary
+    property color color: Theme.textMuted
 
     Layout.fillWidth: true
     spacing: Theme.spaceXs
@@ -27,7 +27,9 @@ ColumnLayout {
 
         Label {
             text: root.value
-            font.family: Theme.mono
+            font.features: {
+                "tnum": 1
+            }
             font.pixelSize: Theme.textSm
         }
     }

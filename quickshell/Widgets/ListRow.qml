@@ -1,69 +1,94 @@
 import QtQuick
+import QtQuick.Layouts
 import qs.Common
 
-// A row in a detail list (networks, devices, outputs; dense: it is a child list): icon, text, trailing.
+// The one list row (iOS inset-grouped idiom), meant to sit inside a Group:
+// no resting fill, only the hover/press wash. Leading icon in a fixed box,
+// title (+ muted subtitle), optional muted meta (signal, battery %, volume;
+// tabular), then one trailing slot: spinner while `busy`, a check when
+// `marked`, else the quiet `trailingGlyph`.
+//   marked    the chosen one (connected, default output): filled icon, check,
+//             DemiBold name. No colour, no fill.
+//   selected  legacy "current page" wash for sidebars (Settings, device card).
 Clickable {
     id: root
 
     property string glyph: ""
     property string title: ""
     property string subtitle: ""
+    property string meta: ""
     property string trailingGlyph: ""
+    property bool marked: false
     property bool selected: false
     property bool busy: false
 
-    implicitHeight: subtitle ? Theme.rowHeight : Theme.control
+    implicitHeight: subtitle ? Theme.rowHeightTall : Theme.rowHeight
     radius: Theme.radiusSm
     active: selected
     activeColor: Theme.toneHover
 
-    Icon {
-        id: leading
+    RowLayout {
+        anchors.fill: parent
+        anchors.leftMargin: Theme.padControl
+        anchors.rightMargin: Theme.padControl
+        spacing: Theme.gapInline
 
-        anchors.left: parent.left
-        anchors.leftMargin: Theme.spaceMd
-        anchors.verticalCenter: parent.verticalCenter
-        glyph: root.glyph
-        color: root.selected ? Theme.primary : Theme.text
-    }
+        Icon {
+            glyph: root.glyph
+            filled: root.marked || root.selected
+        }
 
-    Column {
-        anchors.left: leading.right
-        anchors.leftMargin: Theme.spaceMd
-        anchors.right: trailing.left
-        anchors.rightMargin: Theme.spaceSm
-        anchors.verticalCenter: parent.verticalCenter
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: 0
 
-        Label {
-            width: parent.width
-            text: root.title
-            font.weight: root.selected ? Font.DemiBold : Font.Normal
+            Label {
+                Layout.fillWidth: true
+                text: root.title
+                font.weight: root.marked || root.selected ? Theme.weightEmphasis : Font.Normal
+            }
+
+            Label {
+                Layout.fillWidth: true
+                visible: text !== ""
+                text: root.subtitle
+                color: Theme.textMuted
+                font.pixelSize: Theme.textXs
+            }
         }
 
         Label {
-            width: parent.width
-            text: root.subtitle
-            visible: text !== ""
+            visible: root.meta !== ""
+            text: root.meta
             color: Theme.textMuted
-            font.pixelSize: Theme.textXs
+            font.pixelSize: Theme.textSm
+            font.features: {
+                "tnum": 1
+            }
         }
-    }
 
-    Icon {
-        id: trailing
+        // Trailing slot, always an icon-wide box so rows align.
+        Item {
+            visible: root.busy || root.marked || root.trailingGlyph !== ""
+            Layout.preferredWidth: Theme.icon
+            Layout.preferredHeight: Theme.icon
 
-        anchors.right: parent.right
-        anchors.rightMargin: Theme.spaceMd
-        anchors.verticalCenter: parent.verticalCenter
-        glyph: root.busy ? "󰔟" : root.trailingGlyph
-        color: root.selected ? Theme.primary : Theme.textMuted
+            Icon {
+                anchors.centerIn: parent
+                glyph: root.busy ? "progress_activity" : root.marked ? "check" : root.trailingGlyph
+                size: root.busy || root.marked ? Theme.icon : Theme.iconSm
+                color: root.marked && !root.busy ? Theme.text : Theme.textMuted
 
-        RotationAnimation on rotation {
-            running: root.busy
-            from: 0
-            to: 360
-            duration: Theme.animSpin
-            loops: Animation.Infinite
+                RotationAnimation on rotation {
+                    running: root.busy && Theme.motionScale > 0
+                    from: 0
+                    to: 360
+                    duration: Theme.animSpin
+                    loops: Animation.Infinite
+                    onRunningChanged: if (!running)
+                        parent.rotation = 0
+                }
+            }
         }
     }
 }

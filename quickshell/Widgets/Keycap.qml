@@ -19,5 +19,8 @@ Rectangle {
         text: root.text
         color: Theme.textMuted
         font.pixelSize: Theme.textXs
+        font.features: {
+            "tnum": 1
+        }
     }
 }

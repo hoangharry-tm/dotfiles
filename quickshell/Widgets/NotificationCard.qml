@@ -139,20 +139,8 @@ Item {
         Surface {
             anchors.fill: parent
             variant: "aurora"
-            seed: Theme.hash(root.notification.appName || "")
             radius: root.toast ? Theme.radiusLg : Theme.radiusMd
             hovered: root.hovered
-            opacity: root.shade
-        }
-
-        // Critical: a thin accent rim.
-        Rectangle {
-            anchors.fill: parent
-            visible: root.critical
-            radius: root.toast ? Theme.radiusLg : Theme.radiusMd
-            color: "transparent"
-            border.width: Theme.trackThin
-            border.color: Theme.tertiary
             opacity: root.shade
         }
 
@@ -199,7 +187,7 @@ Item {
                     Layout.preferredWidth: Theme.controlLg
                     Layout.preferredHeight: Theme.controlLg
                     radius: Theme.radiusSm
-                    color: hasIcon ? Theme.tile : Theme.primaryContainer
+                    color: Theme.tile
 
                     IconImage {
                         id: appIcon
@@ -214,9 +202,9 @@ Item {
                         anchors.centerIn: parent
                         visible: !tile.hasIcon
                         text: (root.notification.appName || "?").charAt(0).toUpperCase()
-                        color: Theme.containerText
+                        color: Theme.textMuted
                         font.pixelSize: Theme.textLg
-                        font.weight: Font.DemiBold
+                        font.weight: Theme.weightTitle
                     }
                 }
 
@@ -237,14 +225,18 @@ Item {
                             elide: Text.ElideRight
                             color: Theme.textMuted
                             font.pixelSize: Theme.textXs
-                            font.weight: Font.DemiBold
+                            font.weight: Theme.weightEmphasis
+                            font.features: {
+                                "tnum": 1
+                            }
                         }
 
                         Icon {
                             visible: root.critical
-                            glyph: "󰀦"
+                            glyph: "error"
+                            filled: true
                             size: Theme.iconSm
-                            color: Theme.tertiary
+                            color: Theme.error
                         }
 
                         Clickable {
@@ -265,7 +257,7 @@ Item {
 
                             Icon {
                                 anchors.centerIn: parent
-                                glyph: "󰅖"
+                                glyph: "close"
                                 size: Theme.iconSm
                             }
                         }
@@ -274,7 +266,7 @@ Item {
                     Label {
                         Layout.fillWidth: true
                         text: root.notification.summary
-                        font.weight: Font.Medium
+                        font.weight: Theme.weightEmphasis
                     }
 
                     Label {
@@ -355,17 +347,13 @@ Item {
                 radius: Theme.radiusFull
                 color: Theme.tile
 
-                TextInput {
+                Input {
                     id: replyInput
 
                     anchors.left: parent.left
                     anchors.right: send.left
                     anchors.leftMargin: Theme.padControl
                     anchors.verticalCenter: parent.verticalCenter
-                    color: Theme.text
-                    font.family: Theme.font
-                    font.pixelSize: Theme.textMd
-                    clip: true
                     selectByMouse: true
                     onAccepted: root.sendReply()
                     Keys.onEscapePressed: focus = false
@@ -390,7 +378,7 @@ Item {
 
                     Icon {
                         anchors.centerIn: parent
-                        glyph: "󰒊"
+                        glyph: "send"
                     }
                 }
             }

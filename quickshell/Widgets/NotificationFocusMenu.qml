@@ -11,8 +11,8 @@ Rectangle {
     property bool open: false
 
     visible: open
-    implicitWidth: col.implicitWidth + Theme.spaceSm * 2
-    implicitHeight: col.implicitHeight + Theme.spaceSm * 2
+    implicitWidth: col.implicitWidth + Theme.spaceXs * 2   // inset spaceXs: rows radiusMd - spaceXs = radiusSm
+    implicitHeight: col.implicitHeight + Theme.spaceXs * 2
     radius: Theme.radiusMd
     color: Theme.glassSolid // QML-drawn popup: flat, like toasts
     border.width: Theme.hairlineWidth
@@ -37,6 +37,9 @@ Rectangle {
             anchors.leftMargin: Theme.padControl
             anchors.verticalCenter: parent.verticalCenter
             text: row.text
+            font.features: {
+                "tnum": 1 // times in "Focus until 07:00"
+            }
         }
 
         Icon {
@@ -44,8 +47,8 @@ Rectangle {
             anchors.right: parent.right
             anchors.rightMargin: Theme.padControl
             anchors.verticalCenter: parent.verticalCenter
-            glyph: row.checked ? "󰄬" : ""
-            color: Theme.primary
+            glyph: row.checked ? "check" : ""
+            color: Theme.text
         }
     }
 
