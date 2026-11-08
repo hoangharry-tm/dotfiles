@@ -1,17 +1,16 @@
 import QtQuick
-import QtQuick.Layouts
 import Quickshell
 import Quickshell.Io
 import qs.Common
+import qs.Services
 import qs.Widgets
 
-ColumnLayout {
+SettingsPage {
     id: root
 
     property var info: ({})
     property string uptime: ""
 
-    spacing: Theme.gapSection
 
     // Read once when the page opens; nothing runs in the background.
     Process {
@@ -39,36 +38,54 @@ ColumnLayout {
         }
     }
 
-    Group {
+    SettingsGroup {
         title: "System"
 
-        ReadOnlyRow {
+        SettingsRow {
             title: "Uptime"
             value: root.uptime
         }
 
-        ReadOnlyRow {
+        SettingsRow {
             title: "niri"
-            value: root.info.niri ?? "..."
+            value: (root.info.niri ?? "...").replace(/^niri /, "")
         }
 
-        ReadOnlyRow {
+        SettingsRow {
             title: "Quickshell"
-            value: root.info.qs ?? "..."
+            value: (root.info.qs ?? "...").replace(/^Quickshell /, "").split(" (")[0]
         }
     }
 
-    Group {
+    SettingsGroup {
         title: "Configuration"
 
-        ReadOnlyRow {
+        SettingsRow {
             title: "hh-nix-config"
             value: root.info.config ?? "..."
         }
 
-        ReadOnlyRow {
+        SettingsRow {
             title: "dotfiles"
             value: root.info.dotfiles ?? "..."
+        }
+    }
+
+    SettingsGroup {
+        title: "Settings file"
+
+        SettingsRow {
+            title: "settings.json"
+            description: "Edit by hand; changes apply on save"
+
+            Button {
+                glyph: "edit"
+                text: "Open"
+                onClicked: {
+                    Panels.close();
+                    Apps.run([Apps.terminal, "-e", "nvim", Settings.dir + "/settings.json"]);
+                }
+            }
         }
     }
 }

@@ -3,10 +3,12 @@ import QtQuick.Layouts
 import Quickshell
 import qs.Common
 import qs.Services
+import qs.Widgets
 
-// Read-only view of a Nix-owned setting. Changing it at runtime would break
-// reproducibility, so the only action is opening the module that defines it.
-Group {
+// A Nix-owned setting, read-only here (changing it at runtime would break
+// reproducibility). The values are rows; the last row opens the module that
+// defines it.
+SettingsGroup {
     id: root
 
     property string file: "" // under modules/
@@ -20,12 +22,12 @@ Group {
         spacing: 0
     }
 
-    SettingRow {
+    SettingsRow {
         title: "Defined in modules/" + root.file
-        subtitle: "Managed by Nix; edit, then run home-manager switch"
+        description: "Edit it, then run home-manager switch"
 
-        ActionButton {
-            glyph: "󰏫"
+        Button {
+            glyph: "edit"
             text: "Open"
             onClicked: {
                 Panels.close();

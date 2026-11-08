@@ -1,73 +1,99 @@
 import QtQuick
-import QtQuick.Layouts
-import Quickshell
 import qs.Common
 import qs.Services
 
-ColumnLayout {
-    spacing: Theme.gapSection
-
-    Group {
+SettingsPage {
+    SettingsGroup {
         title: "Desktop"
 
-        SettingRow {
+        SettingsRow {
             title: "Desktop widgets"
-            subtitle: "Clock and weather on the wallpaper"
+            description: "Clock and weather on the wallpaper"
 
-            SwitchControl {
+            SettingsSwitch {
                 checked: Settings.desktopWidgets
                 onToggled: Settings.desktopWidgets = !Settings.desktopWidgets
             }
         }
     }
 
-    Group {
+    SettingsGroup {
+        title: "Clock"
+
+        SettingsRow {
+            title: "Time format"
+            description: "Bar and calendar"
+
+            SettingsSegmented {
+                model: [
+                    { label: "24-hour", value: true },
+                    { label: "12-hour", value: false }
+                ]
+                current: Settings.clock24h
+                onPicked: v => Settings.clock24h = v
+            }
+        }
+    }
+
+    SettingsGroup {
+        title: "Network"
+
+        SettingsRow {
+            title: "Scan length"
+            description: "How long a Wi-Fi or Bluetooth refresh scans"
+
+            SettingsSegmented {
+                segmentWidth: Theme.controlXl + Theme.spaceMd
+                model: [
+                    { label: "1 min", value: 60 },
+                    { label: "2 min", value: 120 },
+                    { label: "5 min", value: 300 }
+                ]
+                current: Settings.scanWindow
+                onPicked: v => Settings.scanWindow = v
+            }
+        }
+    }
+
+    SettingsGroup {
         title: "Notes"
 
-        SettingRow {
+        SettingsRow {
             title: "Quick-note inbox"
-            subtitle: "Launcher + appends here (a neorg file)"
+            description: "Where the launcher's + appends"
 
-            FieldControl {
+            SettingsField {
+                implicitWidth: Theme.launcherWidth / 2
                 text: Settings.notesInbox
                 onCommitted: v => Settings.notesInbox = v
             }
         }
     }
 
-    Group {
-        title: "Recording"
+    SettingsGroup {
+        title: "Media"
 
-        SettingRow {
-            title: "Capture desktop audio"
-            subtitle: "Record what the speakers play with screen recordings"
+        SettingsRow {
+            title: "Keep player after pause"
+            description: "In the bar and Control Center"
 
-            SwitchControl {
-                checked: Settings.recDesktopAudio
-                onToggled: Settings.recDesktopAudio = !Settings.recDesktopAudio
+            SettingsSlider {
+                from: 0
+                to: 30
+                step: 1
+                current: Settings.mediaGraceMs / 1000
+                suffix: " s"
+                onPicked: v => Settings.mediaGraceMs = v * 1000
             }
         }
-    }
 
-    Group {
-        title: "Settings file"
+        SettingsRow {
+            title: "Desktop audio in recordings"
+            description: "Record what the speakers play"
 
-        ReadOnlyRow {
-            title: "Location"
-            value: "~/.local/state/quickshell/settings.json"
-        }
-
-        SettingRow {
-            title: "Edit by hand"
-            subtitle: "Changes apply as soon as the file is saved"
-
-            ActionButton {
-                glyph: "󰏫"
-                text: "Open"
-                onClicked: {
-                    Panels.close();
-                    Apps.run([Apps.terminal, "-e", "nvim", Settings.dir + "/settings.json"]);
-                }
+            SettingsSwitch {
+                checked: Settings.recDesktopAudio
+                onToggled: Settings.recDesktopAudio = !Settings.recDesktopAudio
             }
         }
     }
@@ -83,7 +109,7 @@ ColumnLayout {
         title: "Backups"
         file: "backup.nix"
 
-        ReadOnlyRow {
+        SettingsRow {
             title: "Schedule"
             value: (backupUnit.text.match(/OnCalendar=(.*)/) ?? [0, "not installed"])[1]
         }

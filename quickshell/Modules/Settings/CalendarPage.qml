@@ -1,56 +1,50 @@
 import QtQuick
-import QtQuick.Layouts
-import qs.Common
 import qs.Services
+import qs.Widgets
 
-ColumnLayout {
-    spacing: Theme.gapSection
-
+SettingsPage {
     function synced(ms) {
         return ms > 0 ? Qt.formatDateTime(new Date(ms), "ddd d MMM, " + (Settings.clock24h ? "HH:mm" : "h:mm AP")) : "never";
     }
 
     // Names and status only: the secret URLs never leave sops.
-    Group {
+    SettingsGroup {
         title: "Calendars"
+        empty: CalendarEvents.calendars.length === 0 ? "No calendars" : ""
+        footnote: "Add or remove calendars in a terminal with calendar-add and calendar-remove."
 
         Repeater {
             model: CalendarEvents.calendars
 
-            ReadOnlyRow {
+            SettingsRow {
                 required property var modelData
 
                 title: modelData.name
-                value: modelData.ok ? "synced" : modelData.error
+                value: modelData.ok ? "Synced" : modelData.error
             }
         }
 
-        ReadOnlyRow {
-            visible: CalendarEvents.calendars.length === 0
-            title: "No calendars"
-            value: "none added"
-        }
-
-        SettingRow {
+        SettingsRow {
             title: "Refresh"
-            subtitle: "Last synced " + synced(CalendarEvents.syncedAt) + ", then every 10 min"
+            description: "Last synced " + synced(CalendarEvents.syncedAt) + ", then every 10 min"
 
-            ActionButton {
-                glyph: "󰑐"
-                text: CalendarEvents.syncing ? "Syncing" : "Refresh now"
+            Button {
+                text: "Refresh now"
+                glyph: "refresh"
+                busy: CalendarEvents.syncing
                 onClicked: CalendarEvents.refresh()
             }
         }
     }
 
-    Group {
-        title: "Reminders and bar"
+    SettingsGroup {
+        title: "Reminders"
 
-        SettingRow {
+        SettingsRow {
             title: "Reminder toast"
-            subtitle: "Minutes before an event starts; 0 turns it off"
+            description: "Minutes before an event; 0 turns it off"
 
-            SettingSlider {
+            SettingsSlider {
                 from: 0
                 to: 60
                 step: 5
@@ -60,11 +54,11 @@ ColumnLayout {
             }
         }
 
-        SettingRow {
+        SettingsRow {
             title: "Bar chip window"
-            subtitle: "Show the next event this long before it starts"
+            description: "Show the next event this long before it starts"
 
-            SettingSlider {
+            SettingsSlider {
                 from: 5
                 to: 120
                 step: 5
@@ -72,21 +66,6 @@ ColumnLayout {
                 suffix: " min"
                 onPicked: v => Settings.calendarChipMin = v
             }
-        }
-    }
-
-    Group {
-        title: "How to add"
-
-        ReadOnlyRow {
-            title: "Add a calendar"
-            subtitle: "Paste its secret iCal (ICS) address; view only"
-            value: "calendar-add"
-        }
-
-        ReadOnlyRow {
-            title: "Remove one"
-            value: "calendar-remove <name>"
         }
     }
 }

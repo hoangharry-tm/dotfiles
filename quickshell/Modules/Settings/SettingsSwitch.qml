@@ -2,7 +2,10 @@ import QtQuick
 import qs.Common
 import qs.Widgets
 
-// On/off pill. Controlled: it only reports `toggled`; the owner flips the value.
+// The one on/off control (Apple idiom): a light knob on a neutral track when
+// off, on the accent when on (state). The knob is fillSolid, so it reads as a
+// physical white knob in light mode and stays light in dark mode.
+// Controlled: it only reports `toggled`; the owner flips the value.
 Item {
     id: root
 
@@ -18,7 +21,7 @@ Item {
     Surface {
         anchors.fill: parent
         radius: Theme.radiusFull
-        variant: root.checked ? "accent" : "recessed"
+        variant: root.checked ? "accent" : "track"
         hovered: area.containsMouse
     }
 
@@ -28,7 +31,7 @@ Item {
         width: root.thumb
         height: root.thumb
         radius: Theme.radiusFull
-        color: root.checked ? Theme.onAccent : Theme.textMuted
+        color: root.checked ? Theme.onAccent : Theme.fillSolid
 
         Behavior on x {
             NumberAnimation {

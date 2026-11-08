@@ -1,9 +1,8 @@
 import QtQuick
-import QtQuick.Layouts
-import qs.Common
 import qs.Services
+import qs.Widgets
 
-ColumnLayout {
+SettingsPage {
     id: page
 
     // Same builder the dock uses, so names/icons/running state match.
@@ -11,37 +10,32 @@ ColumnLayout {
     readonly property var pinned: apps.filter(a => a.pinned)
     readonly property var running: apps.filter(a => !a.pinned)
 
-    spacing: Theme.gapSection
-
-    Group {
-        title: "Dock"
-
-        SettingRow {
+    SettingsGroup {
+        SettingsRow {
             title: "Show dock"
-            subtitle: "App launcher and switcher at the bottom edge"
+            description: "Launcher and switcher at the bottom edge"
 
-            SwitchControl {
+            SettingsSwitch {
                 checked: Settings.dockEnabled
                 onToggled: Settings.dockEnabled = !Settings.dockEnabled
             }
         }
 
-        SettingRow {
+        SettingsRow {
             title: "Auto-hide"
-            subtitle: "Reveal when the pointer touches the bottom edge"
+            description: "Reveal when the pointer touches the edge"
 
-            SwitchControl {
+            SettingsSwitch {
                 checked: Settings.dockAutoHide
                 onToggled: Settings.dockAutoHide = !Settings.dockAutoHide
             }
         }
 
-        SettingRow {
+        SettingsRow {
             title: "Style"
-            subtitle: "macOS: magnifying wave, launch hop, drag to reorder. Minimal: quiet lift"
+            description: Settings.dockStyle === "macos" ? "Magnifying wave, launch hop, drag to reorder" : "A quiet lift"
 
-            Segmented {
-                width: Theme.launcherWidth / 3
+            SettingsSegmented {
                 model: [
                     { label: "macOS", value: "macos" },
                     { label: "Minimal", value: "minimal" }
@@ -51,10 +45,10 @@ ColumnLayout {
             }
         }
 
-        SettingRow {
+        SettingsRow {
             title: "Icon size"
 
-            SettingSlider {
+            SettingsSlider {
                 from: 32
                 to: 64
                 step: 4
@@ -65,13 +59,14 @@ ColumnLayout {
         }
     }
 
-    Group {
-        title: "Pinned apps"
+    SettingsGroup {
+        title: "Pinned"
+        empty: page.pinned.length === 0 ? "Pin a running app below" : ""
 
         Repeater {
             model: page.pinned
 
-            SettingRow {
+            SettingsRow {
                 id: row
 
                 required property var modelData
@@ -79,58 +74,49 @@ ColumnLayout {
 
                 title: modelData.name
 
-                ActionButton {
-                    glyph: "󰁝"
-                    visible: row.index > 0
+                Button {
+                    glyph: "keyboard_arrow_up"
+                    enabled: row.index > 0
+                    opacity: enabled ? 1 : 0 // keeps the columns of the other rows aligned
+                    tip: "Move up"
                     onClicked: Dock.movePin(row.modelData.key, -1)
                 }
 
-                ActionButton {
-                    glyph: "󰁅"
-                    visible: row.index < page.pinned.length - 1
+                Button {
+                    glyph: "keyboard_arrow_down"
+                    enabled: row.index < page.pinned.length - 1
+                    opacity: enabled ? 1 : 0
+                    tip: "Move down"
                     onClicked: Dock.movePin(row.modelData.key, 1)
                 }
 
-                ActionButton {
-                    glyph: "󰆴"
+                Button {
                     text: "Unpin"
                     onClicked: Dock.togglePin(row.modelData)
                 }
             }
         }
-
-        ReadOnlyRow {
-            visible: page.pinned.length === 0
-            title: "Nothing pinned"
-            value: "pin a running app below"
-        }
     }
 
-    Group {
-        title: "Running apps"
+    SettingsGroup {
+        title: "Running"
+        empty: page.running.length === 0 ? "No other apps running" : ""
 
         Repeater {
             model: page.running
 
-            SettingRow {
+            SettingsRow {
                 id: runRow
 
                 required property var modelData
 
                 title: modelData.name
 
-                ActionButton {
-                    glyph: "󰐃"
+                Button {
                     text: "Pin"
                     onClicked: Dock.togglePin(runRow.modelData)
                 }
             }
-        }
-
-        ReadOnlyRow {
-            visible: page.running.length === 0
-            title: "No other apps running"
-            value: ""
         }
     }
 }

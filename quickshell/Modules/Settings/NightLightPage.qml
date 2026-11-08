@@ -1,25 +1,21 @@
 import QtQuick
-import QtQuick.Layouts
 import qs.Common
 import qs.Services
-import qs.Widgets
 
-ColumnLayout {
-    spacing: Theme.gapSection
+SettingsPage {
+    // First group: no heading, the page title already names it.
+    SettingsGroup {
 
-    Group {
-        title: "Mode"
+        SettingsRow {
+            title: "Mode"
+            description: "Auto tints between sunset and sunrise"
 
-        SettingRow {
-            title: "Night light"
-            subtitle: "Auto tints between sunset and sunrise at your location"
-
-            Segmented {
-                width: Theme.launcherWidth / 2
+            SettingsSegmented {
+                segmentWidth: Theme.controlXl + Theme.spaceMd
                 model: [
-                    { glyph: "󰖙", label: "Off", value: "off" },
-                    { glyph: "󰖔", label: "On", value: "on" },
-                    { glyph: "󰔛", label: "Auto", value: "auto" }
+                    { label: "Off", value: "off" },
+                    { label: "On", value: "on" },
+                    { label: "Auto", value: "auto" }
                 ]
                 current: Settings.nightMode
                 onPicked: v => NightLight.setMode(v)
@@ -27,14 +23,15 @@ ColumnLayout {
         }
     }
 
-    Group {
+    SettingsGroup {
         title: "Colour temperature"
 
-        SettingRow {
+        SettingsRow {
+            enabled: Settings.nightMode !== "off"
             title: "Warm"
-            subtitle: "While tinted; lower is warmer"
+            description: "While tinted; lower is warmer"
 
-            SettingSlider {
+            SettingsSlider {
                 from: 2000
                 to: 5000
                 step: 100
@@ -44,11 +41,12 @@ ColumnLayout {
             }
         }
 
-        SettingRow {
+        SettingsRow {
+            enabled: Settings.nightMode === "auto"
             title: "Daylight"
-            subtitle: "Auto mode only"
+            description: "Auto mode only"
 
-            SettingSlider {
+            SettingsSlider {
                 from: 4000
                 to: 6500
                 step: 100

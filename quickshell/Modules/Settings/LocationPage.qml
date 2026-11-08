@@ -1,94 +1,87 @@
 import QtQuick
-import QtQuick.Layouts
 import qs.Common
 import qs.Services
-import qs.Widgets
 
-ColumnLayout {
-    spacing: Theme.gapSection
-
+SettingsPage {
     readonly property var coord: DoubleValidator {
         decimals: 4
         notation: DoubleValidator.StandardNotation
     }
 
-    Group {
+    SettingsGroup {
         title: "Location"
+        footnote: "In use: " + Location.city + ", " + Location.latitude.toFixed(2) + ", " + Location.longitude.toFixed(2)
 
-        SettingRow {
+        SettingsRow {
             title: "Detect automatically"
-            subtitle: "By IP address (ipinfo.io), refreshed every 6 hours"
+            description: "By IP address, refreshed every 6 hours"
 
-            SwitchControl {
+            SettingsSwitch {
                 checked: Settings.locAutoDetect
                 onToggled: Settings.locAutoDetect = !Settings.locAutoDetect
             }
         }
-
-        ReadOnlyRow {
-            title: "In use"
-            value: Location.city + "  " + Location.latitude.toFixed(2) + ", " + Location.longitude.toFixed(2)
-        }
     }
 
-    Group {
+    SettingsGroup {
         title: "Fixed location"
 
-        SettingRow {
+        SettingsRow {
+            enabled: !Settings.locAutoDetect
             title: "City"
-            subtitle: "Shown in the weather"
+            description: "Shown in the weather"
 
-            FieldControl {
+            SettingsField {
                 text: Settings.locCity
                 onCommitted: t => Settings.locCity = t
             }
         }
 
-        SettingRow {
+        SettingsRow {
+            enabled: !Settings.locAutoDetect
             title: "Latitude"
 
-            FieldControl {
+            SettingsField {
                 text: String(Settings.locLatitude)
                 validator: coord
-                mono: true
                 onCommitted: t => Settings.locLatitude = Number(t)
             }
         }
 
-        SettingRow {
+        SettingsRow {
+            enabled: !Settings.locAutoDetect
             title: "Longitude"
 
-            FieldControl {
+            SettingsField {
                 text: String(Settings.locLongitude)
                 validator: coord
-                mono: true
                 onCommitted: t => Settings.locLongitude = Number(t)
             }
         }
 
-        SettingRow {
+        SettingsRow {
+            enabled: !Settings.locAutoDetect
             title: "Timezone"
-            subtitle: "IANA name, e.g. Europe/Berlin"
+            description: "IANA name, e.g. Europe/Berlin"
 
-            FieldControl {
+            SettingsField {
                 text: Settings.locTimezone
-                mono: true
                 onCommitted: t => Settings.locTimezone = t
             }
         }
     }
 
-    Group {
+    SettingsGroup {
         title: "Weather"
 
-        SettingRow {
+        SettingsRow {
             title: "Temperature"
 
-            Segmented {
-                width: Theme.launcherWidth / 3
+            SettingsSegmented {
+                segmentWidth: Theme.controlXl + Theme.spaceXl
                 model: [
-                    { glyph: "󰔄", label: "Celsius", value: false },
-                    { glyph: "󰔅", label: "Fahrenheit", value: true }
+                    { label: "Celsius", value: false },
+                    { label: "Fahrenheit", value: true }
                 ]
                 current: Settings.weatherFahrenheit
                 onPicked: v => Settings.weatherFahrenheit = v

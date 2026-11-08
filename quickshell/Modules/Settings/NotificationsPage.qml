@@ -1,71 +1,30 @@
 import QtQuick
-import QtQuick.Layouts
-import qs.Common
 import qs.Services
+import qs.Widgets
 
-ColumnLayout {
-    spacing: Theme.gapSection
-
+SettingsPage {
     readonly property var hhmm: RegularExpressionValidator {
         regularExpression: /^([01]\d|2[0-3]):[0-5]\d$/
     }
 
-    Group {
+    SettingsGroup {
         title: "Focus"
 
-        SettingRow {
+        SettingsRow {
             title: "Focus now"
-            subtitle: "Mute everything except critical notifications"
+            description: "Mute everything except critical notifications"
 
-            SwitchControl {
+            SettingsSwitch {
                 checked: Notifications.dnd
                 onToggled: Notifications.dnd = !Notifications.dnd
             }
         }
 
-        SettingRow {
-            title: "Schedule"
-            subtitle: "Turn Focus on and off at set times"
+        SettingsRow {
+            title: "Default timer"
+            description: "Remembers the last one you set"
 
-            SwitchControl {
-                checked: Settings.scheduleEnabled
-                onToggled: Settings.scheduleEnabled = !Settings.scheduleEnabled
-            }
-        }
-
-        SettingRow {
-            title: "From"
-            subtitle: "HH:MM, 24-hour"
-
-            FieldControl {
-                text: Settings.scheduleStart
-                validator: hhmm
-                mono: true
-                onCommitted: t => Settings.scheduleStart = t
-            }
-        }
-
-        SettingRow {
-            title: "Until"
-            subtitle: "May be earlier than From (overnight)"
-
-            FieldControl {
-                text: Settings.scheduleEnd
-                validator: hhmm
-                mono: true
-                onCommitted: t => Settings.scheduleEnd = t
-            }
-        }
-    }
-
-    Group {
-        title: "Focus timer"
-
-        SettingRow {
-            title: "Default duration"
-            subtitle: "Also remembers the last one you set; Focus is on while it runs"
-
-            SettingSlider {
+            SettingsSlider {
                 from: 5
                 to: 120
                 step: 5
@@ -76,24 +35,60 @@ ColumnLayout {
         }
     }
 
-    Group {
+    SettingsGroup {
+        title: "Schedule"
+
+        SettingsRow {
+            title: "Turn Focus on at set times"
+
+            SettingsSwitch {
+                checked: Settings.scheduleEnabled
+                onToggled: Settings.scheduleEnabled = !Settings.scheduleEnabled
+            }
+        }
+
+        SettingsRow {
+            enabled: Settings.scheduleEnabled
+            title: "From"
+            description: "24-hour, HH:MM"
+
+            SettingsField {
+                text: Settings.scheduleStart
+                validator: hhmm
+                onCommitted: t => Settings.scheduleStart = t
+            }
+        }
+
+        SettingsRow {
+            enabled: Settings.scheduleEnabled
+            title: "Until"
+            description: "May be earlier than From (overnight)"
+
+            SettingsField {
+                text: Settings.scheduleEnd
+                validator: hhmm
+                onCommitted: t => Settings.scheduleEnd = t
+            }
+        }
+    }
+
+    SettingsGroup {
         title: "History"
 
-        SettingRow {
-            title: "Keep history across restarts"
-            subtitle: "Writes summaries and bodies to disk as plain text"
+        SettingsRow {
+            title: "Keep across restarts"
+            description: "Writes summaries and bodies to disk as plain text"
 
-            SwitchControl {
+            SettingsSwitch {
                 checked: Settings.persistHistory
                 onToggled: Settings.persistHistory = !Settings.persistHistory
             }
         }
 
-        SettingRow {
+        SettingsRow {
             title: "Clear history"
 
-            ActionButton {
-                glyph: "󰩺"
+            Button {
                 text: "Clear"
                 onClicked: Notifications.clearAll()
             }
