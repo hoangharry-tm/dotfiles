@@ -47,8 +47,10 @@ Singleton {
     // 0.78: the lowest alpha where muted text keeps 4.5:1 and body text 7:1
     // even over the worst backdrop (dark glass on a white page, light glass on
     // black), computed for both modes. Legibility before translucency.
-    readonly property color glass: Qt.alpha(surface, 0.78)
-    readonly property color glassSolid: Qt.alpha(surface, 0.92)
+    // Reduce transparency (Settings, a11y): the same surface at alpha 1; the
+    // one switch, like lowPower's motionScale. niri's blur is dropped to match.
+    readonly property color glass: Qt.alpha(surface, Transparency.reduce ? 1 : 0.78)
+    readonly property color glassSolid: Qt.alpha(surface, Transparency.reduce ? 1 : 0.92)
     // Light glass has less contrast between sheet and backdrop, so its edge is
     // drawn from `outline` (darker than outlineVariant) a little stronger.
     readonly property color hairline: dark ? Qt.alpha(outlineVariant, 0.5) : Qt.alpha(outline, 0.35)

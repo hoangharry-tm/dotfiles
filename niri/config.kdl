@@ -16,5 +16,8 @@ include optional=true "~/.local/state/motion/niri.kdl"
 
 include optional=true "~/.local/state/theme/niri.kdl"
 
+// Reduce transparency (blur off for qs-* sheets); written by quickshell's Transparency, empty otherwise.
+include optional=true "~/.local/state/theme/niri-transparency.kdl"
+
 // Low-power override (blur off, short animations); written by quickshell's PowerMode, empty otherwise. Keep last.
 include optional=true "~/.local/state/theme/niri-power.kdl"

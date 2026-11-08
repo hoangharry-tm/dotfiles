@@ -48,7 +48,7 @@ SettingsPage {
     }
 
     SettingsGroup {
-        title: "Colours"
+        title: "Display"
 
         SettingsRow {
             title: "Mode"
@@ -69,22 +69,14 @@ SettingsPage {
                 }
             }
         }
-    }
-
-    SettingsGroup {
-        title: "Scrolling"
 
         SettingsRow {
-            title: "Scroll style"
-            description: Settings.scrollStyle === "smooth" ? "Eased wheel steps and coasting" : "Qt's own: direct and lightest"
+            title: "Reduce transparency"
+            description: "Solid panels instead of glass"
 
-            SettingsSegmented {
-                model: [
-                    { label: "Native", value: "native" },
-                    { label: "Smooth", value: "smooth" }
-                ]
-                current: Settings.scrollStyle
-                onPicked: v => Settings.scrollStyle = v
+            SettingsSwitch {
+                checked: Settings.reduceTransparency
+                onToggled: Settings.reduceTransparency = !Settings.reduceTransparency
             }
         }
     }
@@ -106,6 +98,20 @@ SettingsPage {
                 ]
                 current: Settings.motionTier
                 onPicked: v => Settings.motionTier = v
+            }
+        }
+
+        SettingsRow {
+            title: "Scroll style"
+            description: Settings.scrollStyle === "smooth" ? "Eased wheel steps and coasting" : "Qt's own: direct and lightest"
+
+            SettingsSegmented {
+                model: [
+                    { label: "Native", value: "native" },
+                    { label: "Smooth", value: "smooth" }
+                ]
+                current: Settings.scrollStyle
+                onPicked: v => Settings.scrollStyle = v
             }
         }
     }

@@ -4,8 +4,6 @@ import qs.Services
 
 SettingsPage {
     SettingsGroup {
-        title: "Desktop"
-
         SettingsRow {
             title: "Desktop widgets"
             description: "Clock and weather on the wallpaper"
@@ -15,10 +13,6 @@ SettingsPage {
                 onToggled: Settings.desktopWidgets = !Settings.desktopWidgets
             }
         }
-    }
-
-    SettingsGroup {
-        title: "Clock"
 
         SettingsRow {
             title: "Time format"
@@ -33,10 +27,6 @@ SettingsPage {
                 onPicked: v => Settings.clock24h = v
             }
         }
-    }
-
-    SettingsGroup {
-        title: "Network"
 
         SettingsRow {
             title: "Scan length"
@@ -53,10 +43,6 @@ SettingsPage {
                 onPicked: v => Settings.scanWindow = v
             }
         }
-    }
-
-    SettingsGroup {
-        title: "Notes"
 
         SettingsRow {
             title: "Quick-note inbox"
@@ -71,7 +57,7 @@ SettingsPage {
     }
 
     SettingsGroup {
-        title: "Media"
+        title: "Media and recording"
 
         SettingsRow {
             title: "Keep player after pause"

@@ -27,6 +27,7 @@ import Quickshell.Io
 //   focusDefaultMin  real   = 25      Focus timer length; also the last one used (FocusTimer)
 //   lowPower         string = "auto"   "auto" (on battery) | "always" | "never" (PowerMode)
 //   motionTier       string = "auto"   "auto" | "low" | "balanced" | "high" (PowerMode, motion-tier)
+//   reduceTransparency bool = false   solid sheets, no blur (a11y)         (Transparency, Theme.glass)
 //   dockEnabled      bool   = true     bottom dock                        (Dock)
 //   dockAutoHide     bool   = true     reveal at the bottom edge only     (Dock)
 //   dockIconSize     int    = 48       app icon px                        (Dock)
@@ -72,6 +73,7 @@ Singleton {
     property alias lowPower: data.lowPower
     property alias motionTier: data.motionTier
     property alias scrollStyle: data.scrollStyle
+    property alias reduceTransparency: data.reduceTransparency
     property alias calendarRemindMin: data.calendarRemindMin
     property alias calendarChipMin: data.calendarChipMin
     property alias notesInbox: data.notesInbox
@@ -120,6 +122,7 @@ Singleton {
             property real focusDefaultMin: 25
             property string lowPower: "auto"
             property string motionTier: "auto"
+            property bool reduceTransparency: false
             property string scrollStyle: "native" // native (Qt Flickable) | smooth (Widgets/SmoothWheel)
             property int calendarRemindMin: 10
             property int calendarChipMin: 30
