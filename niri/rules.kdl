@@ -50,12 +50,6 @@ window-rule {
     }
 }
 
-// Work around WezTerm's initial configure bug.
-window-rule {
-    match app-id=r#"^org\.wezfurlong\.wezterm$"#
-    default-column-width {}
-}
-
 // Quick-settings popups from the Control Center (nmtui, bluetui, wiremix):
 // a floating glass terminal, centered.
 window-rule {
@@ -87,6 +81,24 @@ window-rule {
     open-floating true
     default-column-width { fixed 760; }
     default-window-height { fixed 520; }
+}
+
+// Steam: the main window tiles; the small satellite windows float.
+window-rule {
+    match app-id=r#"^steam$"# title=r#"^(Friends List|Steam Settings|Special Offers|Steam - News|Screenshot Uploader|Add a Game)"#
+    match app-id=r#"^steam$"# title=r#"^(Steam - Self Updater|Steam Guard)"#
+    open-floating true
+}
+
+// Zoom: settings and the floating video window float; the screen-share
+// toolbar/controls stay out of screen recordings and shares.
+window-rule {
+    match app-id=r#"^[Zz]oom"# title=r#"^(Settings|zoom_linux_float_video_window)$"#
+    open-floating true
+}
+window-rule {
+    match app-id=r#"^[Zz]oom"# title=r#"^(as_toolbar|Zoom Floating Video|zoom_linux_float_video_window)"#
+    block-out-from "screencast"
 }
 
 // Dialogs and pickers: file choosers (xdg-desktop-portal-gtk), browser

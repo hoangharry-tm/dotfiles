@@ -41,7 +41,7 @@ binds {
     XF86MonBrightnessUp   allow-when-locked=true { spawn "qs" "ipc" "call" "brightness" "up"; }
     XF86MonBrightnessDown allow-when-locked=true { spawn "qs" "ipc" "call" "brightness" "down"; }
 
-    // Overview — also: top-left hot corner, four-finger swipe up
+    // Overview — also: bottom-right hot corner, four-finger swipe up
     Mod+O repeat=false { toggle-overview; }
 
     // Windows
