@@ -28,11 +28,29 @@ PanelWindow {
     margins.top: Theme.popoverTop
     margins.right: Theme.edge
     implicitWidth: shown ? Theme.panelWidth : 1
-    // Pinned to one deliberate size (Theme.panelHeight, golden ratio of the
-    // width; capped by the screen) and the content scrolls inside it. A
-    // layer-surface resize makes niri re-blur and re-shadow the whole sheet,
-    // and the window used to follow its content, which lagged on the T480.
-    implicitHeight: !shown ? 1 : Math.min(Theme.panelHeight, modelData.height - margins.top - Theme.edge)
+    // Sized to the content at rest (everything collapsed, never shorter than
+    // Theme.panelHeight), capped by the screen. Measured only just after
+    // opening (hidden items drop out of layouts, so a closed measure is short)
+    // and then frozen: expanded rows scroll inside the sheet. A layer-surface
+    // resize makes niri re-blur and re-shadow the whole sheet, and following
+    // the content live lagged on the T480. The last height is kept, so a
+    // reopen with unchanged content never resizes at all.
+    property real restHeight: Theme.panelHeight
+    property bool settled: true
+    Timer {
+        id: settle
+
+        interval: Theme.settleDelay
+        onTriggered: root.settled = true
+    }
+    Binding {
+        when: root.shown && !root.settled
+        target: root
+        property: "restHeight"
+        value: Theme.padSheet * 2 + footer.height + Theme.gapSection + layout.implicitHeight
+        restoreMode: Binding.RestoreNone
+    }
+    implicitHeight: !shown ? 1 : Math.min(Math.max(Theme.panelHeight, restHeight), (modelData?.height ?? 0) - margins.top - Theme.edge)
     // Ignore the bar's exclusive zone, else margins.top (already measured
     // from the screen edge) is added below the bar a second time.
     exclusionMode: ExclusionMode.Ignore
@@ -55,7 +73,11 @@ PanelWindow {
     }
 
     onShownChanged: {
-        if (!shown) {
+        if (shown) {
+            ccScroll.contentY = 0; // always open at the top
+            settled = false;
+            settle.restart();
+        } else {
             detail = "";
             module = "";
         }
@@ -86,11 +108,6 @@ PanelWindow {
             contentHeight: layout.implicitHeight
             clip: true
             boundsBehavior: Flickable.StopAtBounds
-
-            ScrollIndicator {
-                flick: ccScroll
-            }
-
             // Hold presses briefly: a scroll/drag that starts on a control (power
             // mode, tiles) must scroll the page, never land as a click on it.
             pressDelay: Theme.pressDelay

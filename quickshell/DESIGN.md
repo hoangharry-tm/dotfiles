@@ -423,7 +423,7 @@ frequent interactions):
 - Delays: `settleDelay` 400 (slider waits for the system value after release),
   `osdStartup` 1500 / `osdHold` 1400 (OSD ignores startup changes / stays),
   `warmKeep` 3000 (Control Center stays loaded after start), `shaderFps` 30
-  (lock shader), `scrollLinger` 800 (scroll indicator fade-out delay). The OSD stays hidden while the Control Center is open on its
+  (lock shader). The OSD stays hidden while the Control Center is open on its
   screen (its sliders already show the change).
 - Loops: only `animSpin` (a spinner while busy) and the stepped `animPulse`
   (while privacy / screencast / recording is live), plus the gated lock
@@ -551,8 +551,9 @@ Services expose symbol names directly (`Network.icon`, `Audio.volumeIcon`,
 Groups are `gapSection` apart, items `gapStack`; sheet `radiusXl` 28 with
 `padSheet` 16, so cards are `radiusMd` 12. Modules are rows of one `Group`
 and Notifications is its own `Group`, so the larger gap between them reads as
-intended. The sheet is `panelHeight` (648, golden ratio) high, capped by the
-screen; the default content fits without scrolling.
+intended. The sheet is as tall as its content at rest (never shorter than
+`panelHeight`, 648, golden ratio), capped by the screen, so nothing is cut at
+rest; it opens scrolled to the top.
 
 Wi-Fi and Bluetooth lists never scan on their own: opening one shows what is
 known (NetworkManager's cache, paired devices). The refresh button in the list
@@ -569,7 +570,9 @@ Sound lists open as an L2 well (`DetailList`) right under the connectivity
 row. Every control is a `Widgets/Button` (quiet / tonal pill, or a 32 circle
 for icons); static headlines and summaries never react to hover.
 
-Behaviour: the sheet has a fixed height and its content scrolls inside it; nothing inside may resize the window (each
+Behaviour: the height is measured once just after opening (closed, hidden
+items drop out of the layout) and then frozen; expanded rows scroll inside it
+and nothing inside may resize the window while open (each
 layer-surface resize made niri re-blur and re-shadow the whole sheet: ~2x
 quickshell and niri CPU and dropped frames on the T480). Scrolling is native
 `Flickable` by default (`Settings.scrollStyle` "native"; `Widgets/SmoothWheel`
