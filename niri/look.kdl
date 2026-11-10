@@ -18,13 +18,13 @@ layout {
     }
     default-column-width { proportion 0.5; }
 
-    // No focus ring: focus is shown by depth, not an outline (DESIGN.md
-    // "Windows"). The active window sits at E2; inactive windows sit lower
-    // (tighter, lighter shadow, rules.kdl), the way macOS makes inactive
-    // windows "seem farther away". A permanent coloured line around the
-    // active window was the only accent always on screen.
+    // Focus = depth + one quiet ring (DESIGN.md "Windows"). The active window
+    // sits at E2 (inactive ones lower, rules.kdl) and carries a 2 px ring in
+    // the wallpaper's own hue, desaturated (matugen `secondary`, set in the
+    // theme include): it follows every wallpaper and light/dark switch.
+    // Inactive windows have no ring; an urgent window's ring is `error`.
     focus-ring {
-        off
+        width 2
     }
     border {
         off

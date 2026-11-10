@@ -157,12 +157,15 @@ Modules never read the setting; app windows are unaffected.
   toasts, the dock and every window share one left/right edge, and the space
   between the bar and windows, between windows, and around the screen is the
   same 12. (Measured before: the bar at x 8, windows at x 12.)
-- **Focus by depth, not by outline.** No focus ring. The active window sits
-  at E2 (`shadow` softness 48, y 8, `#00000047`); inactive windows sit lower
-  (`match is-active=false`: softness 24, y 4, `inactive-color` `#00000024`),
-  so the focused window lifts toward you, as macOS lets inactive windows
-  "seem farther away". Tab indicators and the insert hint keep the accent:
-  they mark state.
+- **Focus = depth + one quiet ring.** The active window sits at E2
+  (`shadow` softness 48, y 8, `#00000047`); inactive windows sit lower
+  (`match is-active=false`: softness 24, y 4, `inactive-color` `#00000024`).
+  The active window also carries a 2 px ring in matugen's `secondary`: the
+  wallpaper's own hue with the chroma pulled down, at 80 % alpha, so it
+  belongs to the image without shouting (`primary` stays for state). It is
+  regenerated with every wallpaper and mode (dark spheres `#c2c5dd`, light
+  peach `#715a41`), inactive windows have none (one ring on screen), and an
+  urgent window's ring is `error`, the same rule as the urgent workspace dot.
 - **Terminals on the grid.** kitty `window_padding_width 9` (pt) and
   alacritty `padding 12` (px) are both 12 px: the window radius and the
   shell's row padding, so terminal text starts on the shell's rhythm.
