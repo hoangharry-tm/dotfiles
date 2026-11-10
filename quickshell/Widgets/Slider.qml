@@ -52,7 +52,7 @@ Item {
     Timer {
         id: settle
 
-        interval: 400 // time for the system value to catch up after release
+        interval: Theme.settleDelay
     }
 
     MouseArea {

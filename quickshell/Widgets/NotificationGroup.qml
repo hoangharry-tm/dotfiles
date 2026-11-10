@@ -260,19 +260,19 @@ Item {
                 gradient: Gradient {
                     GradientStop {
                         position: 0
-                        color: Qt.rgba(0, 0, 0, Math.min(1, 1 - root.scrollY / Theme.spaceXl))
+                        color: Qt.alpha(Theme.maskInk, Math.min(1, 1 - root.scrollY / Theme.spaceXl))
                     }
                     GradientStop {
                         position: Theme.spaceXl / Math.max(area.height, 1)
-                        color: "black"
+                        color: Theme.maskInk
                     }
                     GradientStop {
                         position: 1 - Theme.spaceXl / Math.max(area.height, 1)
-                        color: "black"
+                        color: Theme.maskInk
                     }
                     GradientStop {
                         position: 1
-                        color: Qt.rgba(0, 0, 0, Math.min(1, (root.maxScroll - root.scrollY) / Theme.spaceXl))
+                        color: Qt.alpha(Theme.maskInk, Math.min(1, (root.maxScroll - root.scrollY) / Theme.spaceXl))
                     }
                 }
             }

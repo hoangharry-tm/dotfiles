@@ -108,6 +108,9 @@ RowLayout {
         // From the token, not font.pixelSize: reading the font group inside
         // its own binding loops.
         font.letterSpacing: Theme.tracking(Theme.textSm)
+        font.features: {
+            "tnum": 1
+        }
         font.variableAxes: {
             "opsz": Math.max(14, Theme.textSm)
         }

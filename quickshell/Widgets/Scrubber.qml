@@ -43,6 +43,8 @@ Item {
         id: drag
 
         anchors.fill: parent
+        anchors.topMargin: -(Theme.control - root.implicitHeight) / 2     // hit area grows to `control`; visuals unchanged
+        anchors.bottomMargin: anchors.topMargin
         enabled: root.enabled
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor

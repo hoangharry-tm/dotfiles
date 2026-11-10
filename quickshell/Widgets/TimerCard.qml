@@ -52,7 +52,7 @@ ColumnLayout {
         implicitWidth: filled ? Theme.controlXl : Theme.controlLg
         implicitHeight: implicitWidth
         radius: Theme.radiusFull
-        opacity: enabled ? 1 : 0.4
+        opacity: enabled ? 1 : Theme.disabledOpacity
         onClicked: if (!repeat)
             activated()
         onPressedChanged: if (repeat && pressed) {
@@ -77,7 +77,7 @@ ColumnLayout {
             radius: parent.radius
             z: -1
             color: btn.filled ? Theme.primary : Theme.tile
-            opacity: btn.filled && btn.hovered ? 0.9 : 1
+            opacity: btn.filled && btn.hovered ? Theme.accentHoverOpacity : 1
         }
 
         Icon {

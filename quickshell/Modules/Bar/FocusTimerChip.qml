@@ -41,7 +41,7 @@ BarChip {
         implicitHeight: Theme.icon
         value: FocusTimer.fraction
         tone: Theme.text
-        opacity: FocusTimer.running ? 1 : 0.5 // paused reads as dimmed
+        opacity: FocusTimer.running ? 1 : Theme.pausedOpacity // paused reads as dimmed
     }
 
     Label {

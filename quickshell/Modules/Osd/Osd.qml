@@ -30,7 +30,7 @@ Scope {
     }
 
     Timer {
-        interval: 1500
+        interval: Theme.osdStartup
         running: true
         onTriggered: root.ready = true
     }
@@ -38,7 +38,7 @@ Scope {
     Timer {
         id: hide
 
-        interval: 1400
+        interval: Theme.osdHold
         onTriggered: root.shown = false
     }
 
@@ -76,7 +76,8 @@ Scope {
             required property ShellScreen modelData
 
             screen: modelData
-            visible: root.shown && Panels.focusedScreen() === modelData.name
+            // Not over the Control Center: its sliders already show the change.
+            visible: root.shown && Panels.focusedScreen() === modelData.name && !Panels.isOpen("control", modelData.name)
             anchors.bottom: true
             margins.bottom: Theme.space2xl * 2
             implicitWidth: root.showValue ? Theme.popoverWidth - Theme.space2xl : Theme.fieldHeight

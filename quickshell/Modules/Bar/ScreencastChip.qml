@@ -12,24 +12,6 @@ BarChip {
     wanted: Privacy.sharing
     // Never collapsed: it is a safety/recording indicator.
 
-    // One pill for every stop action (DRY).
-    component StopPill: Clickable {
-        property alias text: pillLabel.text
-
-        implicitWidth: pillLabel.implicitWidth + Theme.padControl * 2
-        implicitHeight: Theme.control - Theme.spaceSm
-        radius: Theme.radiusFull
-        color: pressed ? Theme.pressed : hovered ? Qt.alpha(Theme.error, 0.24) : Qt.alpha(Theme.error, 0.14)
-
-        Label {
-            id: pillLabel
-
-            anchors.centerIn: parent
-            color: Theme.error
-            font.pixelSize: Theme.textSm
-        }
-    }
-
     Icon {
         glyph: "screen_record"
         color: Theme.error
@@ -66,14 +48,16 @@ BarChip {
                     text: modelData.app ? modelData.target + "  ·  " + modelData.app : modelData.target
                 }
 
-                StopPill {
+                PillButton {
+                    danger: true
                     text: "Stop"
                     onClicked: Niri.stopCast(modelData.id)
                 }
             }
         }
 
-        StopPill {
+        PillButton {
+            danger: true
             visible: Privacy.casts.length > 1
             Layout.alignment: Qt.AlignRight
             text: "Stop all"

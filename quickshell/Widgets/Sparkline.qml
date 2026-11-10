@@ -10,8 +10,8 @@ Canvas {
     property real maxValue: 1
     property color color: Theme.textMuted
 
-    implicitWidth: 120
-    implicitHeight: 28
+    implicitWidth: Theme.sparkWidth
+    implicitHeight: Theme.sparkHeight
     antialiasing: true
 
     // Sparklines live in hover tooltips: skip repainting while hidden
@@ -47,7 +47,7 @@ Canvas {
         ctx.lineTo(width, height);
         ctx.lineTo(0, height);
         ctx.closePath();
-        ctx.fillStyle = Qt.alpha(color, 0.16);
+        ctx.fillStyle = Qt.alpha(color, Theme.chartFill);
         ctx.fill();
     }
 }

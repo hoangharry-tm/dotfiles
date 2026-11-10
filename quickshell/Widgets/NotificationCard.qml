@@ -125,7 +125,7 @@ Item {
 
         width: parent.width
         height: parent.height
-        opacity: (1 - Math.min(Math.abs(x) / root.width, 1) * 0.6) * root.enter
+        opacity: (1 - Math.min(Math.abs(x) / root.width, 1) * Theme.swipeFade) * root.enter
         transform: Translate {
             x: (1 - root.enter) * Theme.spaceXl
             y: (root.enter - 1) * Theme.spaceSm
@@ -391,7 +391,7 @@ Item {
                     anchors.bottom: parent.bottom
                     width: Theme.control
                     radius: Theme.radiusFull
-                    opacity: replyInput.text.trim() === "" ? 0.5 : 1
+                    opacity: replyInput.text.trim() === "" ? Theme.disabledOpacity : 1
                     onClicked: root.sendReply()
 
                     Icon {

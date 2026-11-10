@@ -49,7 +49,7 @@ BarChip {
         height: Theme.trackThin
         radius: Theme.trackThin / 2
         width: (parent.width - Theme.padControl * 2) * Media.progress
-        color: Qt.alpha(Theme.text, Media.playing ? 0.5 : 0.2)
+        color: Media.playing ? Theme.progressOn : Theme.progressOff
     }
 
     // Interactive: stays open while the pointer is on the card.

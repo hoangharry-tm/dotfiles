@@ -18,10 +18,10 @@ BarChip {
         glyph: "memory"
     }
 
-    // `ps` and the extra reads run only while the card is open.
+    // Fast sampling plus `ps` and the extra reads run only while the card is open.
     Binding {
         target: System
-        property: "tracking"
+        property: "detailed"
         value: card.open
     }
 
@@ -140,22 +140,11 @@ BarChip {
                 }
 
                 // Sends SIGTERM (a polite quit); no pill for session-critical processes.
-                Clickable {
+                PillButton {
                     visible: System.canKill(modelData)
-                    implicitWidth: killLabel.implicitWidth + Theme.padControl * 2
-                    implicitHeight: Theme.controlSm
-                    radius: Theme.radiusFull
-                    color: pressed ? Theme.pressed : hovered ? Qt.alpha(Theme.error, 0.24) : Qt.alpha(Theme.error, 0.14)
+                    danger: true
+                    text: "Quit"
                     onClicked: System.kill(modelData)
-
-                    Label {
-                        id: killLabel
-
-                        anchors.centerIn: parent
-                        text: "Quit"
-                        color: Theme.error
-                        font.pixelSize: Theme.textXs
-                    }
                 }
             }
         }

@@ -84,6 +84,12 @@ Singleton {
     readonly property color fillTrackInset: dark ? tile : fillTrack               // the same, inside a recessed well (dark: lifts off it)
     readonly property color toneHover: Qt.alpha(text, 0.07)                      // overlay step, not a new colour
     readonly property color tonePress: Qt.alpha(text, 0.13)
+    readonly property color errorWash: Qt.alpha(error, 0.14)                     // danger pill (Widgets/PillButton) at rest
+    readonly property color errorWashHover: Qt.alpha(error, 0.24)                // ...hovered
+    readonly property color maskInk: Qt.rgba(0, 0, 0, 1)                         // alpha-mask source only (edge fades); never drawn
+    readonly property color progressOn: Qt.alpha(text, 0.5)                      // hairline progress, playing
+    readonly property color progressOff: Qt.alpha(text, 0.2)                     // ...paused
+    readonly property real chartFill: 0.16                                       // alpha of the area under a sparkline
     readonly property color onAccent: primaryText                                // text/glyph on the accent
     readonly property int hairlineWidth: 1
 
@@ -214,6 +220,11 @@ Singleton {
     readonly property int barMargin: edge       // bar <-> screen top (and sides)
     readonly property int panelWidth: 400
     readonly property int columnA: spaceXs + padControl   // icon column inside a Group: group inset + row padding
+    readonly property real pausedOpacity: 0.5             // a running thing that is paused (focus ring)
+    readonly property real accentHoverOpacity: 0.9        // a solid accent fill dims a touch on hover
+    readonly property real swipeFade: 0.6                 // opacity lost by a card dragged a full width
+    readonly property int sparkWidth: 120                 // sparkline default size
+    readonly property int sparkHeight: 28
     readonly property real disabledOpacity: 0.5           // a control that can't act right now (dimmed, still legible)
     readonly property int settingsHeight: launcherWidth   // Settings sheet: 640 high, width = height x ratio
     // Sheet proportion: height = width x golden ratio, snapped to the 4-pt grid
@@ -252,6 +263,12 @@ Singleton {
     readonly property int holdRepeat: 80    // press-and-hold: repeat rate
     readonly property int hoverOpen: 350    // hover card appears after this long
     readonly property int hoverClose: 200   // ...and leaves this long after the pointer
+    readonly property int settleDelay: 400  // system value catches up after a slider release
+    readonly property int osdStartup: 1500  // OSD ignores changes this long after the shell starts
+    readonly property int osdHold: 1400     // OSD stays this long after the last change
+    readonly property int warmKeep: 3000    // Control Center stays loaded this long after start
+    readonly property int shaderFps: 30     // lock-screen drift shader frame rate
+    readonly property int scrollLinger: 800 // scroll indicator stays this long after the last scroll
     readonly property int animPulse: 1400   // slow breathing, e.g. privacy dot
     readonly property int easing: Easing.OutCubic
     readonly property int animInstant: Math.round(80 * motionScale)  // press feedback: must feel immediate

@@ -91,7 +91,7 @@ Item {
             blending: true
 
             Timer {
-                interval: 1000 / 30
+                interval: 1000 / Theme.shaderFps
                 repeat: true
                 running: true
                 onTriggered: parent.time += interval / 1000

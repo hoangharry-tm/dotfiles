@@ -280,6 +280,15 @@ them: the wallpaper speaks only through the accent.
 - Fills: `tile` 6% resting, `hover` 8%, `pressed` 14%, `fillOn` 12% ("on"
   tile), `fillRecess` (well), `fillSolid` (large neutral fill); `scrim` dims
   behind full-screen overlays.
+- Washes and ink tokens: `errorWash` 14% / `errorWashHover` 24% (danger pill,
+  `Widgets/PillButton danger`: Stop, Quit; `controlSm` high, `textXs`),
+  `progressOn` 50% / `progressOff` 20% (hairline progress), `chartFill` 16%
+  (area under a sparkline), `maskInk` (alpha source of an edge-fade mask,
+  never drawn).
+- Opacity tokens: `disabledOpacity` 0.5 (can't act), `pausedOpacity` 0.5 (a
+  running thing that is paused), `accentHoverOpacity` 0.9 (solid accent fill on
+  hover), `swipeFade` 0.6 (a card dragged a full width). Sparkline default
+  size `sparkWidth` 120 x `sparkHeight` 28.
 - **Data colours** the user chose (calendar colours) may appear as small marks
   (dots, a 4 px bar), never as fills.
 Never raw hex or alpha literals in modules; derive in Theme.
@@ -401,6 +410,11 @@ frequent interactions):
   dock's opt-in macOS magnification (a familiar idiom), the notification fan
   (disclosure, behind hover intent), and the power menu's 4 % lift of the
   chosen action (rare and modal). Nothing else moves on hover.
+- Delays: `settleDelay` 400 (slider waits for the system value after release),
+  `osdStartup` 1500 / `osdHold` 1400 (OSD ignores startup changes / stays),
+  `warmKeep` 3000 (Control Center stays loaded after start), `shaderFps` 30
+  (lock shader), `scrollLinger` 800 (scroll indicator fade-out delay). The OSD stays hidden while the Control Center is open on its
+  screen (its sliders already show the change).
 - Loops: only `animSpin` (a spinner while busy) and the stepped `animPulse`
   (while privacy / screencast / recording is live), plus the gated lock
   shader. Every loop is gated on `Theme.motionScale > 0`, so low power freezes
