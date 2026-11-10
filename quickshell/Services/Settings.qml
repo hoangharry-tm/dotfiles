@@ -36,6 +36,7 @@ import Quickshell.Io
 //   calendarChipMin  int    = 30      bar chip shows this long before start (NextEventChip)
 //   notesInbox       string = "~/mh_notes/inbox.norg"  launcher `+` quick-capture target (Notes)
 //   scanWindow       int    = 60      seconds a Wi-Fi/Bluetooth refresh scans: 60 | 120 | 300 (Network, BluetoothState UI)
+//   textSize         string = "default" "small" | "default" | "large"     (Theme.textScale)
 //   dockPinned       list   = [...]    desktop-entry ids ("@settings" = built-in) (Dock)
 //
 // NOT here (owned by Nix, read-only in the panel): swayidle timings
@@ -78,6 +79,7 @@ Singleton {
     property alias calendarChipMin: data.calendarChipMin
     property alias notesInbox: data.notesInbox
     property alias scanWindow: data.scanWindow
+    property alias textSize: data.textSize
 
     FileView {
         id: file
@@ -128,6 +130,7 @@ Singleton {
             property int calendarChipMin: 30
             property string notesInbox: "~/mh_notes/inbox.norg"
             property int scanWindow: 60
+            property string textSize: "default"
         }
     }
 

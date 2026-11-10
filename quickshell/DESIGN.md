@@ -343,6 +343,16 @@ size step feels related:
 | textTimer | 40 | timer readout (Light, tabular) |
 | textDisplay | 96 | desktop clock (Light only) |
 
+Text size (Settings > Appearance: Small / Default / Large) multiplies these
+steps by `Theme.textScale` (0.92 / 1 / 1.12), rounded to whole px via
+`Theme.scaled(px)`: 13 becomes 12 / 13 / 15, 16 becomes 15 / 16 / 18, 20
+becomes 18 / 20 / 22. textXs..textHero and textTimer scale; textDisplay (the
+wallpaper clock) does not. Icons derive from text (`icon` = textMd + 3,
+`iconSm` = textXs + 1, `iconLg` = textXl, `iconXl` = textXl + 4, `iconHero` =
+textHero), so the +3 relation holds at every size. Controls, rows, bar and
+sheet sizes stay on their fixed grid (Large 13 -> 15 px still fits `control`
+32); never multiply a Theme size by hand.
+
 `Widgets/Label` applies the optical size (`opsz` = px, Inter's text cut at 14,
 display cut at 32) and Inter's dynamic tracking (`Theme.tracking(px)`:
 -0.0223 + 0.185 e^(-0.1745 px) em; slightly open at 11, tight at display

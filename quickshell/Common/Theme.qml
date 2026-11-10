@@ -128,14 +128,20 @@ Singleton {
     readonly property int iconWeight: 400   // symbol stroke: matches Inter Regular at textMd
     // Grade: light symbols on dark glass bloom; Google advises -25 there.
     readonly property int iconGrade: dark ? -25 : 0
-    readonly property int textXs: 11        // meta: timestamps, keycaps, chips
-    readonly property int textMd: 13        // body and controls (default)
+    // Text size (Settings > Appearance): one factor scales the text steps, whole px.
+    // Icons follow (icon = text + 3); controls, bar and sheets stay on their grid.
+    readonly property real textScale: ({ "small": 0.92, "large": 1.12 })[Settings.textSize] ?? 1
+    function scaled(px) {
+        return Math.round(px * textScale);
+    }
+    readonly property int textXs: scaled(11)        // meta: timestamps, keycaps, chips
+    readonly property int textMd: scaled(13)        // body and controls (default)
     readonly property int textSm: textMd    // alias: secondary text differs by color, not size
-    readonly property int textLg: 16        // titles, result names
-    readonly property int textXl: 20        // headings, search input
-    readonly property int textHero: 32      // display (power menu)
-    readonly property int textTimer: 40     // timer readout (Light weight, tabular figures)
-    readonly property int textDisplay: 96   // desktop clock (Light weight only)
+    readonly property int textLg: scaled(16)        // titles, result names
+    readonly property int textXl: scaled(20)        // headings, search input
+    readonly property int textHero: scaled(32)      // display (power menu)
+    readonly property int textTimer: scaled(40)     // timer readout (Light weight, tabular figures)
+    readonly property int textDisplay: 96   // desktop clock (Light weight only); decor on the wallpaper, not scaled
     // Text drawn straight on the wallpaper follows the IMAGE's brightness, not
     // the mode: `wallpaper` writes brightness.json (luma of the whole image,
     // deskLuma of the corner the desktop widgets sit on). Dark image: light
@@ -158,11 +164,11 @@ Singleton {
     readonly property real lineHeight: 1.25 // wrapped body text only (single lines: leave 1, it shifts glyphs down)
 
     // Icons (glyph em-size): sit on the same optical size as body text + 3.
-    readonly property int iconSm: 12        // dismiss marks, chevrons in dense rows
-    readonly property int icon: 16          // default: bar, rows, buttons
-    readonly property int iconLg: 20        // headers, sliders, tile badges
-    readonly property int iconXl: 24        // launcher glyph results
-    readonly property int iconHero: 32      // power menu
+    readonly property int iconSm: textXs + 1    // dismiss marks, chevrons in dense rows
+    readonly property int icon: textMd + 3      // default: bar, rows, buttons
+    readonly property int iconLg: textXl        // headers, sliders, tile badges
+    readonly property int iconXl: textXl + 4    // launcher glyph results
+    readonly property int iconHero: textHero    // power menu
     readonly property int iconApp: 32       // app icon images in lists
 
     // Spacing: 4-pt scale. One name per step; semantic aliases below say what

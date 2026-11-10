@@ -71,6 +71,20 @@ SettingsPage {
         }
 
         SettingsRow {
+            title: "Text size"
+
+            SettingsSegmented {
+                model: [
+                    { label: "Small", value: "small" },
+                    { label: "Default", value: "default" },
+                    { label: "Large", value: "large" }
+                ]
+                current: Settings.textSize
+                onPicked: v => Settings.textSize = v
+            }
+        }
+
+        SettingsRow {
             title: "Reduce transparency"
             description: "Solid panels instead of glass"
 
