@@ -126,11 +126,6 @@ PanelWindow {
                         contentHeight: page.item ? page.item.implicitHeight : 0
                         clip: true
                         boundsBehavior: Flickable.StopAtBounds
-
-                        ScrollIndicator {
-                            flick: scroller
-                        }
-
                         // Hold presses briefly: a scroll/drag that starts on a control (power
                         // mode, tiles) must scroll the page, never land as a click on it.
                         pressDelay: Theme.pressDelay

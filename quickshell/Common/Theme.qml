@@ -274,7 +274,6 @@ Singleton {
     readonly property int osdHold: 1400     // OSD stays this long after the last change
     readonly property int warmKeep: 3000    // Control Center stays loaded this long after start
     readonly property int shaderFps: 30     // lock-screen drift shader frame rate
-    readonly property int scrollLinger: 800 // scroll indicator stays this long after the last scroll
     readonly property int animPulse: 1400   // slow breathing, e.g. privacy dot
     readonly property int easing: Easing.OutCubic
     readonly property int animInstant: Math.round(80 * motionScale)  // press feedback: must feel immediate

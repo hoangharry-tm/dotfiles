@@ -78,11 +78,6 @@ Surface {
             contentHeight: bodyText.implicitHeight
             boundsBehavior: Flickable.StopAtBounds
 
-            ScrollIndicator {
-                flick: scrollView
-            }
-
-
             Label {
                 id: bodyText
 

@@ -131,11 +131,6 @@ PanelWindow {
                 contentWidth: width
                 contentHeight: body.height
                 boundsBehavior: Flickable.StopAtBounds
-
-                ScrollIndicator {
-                    flick: flick
-                }
-
                 clip: true
 
                 Row {

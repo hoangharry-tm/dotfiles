@@ -87,11 +87,6 @@ PanelWindow {
         interactive: false
         boundsBehavior: Flickable.StopAtBounds
 
-        ScrollIndicator {
-            flick: flick
-        }
-
-
         // Keep the selected row in view when there are more than maxRows.
         Connections {
             target: Switcher

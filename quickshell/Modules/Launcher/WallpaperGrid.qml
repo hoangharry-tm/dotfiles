@@ -24,11 +24,6 @@ GridView {
     clip: true
     currentIndex: current
     boundsBehavior: Flickable.StopAtBounds
-
-    ScrollIndicator {
-        flick: root
-    }
-
     highlightMoveDuration: 0
 
     delegate: Item {
