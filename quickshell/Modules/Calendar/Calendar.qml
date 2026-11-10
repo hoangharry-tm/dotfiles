@@ -61,19 +61,8 @@ PanelWindow {
         anchors.fill: parent
         radius: Theme.radiusXl // = qs-calendar layer rule in niri/rules.kdl
 
-        // Wheel flips months over the grid/header only; over the agenda it
-        // must scroll the events (it used to flip months under the list).
-        MouseArea {
-            anchors.fill: parent
-            onWheel: w => {
-                const p = agenda.mapFromItem(this, w.x, w.y);
-                if (agenda.visible && agenda.contains(p)) {
-                    w.accepted = false;
-                    return;
-                }
-                root.shift(w.angleDelta.y > 0 ? -1 : 1);
-            }
-        }
+        // No wheel on the grid: months change only with the arrows (a stray
+        // scroll flipped months); the agenda below is the only scroller.
 
         ColumnLayout {
             id: column

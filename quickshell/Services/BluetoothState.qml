@@ -65,15 +65,17 @@ Singleton {
     Component.onDestruction: if (adapter && adapter.discovering)
         adapter.discovering = false
 
-    // One tap: disconnect, connect, or pair-then-connect.
+    // One tap: pair-then-connect, disconnect, or connect. Unpaired comes
+    // first: a device can be linked but unpaired (a keyboard that lost its
+    // bond), and disconnecting it would never get it paired.
     function activate(device) {
-        if (device.connected) {
-            device.disconnect();
-        } else if (device.paired) {
-            device.connect();
-        } else {
+        if (!device.paired) {
             device.trusted = true;
             device.pair();
+        } else if (device.connected) {
+            device.disconnect();
+        } else {
+            device.connect();
         }
     }
 

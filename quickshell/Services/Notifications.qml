@@ -34,6 +34,9 @@ Singleton {
     property real focusUntil: 0             // ms epoch; 0 = no timer
     property int tick: 0                    // bumps once a minute while a card is visible
     property int watchers: 0                // visible cards that show a relative time
+    // A toast's reply field was clicked: only then may the toast window take
+    // the keyboard (a toast that grabbed it on appear stole the user's typing).
+    property bool replying: false
 
     readonly property int maxHistory: 50
     readonly property int maxToasts: 12

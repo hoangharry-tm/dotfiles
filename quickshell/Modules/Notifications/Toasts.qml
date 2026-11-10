@@ -39,8 +39,13 @@ PanelWindow {
     color: "transparent"
     WlrLayershell.namespace: "qs-toasts"
     WlrLayershell.layer: WlrLayer.Overlay
-    // Only takes focus when a reply field is clicked.
-    WlrLayershell.keyboardFocus: WlrKeyboardFocus.OnDemand
+    // No keyboard by default: niri hands an on-demand overlay focus when it
+    // maps, so every new toast stole the user's typing. A click on a reply
+    // field sets `replying` (Exclusive: the click already happened, so
+    // on-demand wouldn't focus); Escape, send or the toasts closing release it.
+    WlrLayershell.keyboardFocus: Notifications.replying ? WlrKeyboardFocus.Exclusive : WlrKeyboardFocus.None
+    onVisibleChanged: if (!visible)
+        Notifications.replying = false
 
     // Room for the column: screen minus bar and margins.
     readonly property real avail: modelData.height - Theme.popoverTop - Theme.edge

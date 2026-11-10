@@ -41,8 +41,12 @@ Item {
         if (visible)
             Notifications.watchers++;
     }
-    Component.onDestruction: if (visible)
-        Notifications.watchers--
+    Component.onDestruction: {
+        if (visible)
+            Notifications.watchers--;
+        if (replyInput.activeFocus)
+            Notifications.replying = false;
+    }
 
     // The one exit (swipe, x, middle click, an action): slide out sideways, then close.
     function dismiss(dir = 1) {
@@ -357,11 +361,25 @@ Item {
                     selectByMouse: true
                     onAccepted: root.sendReply()
                     Keys.onEscapePressed: focus = false
+                    onActiveFocusChanged: if (!activeFocus)
+                        Notifications.replying = false
 
                     Label {
                         visible: !parent.text && !parent.activeFocus
                         text: root.notification.inlineReplyPlaceholder || "Reply"
                         color: Theme.textMuted
+                    }
+                }
+
+                // The window has no keyboard until asked (see Toasts.qml):
+                // the first click requests it, then hands focus to the field.
+                MouseArea {
+                    anchors.fill: replyInput
+                    enabled: !replyInput.activeFocus
+                    cursorShape: Qt.IBeamCursor
+                    onPressed: {
+                        Notifications.replying = true;
+                        replyInput.forceActiveFocus();
                     }
                 }
 

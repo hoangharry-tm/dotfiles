@@ -29,6 +29,9 @@ Singleton {
         property bool present: false
 
         path: "/sys/class/leds/" + name + "/brightness"
+        // sysfs attributes can't be written atomically (temp file + rename
+        // is impossible in /sys): every write failed with atomic writes on.
+        atomicWrites: false
         printErrors: false
         onLoaded: present = true
         onPresentChanged: push()
@@ -55,6 +58,7 @@ Singleton {
         id: trigger
 
         path: "/sys/class/leds/platform::micmute/trigger"
+        atomicWrites: false
         printErrors: false
     }
 

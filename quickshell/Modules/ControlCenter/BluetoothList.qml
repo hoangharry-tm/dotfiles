@@ -31,9 +31,9 @@ DetailList {
                 Layout.fillWidth: true
                 glyph: BluetoothState.deviceIcon(modelData)
                 title: BluetoothState.nameOf(modelData)
-                subtitle: modelData.connected ? "Connected" : modelData.paired ? "Paired" : "Tap to pair"
+                subtitle: !modelData.paired ? "Tap to pair" : modelData.connected ? "Connected" : "Paired" // a link without a bond carries no input
                 meta: modelData.connected && modelData.batteryAvailable ? Math.round(modelData.battery * 100) + "%" : ""
-                marked: modelData.connected
+                marked: modelData.connected && modelData.paired
                 busy: modelData.pairing || modelData.state === BluetoothDeviceState.Connecting || modelData.state === BluetoothDeviceState.Disconnecting
                 onClicked: BluetoothState.activate(modelData)
                 onRightClicked: if (modelData.paired)
