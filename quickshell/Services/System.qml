@@ -25,11 +25,15 @@ Singleton {
     property var netDownHistory: []
     property var netUpHistory: []
 
-    // Shown only on the system card. Uptime/load are two tiny /proc reads; the
-    // top process spawns `ps`, so it runs only while a card sets `tracking`.
+    // Sampling cadence: slow at rest (the chip only needs cpu/mem/temp to
+    // decide whether to appear), fast only while the SystemChip card is open.
+    // Everything below, plus net, history, sensors, fan and procs, is
+    // detail-only: sampled and parsed only while `detailed`.
+    property bool detailed: false
+    readonly property int restInterval: PowerMode.lowPower ? 30000 : 10000
+    readonly property int detailInterval: 2000
     property real uptime: 0         // seconds
     property real load: 0           // 1-minute load average
-    property bool tracking: false
 
     // Detail view (card open only): swap, labelled sensors, fan, busiest processes.
     property real swapUsed: 0       // GiB
@@ -69,12 +73,6 @@ Singleton {
         stat.reload();
         meminfo.reload();
         thermal.reload();
-        netdev.reload();
-        uptimeFile.reload();
-        loadavg.reload();
-
-        uptime = parseFloat(uptimeFile.text()) || 0;
-        load = parseFloat(loadavg.text()) || 0;
 
         const fields = stat.text().split("\n")[0].trim().split(/\s+/).slice(1).map(Number);
         const idle = fields[3] + fields[4];
@@ -88,12 +86,23 @@ Singleton {
         const kb = key => parseInt((meminfo.text().match(new RegExp("^" + key + ":\\s+(\\d+)", "m")) || [0, 0])[1]);
         memTotal = kb("MemTotal") / 1048576;
         memUsed = (kb("MemTotal") - kb("MemAvailable")) / 1048576;
-        swapTotal = kb("SwapTotal") / 1048576;
-        swapUsed = (kb("SwapTotal") - kb("SwapFree")) / 1048576;
 
         const t = parseInt(thermal.text());
         if (t > 0)
             temp = t / 1000;
+
+        if (!detailed)
+            return;
+
+        netdev.reload();
+        uptimeFile.reload();
+        loadavg.reload();
+        uptime = parseFloat(uptimeFile.text()) || 0;
+        load = parseFloat(loadavg.text()) || 0;
+        swapTotal = kb("SwapTotal") / 1048576;
+        swapUsed = (kb("SwapTotal") - kb("SwapFree")) / 1048576;
+        if (!probe.running)
+            probe.running = true;
 
         // /proc/net/dev: "iface: rx_bytes … (8 fields) tx_bytes …"; skip loopback
         // and virtual bridges so container traffic doesn't double count.
@@ -173,8 +182,11 @@ Singleton {
         }
     }
 
+    // One timer for everything; the interval follows `detailed`/low power and
+    // the first tick after a change fires at once. cpu/net rates use real
+    // timestamps or tick totals, so they stay correct across intervals.
     Timer {
-        interval: 2000
+        interval: root.detailed ? root.detailInterval : root.restInterval
         running: true
         repeat: true
         triggeredOnStart: true
@@ -270,19 +282,15 @@ Singleton {
         }
     }
 
-    // Runs only while a card is open; the first tick has no delta yet, so the
-    // process list fills on the second.
-    Timer {
-        interval: 2000
-        running: root.tracking
-        repeat: true
-        triggeredOnStart: true
-        onTriggered: if (!probe.running)
-            probe.running = true
-    }
-
-    onTrackingChanged: if (!tracking) {
+    // Closing the card drops the detail state, so the next open starts clean
+    // (the rate and process deltas need one tick before they show).
+    onDetailedChanged: {
         _ticks = null;
+        _net = null;
         procs = [];
+        cpuHistory = [];
+        memHistory = [];
+        netDownHistory = [];
+        netUpHistory = [];
     }
 }

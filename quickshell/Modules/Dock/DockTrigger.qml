@@ -14,7 +14,7 @@ PanelWindow {
 
     screen: modelData
     anchors.bottom: true
-    implicitWidth: Math.min(Theme.launcherWidth, modelData.width / 2)
+    implicitWidth: Math.min(Theme.launcherWidth, (modelData?.width ?? 0) / 2)
     implicitHeight: Theme.spaceXs
     exclusionMode: ExclusionMode.Ignore
     color: "transparent"
@@ -22,6 +22,6 @@ PanelWindow {
     WlrLayershell.layer: WlrLayer.Top
 
     HoverHandler {
-        onHoveredChanged: hovered ? Dock.reveal(root.modelData.name) : Dock.edgeLeft(root.modelData.name)
+        onHoveredChanged: hovered ? Dock.reveal(root.modelData?.name) : Dock.edgeLeft(root.modelData?.name)
     }
 }

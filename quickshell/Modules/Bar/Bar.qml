@@ -9,6 +9,7 @@ PanelWindow {
     id: bar
 
     required property ShellScreen modelData
+    readonly property string sn: modelData?.name ?? ""
 
     screen: modelData
     anchors.top: true
@@ -48,7 +49,7 @@ PanelWindow {
         anchors.left: parent.left
         anchors.leftMargin: Theme.barPadX + workspaces.edge
         anchors.verticalCenter: parent.verticalCenter
-        output: bar.modelData.name
+        output: bar.sn
     }
 
     // Center: when
@@ -56,7 +57,7 @@ PanelWindow {
         id: clock
 
         anchors.centerIn: parent
-        screenName: bar.modelData.name
+        screenName: bar.sn
         level: bar.clockLevel
     }
 
@@ -72,7 +73,7 @@ PanelWindow {
         spacing: Theme.barGap
 
         NextEventChip {
-            screenName: bar.modelData.name
+            screenName: bar.sn
             level: rightRow.level
         }
 
@@ -109,7 +110,7 @@ PanelWindow {
         }
 
         StatusCluster {
-            screenName: bar.modelData.name
+            screenName: bar.sn
             level: rightRow.level
         }
     }

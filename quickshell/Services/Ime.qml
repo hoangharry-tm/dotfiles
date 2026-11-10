@@ -8,7 +8,8 @@ import Quickshell.Io
 // fcitx5 state via `fcitx5-remote -n` (current engine name; fails when the
 // daemon is down). fcitx5 emits no change signal, and its state is per
 // focused window, so re-read on window focus and on a slow tick (catches the
-// niri hotkey and daemon start/stop). Each read is one short process.
+// niri hotkey and daemon start/stop). Each read is one short process; the
+// fallback tick is rare and paused in low power and while locked.
 Singleton {
     id: root
 
@@ -72,8 +73,8 @@ Singleton {
     }
 
     Timer {
-        interval: 2500
-        running: true
+        interval: 15000
+        running: !PowerMode.lowPower && !Lock.locked
         repeat: true
         triggeredOnStart: true
         onTriggered: root.refresh()

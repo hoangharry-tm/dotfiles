@@ -40,10 +40,12 @@ ShellRoot {
             id: perScreen
 
             required property ShellScreen modelData
+            // Variants nulls modelData before it destroys the delegate.
+            readonly property string sn: modelData?.name ?? ""
 
             // On every output: a click on the other monitor closes the popout too.
             LazyLoader {
-                active: Panels.open !== "" && Panels.open !== "power"
+                active: sn !== "" && Panels.open !== "" && Panels.open !== "power"
 
                 Scrim {
                     modelData: perScreen.modelData
@@ -55,7 +57,7 @@ ShellRoot {
             }
 
             LazyLoader {
-                active: DesktopState.enabled
+                active: sn !== "" && DesktopState.enabled
 
                 DesktopWidgets {
                     modelData: perScreen.modelData
@@ -65,7 +67,7 @@ ShellRoot {
             // Auto-hide dock: a 4 px edge strip is always there (zero idle
             // cost); the sheet is only loaded while revealed.
             LazyLoader {
-                active: Settings.dockEnabled && Settings.dockAutoHide
+                active: sn !== "" && Settings.dockEnabled && Settings.dockAutoHide
 
                 DockTrigger {
                     modelData: perScreen.modelData
@@ -73,7 +75,7 @@ ShellRoot {
             }
 
             LazyLoader {
-                active: Settings.dockEnabled && (!Settings.dockAutoHide || Dock.screen === perScreen.modelData.name)
+                active: sn !== "" && Settings.dockEnabled && (!Settings.dockAutoHide || Dock.screen === perScreen.sn)
 
                 DockBar {
                     modelData: perScreen.modelData
@@ -81,7 +83,7 @@ ShellRoot {
             }
 
             LazyLoader {
-                active: Panels.isOpen("timer", perScreen.modelData.name)
+                active: sn !== "" && Panels.isOpen("timer", perScreen.sn)
 
                 TimerPanel {
                     modelData: perScreen.modelData
@@ -89,7 +91,7 @@ ShellRoot {
             }
 
             LazyLoader {
-                active: Panels.isOpen("calendar", perScreen.modelData.name)
+                active: sn !== "" && Panels.isOpen("calendar", perScreen.sn)
 
                 Calendar {
                     modelData: perScreen.modelData
@@ -101,7 +103,7 @@ ShellRoot {
             }
 
             LazyLoader {
-                active: Notifications.toasts.length > 0 && Panels.focusedScreen() === perScreen.modelData.name
+                active: sn !== "" && Notifications.toasts.length > 0 && Panels.focusedScreen() === perScreen.sn
 
                 Toasts {
                     modelData: perScreen.modelData
@@ -109,7 +111,7 @@ ShellRoot {
             }
 
             LazyLoader {
-                active: Panels.isOpen("launcher", perScreen.modelData.name)
+                active: sn !== "" && Panels.isOpen("launcher", perScreen.sn)
 
                 Launcher {
                     modelData: perScreen.modelData
@@ -117,7 +119,7 @@ ShellRoot {
             }
 
             LazyLoader {
-                active: Panels.isOpen("power", perScreen.modelData.name)
+                active: sn !== "" && Panels.isOpen("power", perScreen.sn)
 
                 PowerMenu {
                     modelData: perScreen.modelData
@@ -125,7 +127,7 @@ ShellRoot {
             }
 
             LazyLoader {
-                active: Panels.isOpen("settings", perScreen.modelData.name)
+                active: sn !== "" && Panels.isOpen("settings", perScreen.sn)
 
                 SettingsWindow {
                     modelData: perScreen.modelData
@@ -133,7 +135,7 @@ ShellRoot {
             }
 
             LazyLoader {
-                active: Panels.isOpen("keybinds", perScreen.modelData.name)
+                active: sn !== "" && Panels.isOpen("keybinds", perScreen.sn)
 
                 Cheatsheet {
                     modelData: perScreen.modelData
