@@ -83,12 +83,18 @@ Surface {
         }
 
         Flickable {
+            id: scrollView
             Layout.fillWidth: true
             Layout.fillHeight: true
             visible: root.kind !== "image"
             clip: true
             contentHeight: bodyText.implicitHeight
             boundsBehavior: Flickable.StopAtBounds
+
+            ScrollIndicator {
+                flick: scrollView
+            }
+
 
             Label {
                 id: bodyText

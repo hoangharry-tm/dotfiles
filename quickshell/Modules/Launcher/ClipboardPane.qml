@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import qs.Common
+import qs.Widgets
 
 // Clipboard mode body: compact virtualised list (left) + preview (right).
 // Selection is owned by the launcher (`current`), like ResultList.
@@ -32,6 +33,11 @@ RowLayout {
         currentIndex: root.current
         highlightMoveDuration: Theme.animFast
         boundsBehavior: Flickable.StopAtBounds
+
+        ScrollIndicator {
+            flick: list
+        }
+
         cacheBuffer: 0 // only visible rows are instantiated
 
         highlight: Rectangle {

@@ -20,6 +20,22 @@ Rectangle {
     property bool wheelEnabled: false
 
     radius: Theme.radiusSm
+    activeFocusOnTab: true
+
+    // Keyboard activation; the ring (keyboard focus only) shows what Enter hits.
+    Keys.onReturnPressed: root.clicked({
+        button: Qt.LeftButton
+    })
+    Keys.onEnterPressed: root.clicked({
+        button: Qt.LeftButton
+    })
+    Keys.onSpacePressed: root.clicked({
+        button: Qt.LeftButton
+    })
+
+    FocusRing {
+        target: root
+    }
     color: mouse.pressed ? Theme.pressed : active ? activeColor : mouse.containsMouse ? Theme.hover : "transparent"
 
     // Press dips the control (spring back on release): the cheapest cue that

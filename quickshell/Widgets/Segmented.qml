@@ -16,6 +16,21 @@ Surface {
     implicitHeight: Theme.control + Theme.spaceXs * 2
     variant: "recessed"
     radius: Theme.radiusMd // inner pill radiusSm = radiusMd - spaceXs
+    activeFocusOnTab: true
+
+    // Arrow keys step the selection (ring: keyboard focus only).
+    Keys.onLeftPressed: step(-1)
+    Keys.onRightPressed: step(1)
+
+    function step(d) {
+        const i = Math.max(0, Math.min(model.length - 1, Math.max(0, index) + d));
+        if (model[i])
+            picked(model[i].value);
+    }
+
+    FocusRing {
+        target: root
+    }
 
     Surface {
         visible: root.index >= 0
@@ -73,7 +88,10 @@ Surface {
                 MouseArea {
                     anchors.fill: parent
                     cursorShape: Qt.PointingHandCursor
-                    onClicked: root.picked(seg.modelData.value)
+                    onClicked: {
+                        root.forceActiveFocus(Qt.MouseFocusReason);
+                        root.picked(seg.modelData.value);
+                    }
                 }
             }
         }

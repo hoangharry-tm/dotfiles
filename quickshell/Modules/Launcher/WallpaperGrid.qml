@@ -24,6 +24,11 @@ GridView {
     clip: true
     currentIndex: current
     boundsBehavior: Flickable.StopAtBounds
+
+    ScrollIndicator {
+        flick: root
+    }
+
     highlightMoveDuration: 0
 
     delegate: Item {
@@ -46,7 +51,7 @@ GridView {
             Image {
                 anchors.fill: parent
                 source: cell.modelData.image ? "file://" + cell.modelData.image : ""
-                sourceSize.width: 320 // decode size, not layout
+                sourceSize.width: Math.ceil(cell.width * Screen.devicePixelRatio) // decode size from the tile, not a literal
                 fillMode: Image.PreserveAspectCrop
                 asynchronous: true
                 cache: false

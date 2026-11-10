@@ -50,6 +50,11 @@ Item {
         contentWidth: width
         contentHeight: list.implicitHeight
         boundsBehavior: Flickable.StopAtBounds
+
+        ScrollIndicator {
+            flick: scroller
+        }
+
         pressDelay: Theme.pressDelay
 
         SmoothWheel {

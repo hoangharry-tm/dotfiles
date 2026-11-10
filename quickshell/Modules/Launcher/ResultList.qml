@@ -20,6 +20,11 @@ ListView {
     highlightMoveDuration: Theme.animFast
     boundsBehavior: Flickable.StopAtBounds
 
+    ScrollIndicator {
+        flick: root
+    }
+
+
     highlight: Rectangle {
         radius: Theme.radiusLg // sheet radius (28) - sheet inset (12)
         color: Theme.primaryWash // the one accent mark: what Enter will do

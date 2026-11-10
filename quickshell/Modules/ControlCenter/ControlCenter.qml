@@ -10,7 +10,7 @@ PanelWindow {
     id: root
 
     required property ShellScreen modelData
-    readonly property bool shown: Panels.isOpen("control", modelData.name)
+    readonly property bool shown: modelData ? Panels.isOpen("control", modelData.name) : false
 
     // Which detail list is expanded: "", "wifi", "bluetooth", "sound"
     property string detail: ""
@@ -43,7 +43,7 @@ PanelWindow {
 
     Timer {
         running: root.warm
-        interval: 3000
+        interval: Theme.warmKeep
         onTriggered: root.warm = false
     }
 
@@ -86,6 +86,11 @@ PanelWindow {
             contentHeight: layout.implicitHeight
             clip: true
             boundsBehavior: Flickable.StopAtBounds
+
+            ScrollIndicator {
+                flick: ccScroll
+            }
+
             // Hold presses briefly: a scroll/drag that starts on a control (power
             // mode, tiles) must scroll the page, never land as a click on it.
             pressDelay: Theme.pressDelay
