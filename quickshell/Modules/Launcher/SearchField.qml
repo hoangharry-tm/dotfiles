@@ -21,6 +21,8 @@ RowLayout {
     signal pinRequested // Ctrl+P (clipboard keys only)
     signal openRequested // Ctrl+O (clipboard keys only)
     signal clearRequested // Ctrl+Shift+Del (clipboard keys only)
+    signal lookRequested // Ctrl+Y, or Space on an empty file query (file keys only)
+    property bool lookKeys: false
     property bool clipKeys: false // Ctrl+P pins instead of moving up
 
     function focusInput() {
@@ -65,6 +67,13 @@ RowLayout {
             }
             if (root.clipKeys && (e.modifiers & Qt.ControlModifier) && (e.key === Qt.Key_P || e.key === Qt.Key_O)) {
                 e.key === Qt.Key_P ? root.pinRequested() : root.openRequested();
+                e.accepted = true;
+                return;
+            }
+            // Quick Look: Ctrl+Y, or bare Space while the query is empty (it would
+            // only add a leading blank, so typing "my file" is never hijacked).
+            if (root.lookKeys && ((e.key === Qt.Key_Y && (e.modifiers & Qt.ControlModifier)) || (e.key === Qt.Key_Space && !e.modifiers && input.text === "/"))) {
+                root.lookRequested();
                 e.accepted = true;
                 return;
             }

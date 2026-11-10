@@ -26,21 +26,8 @@ Surface {
         RowLayout {
             spacing: Theme.gapInline
 
-            Surface {
-                implicitWidth: kindLabel.implicitWidth + Theme.padControl * 2
-                implicitHeight: Theme.controlSm
-                radius: Theme.radiusFull
-                variant: "on"
-
-                Label {
-                    id: kindLabel
-
-                    anchors.centerIn: parent
-                    text: Clipboard.kinds[root.kind].label + (root.entry?.pinned ? " · Pinned" : "")
-                    color: Theme.textMuted
-                    font.pixelSize: Theme.textXs
-                    font.weight: Theme.weightEmphasis
-                }
+            Pill {
+                text: Clipboard.kinds[root.kind].label + (root.entry?.pinned ? " · Pinned" : "")
             }
 
             Label {

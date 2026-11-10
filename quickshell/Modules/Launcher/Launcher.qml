@@ -19,6 +19,8 @@ PanelWindow {
     readonly property bool grid: mode === "wall" || mode === "emoji"
     readonly property bool clipMode: mode === "clip"
     readonly property var results: Launch.items(parsed)
+    property bool look: false // Quick Look pane open (file mode only)
+    readonly property bool lookOpen: look && mode === "file" && results.length > 0
     property int current: 0
 
     screen: modelData
@@ -27,7 +29,7 @@ PanelWindow {
     visible: shown
     anchors.top: true
     margins.top: Math.round(modelData.height * 0.2)
-    implicitWidth: clipMode ? Theme.launcherWidthWide : Theme.launcherWidth // resizing is fine; the sheet itself is never scaled
+    implicitWidth: clipMode || lookOpen ? Theme.launcherWidthWide : Theme.launcherWidth // resizing is fine; the sheet itself is never scaled
     implicitHeight: sheet.implicitHeight
     exclusiveZone: 0
     color: "transparent"
@@ -48,6 +50,7 @@ PanelWindow {
     function opened() {
         if (!shown) {
             primed = false;
+            look = false;
         } else if (!primed) {
             primed = true;
             search.text = Launch.seed;
@@ -58,6 +61,7 @@ PanelWindow {
     }
     // Sources refresh on entering their mode, never at startup.
     onModeChanged: {
+        look = false;
         if (!shown)
             return;
         if (mode === "wall")
@@ -168,6 +172,8 @@ PanelWindow {
                 glyph: Launch.modes[root.mode].glyph
                 chip: root.mode === "apps" ? "" : root.clipMode ? Clipboard.chipLabel(root.parsed.query) : Launch.modes[root.mode].label
                 clipKeys: root.clipMode
+                lookKeys: root.mode === "file"
+                onLookRequested: root.look = !root.look
                 gridNav: root.grid
                 onNavigate: (dx, dy) => root.navigate(dx, dy)
                 onAccepted: alt => root.activate(root.current, alt)
@@ -178,16 +184,33 @@ PanelWindow {
                 onDismissed: Panels.close()
             }
 
-            ResultList {
-                id: list
-
+            RowLayout {
                 Layout.fillWidth: true
                 visible: !root.grid && !root.clipMode && root.results.length > 0
-                model: root.grid ? [] : root.results
-                current: root.current
-                open: root.shown
-                onChosen: i => root.activate(i)
-                onHovered: i => root.current = i
+                spacing: Theme.gapSection
+
+                ResultList {
+                    id: list
+
+                    Layout.fillWidth: true
+                    Layout.horizontalStretchFactor: 2 // 2:3 list:preview, as in the clipboard pane
+                    Layout.preferredHeight: root.lookOpen ? 7 * (Theme.resultHeight + spacing) - spacing : implicitHeight // fixed while previewing, so the pane never jumps
+                    model: root.grid ? [] : root.results
+                    current: root.current
+                    open: root.shown
+                    onChosen: i => root.activate(i)
+                    onHovered: i => root.current = i
+                }
+
+                QuickLookPane {
+                    Layout.fillWidth: true
+                    Layout.horizontalStretchFactor: 3
+                    Layout.fillHeight: true
+                    visible: root.lookOpen
+                    active: root.shown && root.lookOpen
+                    path: root.results[root.current]?.id ?? ""
+                    iconName: root.results[root.current]?.icon ?? ""
+                }
             }
 
             ClipboardPane {
@@ -282,6 +305,11 @@ PanelWindow {
                     visible: root.mode === "file"
                     key: "⇧↵"
                     text: "reveal"
+                }
+                KeyHint {
+                    visible: root.mode === "file" && root.results.length > 0
+                    key: "⌃Y"
+                    text: root.look ? "close preview" : "preview"
                 }
 
                 // Prefix hints: full labels when they fit, else bare keycaps
