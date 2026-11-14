@@ -20,7 +20,15 @@ Singleton {
     property bool busy: false
     property int failures: 0
     property string message: ""
-    onLockedChanged: if (!locked) preview = false
+    // The one password buffer every screen's field mirrors. Cleared as soon as
+    // it is handed to PAM, and on lock, unlock and failure.
+    property string entry: ""
+    onEntryChanged: if (entry !== "" && failures > 0 && !busy) message = ""
+    onLockedChanged: {
+        entry = "";
+        if (!locked)
+            preview = false;
+    }
     signal failed
     signal unlocked
 
@@ -42,16 +50,26 @@ Singleton {
     // Held only between submit() and the PAM prompt; cleared right after use.
     property string _pending: ""
 
-    function submit(password) {
-        if (busy || password === "")
+    // Esc: a preview closes; a real lock only clears the field.
+    function cancel() {
+        if (preview)
+            locked = false;
+        else
+            entry = "";
+    }
+
+    function submit() {
+        if (busy || entry === "")
             return;
-        _pending = password;
+        _pending = entry;
+        entry = "";
         busy = true;
         pam.start();
     }
 
     function _finish(ok) {
         _pending = "";
+        entry = "";
         busy = false;
         if (ok) {
             // A real password check passed in preview: lock-screen may now

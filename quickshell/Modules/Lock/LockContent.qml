@@ -22,6 +22,12 @@ Item {
     property bool entered: false
     property real veil: (leaving || !entered) ? 1 : 0
 
+    // Decode at screen size (never the full 4K file) and only once sized: a
+    // zero sourceSize would mean "full size".
+    readonly property size imageSize: Qt.size(width * Screen.devicePixelRatio, height * Screen.devicePixelRatio)
+    readonly property bool sized: width > 0 && height > 0
+    readonly property string stateDir: "file://" + Quickshell.env("HOME") + "/.local/state/theme/"
+
     Behavior on veil {
         NumberAnimation {
             duration: Theme.animSlow
@@ -30,9 +36,13 @@ Item {
         }
     }
 
-    Component.onCompleted: Qt.callLater(() => root.entered = true)
+    // Arrive only once the blurred image is decoded (or failed: a missing file
+    // must not block), so every screen appears together, not the sharp
+    // wallpaper lingering on one.
+    readonly property bool imageSettled: lockImage.status === Image.Ready || lockImage.status === Image.Error
+    onImageSettledChanged: if (imageSettled) Qt.callLater(() => root.entered = true)
 
-    // Only the surface that has keyboard focus types; others mirror the dots.
+    // Only the surface that has keyboard focus types; others mirror it via Lock.entry.
     function focusInput() {
         input.forceActiveFocus();
     }
@@ -45,8 +55,11 @@ Item {
     }
 
     Image {
+        id: lockImage
+
         anchors.fill: parent
-        source: "file://" + Quickshell.env("HOME") + "/.local/state/theme/lock.jpg"
+        source: root.sized ? root.stateDir + "lock.jpg" : ""
+        sourceSize: root.imageSize
         fillMode: Image.PreserveAspectCrop
         cache: false
         asynchronous: true
@@ -55,7 +68,8 @@ Item {
     // The desktop's own wallpaper, sharp: visible only while the veil is up.
     Image {
         anchors.fill: parent
-        source: "file://" + Quickshell.env("HOME") + "/.local/state/theme/wallpaper.jpg"
+        source: root.sized ? root.stateDir + "wallpaper.jpg" : ""
+        sourceSize: root.imageSize
         fillMode: Image.PreserveAspectCrop
         cache: false
         asynchronous: true
@@ -177,7 +191,6 @@ Item {
                     target: Lock
 
                     function onFailed() {
-                        input.text = "";
                         shake.restart();
                         Qt.callLater(root.focusInput);
                     }
@@ -207,15 +220,22 @@ Item {
                     passwordCharacter: "•"
                     enabled: !Lock.busy
 
-                    Keys.onReturnPressed: Lock.submit(text)
-                    Keys.onEnterPressed: Lock.submit(text)
-                    Keys.onEscapePressed: {
-                        if (Lock.preview)
-                            Lock.locked = false; // preview only: a real lock ignores Esc
-                        else
-                            text = "";
+                    text: Lock.entry
+                    Keys.onReturnPressed: Lock.submit()
+                    Keys.onEnterPressed: Lock.submit()
+                    Keys.onEscapePressed: Lock.cancel()
+                    // User edits write the shared buffer; the text binding is
+                    // broken by typing, so re-sync from Lock on every change.
+                    onTextEdited: Lock.entry = text
+
+                    Connections {
+                        target: Lock
+
+                        function onEntryChanged() {
+                            if (input.text !== Lock.entry)
+                                input.text = Lock.entry;
+                        }
                     }
-                    onTextChanged: if (text !== "" && Lock.failures > 0 && !Lock.busy) Lock.message = ""
 
                     Label {
                         anchors.verticalCenter: parent.verticalCenter
