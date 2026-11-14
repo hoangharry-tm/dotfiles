@@ -7,7 +7,8 @@ import Quickshell.Io
 // the whole file; empty = no override. Written only when it actually changes:
 // every write makes niri reload its config, which briefly drops window blur (a
 // visible frosted -> clear -> frosted flicker), and shell restarts used to
-// rewrite it.
+// rewrite it. Also used for non-niri state files in the same directory
+// (Transparency.qml's firefox-solid.css).
 Item {
     id: root
 

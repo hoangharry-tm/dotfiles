@@ -24,13 +24,15 @@ window-rule {
 // Glass app windows: translucent apps get the shared blur from look.kdl
 // (`blur {}`; `blur { off }` there disables all of it). Radius 12 comes from
 // the catch-all rule at the top, so the blur follows the rounded corners.
-// Opaque apps (browsers, video) are deliberately not listed: blur would cost
-// GPU for nothing.
+// Opaque apps (video) are deliberately not listed: blur would cost GPU for
+// nothing. Firefox is listed: its chrome is a glass sheet (matugen
+// firefox.css) with the page as an opaque card inside it.
 window-rule {
     match app-id="^Alacritty$"
     match app-id="^kitty$"
     match app-id="^dropdown$"
     match app-id="^yazi$"
+    match app-id="^firefox$"
     background-effect {
         blur true
     }

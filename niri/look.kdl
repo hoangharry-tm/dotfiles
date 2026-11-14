@@ -70,8 +70,8 @@ prefer-no-csd
 
 cursor {
     // Installed by modules/theming.nix (home.pointerCursor); keep in sync.
-    xcursor-theme "Bibata-Modern-Classic"
-    xcursor-size 24
+    xcursor-theme "catppuccin-latte-peach-cursors"
+    xcursor-size 18
     hide-when-typing
 }
 
