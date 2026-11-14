@@ -119,7 +119,7 @@ ShellRoot {
             }
 
             LazyLoader {
-                active: sn !== "" && Panels.isOpen("power", perScreen.sn)
+                active: sn !== "" && Panels.open === "power" // backdrop on every screen
 
                 PowerMenu {
                     modelData: perScreen.modelData

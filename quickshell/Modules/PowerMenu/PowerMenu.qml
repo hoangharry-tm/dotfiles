@@ -7,11 +7,14 @@ import qs.Widgets
 
 // Full-screen frosted overlay with Lock · Sleep · Log out · Restart · Shut down.
 // ←/→ to choose, Enter to confirm, Esc or click the backdrop to cancel.
+// The frosted backdrop covers every screen (like the lock it leads to); the
+// choices and keyboard focus live on the screen it was opened from.
 PanelWindow {
     id: root
 
     required property ShellScreen modelData
     readonly property bool shown: Panels.isOpen("power", modelData.name)
+    readonly property bool backdrop: Panels.open === "power"
     property int selected: 0
 
     readonly property var actions: [
@@ -28,7 +31,7 @@ PanelWindow {
     }
 
     screen: modelData
-    visible: shown
+    visible: backdrop
     anchors.top: true
     anchors.bottom: true
     anchors.left: true
@@ -67,6 +70,7 @@ PanelWindow {
     }
 
     ColumnLayout {
+        visible: root.shown
         anchors.centerIn: parent
         spacing: Theme.space2xl
 
